@@ -181,6 +181,8 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .rec small{color:var(--muted)}
 .rec .del{border:none;background:none;color:var(--warn);padding:0 4px;font-size:11px}
 .pago{color:var(--accent);font-weight:800}
+.anuncio{color:var(--gold);font-weight:800}
+.seg button{font-size:12px;padding:9px 4px}
 .visto{color:var(--tag-ink);font-weight:800}
 .alerta{border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin:6px 0}
 .alerta.up{background:#fdeceb;color:var(--warn)}
@@ -324,7 +326,10 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
         <input id="pBusca" placeholder="BUSCAR NOME, MARCA, ID OU CÓDIGO">
         <button id="pBuscaBar" class="cam" title="LER CÓDIGO DE BARRAS">▥</button>
       </div>
-      <button id="btnNovoProd" class="primary" style="width:100%;margin-bottom:12px;padding:12px">+ PRODUTO</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button id="btnNovoProd" class="primary" style="flex:1;padding:12px">+ PRODUTO</button>
+        <button id="btnPrecoRapido" style="flex:1;padding:12px">💲 REGISTRAR PREÇO</button>
+      </div>
       <div id="produtos"></div>
     </section>
 
@@ -388,6 +393,42 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
   </div>
 </div></div>
 
+<!-- Preço rápido (anúncio) -->
+<div class="modal" id="mPrecoRapido"><div class="sheet">
+  <h2>💲 REGISTRAR PREÇO DE ANÚNCIO</h2>
+  <div class="hint">PREÇO VISTO NA TV, NA INTERNET OU EM FOLHETO, FORA DO MERCADO.</div>
+  <div class="sect">PRODUTO</div>
+  <div id="rpEscolhido" class="prow hidden" style="grid-template-columns:56px 1fr auto"></div>
+  <div id="rpBuscaWrap">
+    <div class="search" style="margin-bottom:4px">
+      <input id="rpBusca" placeholder="BUSCAR PELO NOME OU MARCA" autocomplete="off">
+      <button id="rpBarras" class="cam" title="LER CÓDIGO DE BARRAS">▥</button>
+    </div>
+    <div id="rpSug"></div>
+  </div>
+  <label class="f">ESTABELECIMENTO<select id="rpLoja"></select></label>
+  <div class="row big">
+    <label class="f">VALOR (R$)<input id="rpValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+  </div>
+  <div class="hint" id="rpBase"></div>
+  <div id="rpAlerta"></div>
+  <div class="sect">ONDE VIU</div>
+  <div class="seg">
+    <button data-rpo="TV">📺 TV</button>
+    <button data-rpo="INTERNET">🌐 INTERNET</button>
+    <button data-rpo="FOLHETO">📰 FOLHETO</button>
+    <button data-rpo="OUTRO">📣 OUTRO</button>
+  </div>
+  <div class="row">
+    <label class="f">DATA DO PREÇO<input id="rpData" type="date"></label>
+    <label class="f">VÁLIDO ATÉ (OPCIONAL)<input id="rpValido" type="date"></label>
+  </div>
+  <div class="btns">
+    <button id="rpCancel">CANCELAR</button>
+    <button id="rpSave" class="primary">SALVAR</button>
+  </div>
+</div></div>
+
 <!-- Produto -->
 <div class="modal" id="mProd"><div class="sheet">
   <h2 id="pdTitle">PRODUTO</h2>
@@ -411,7 +452,9 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
   <div class="sect">ZONA EM CADA ESTABELECIMENTO</div>
   <div id="pdZonas"></div>
   <div id="pdMarcasWrap"><div class="sect">OUTRAS MARCAS DO MESMO PRODUTO</div><div id="pdMarcas"></div></div>
-  <div id="pdHistWrap"><div class="sect">PREÇOS REGISTRADOS</div><div id="pdHist"></div></div>
+  <div id="pdHistWrap"><div class="sect">PREÇOS REGISTRADOS</div>
+    <button id="pdPreco" class="small" style="margin:4px 0 6px">💲 REGISTRAR PREÇO</button>
+    <div id="pdHist"></div></div>
   <div class="btns">
     <button id="pdDel" class="danger hidden">EXCLUIR</button>
     <button id="pdCancel">CANCELAR</button>
@@ -659,7 +702,8 @@ async function entrou(u){
     DB.listen("usuarios",d=>{S.usuarios=byId(d);agendar()}),
     DB.listen("produtos",d=>{S.produtos=byId(d);agendar()}),
     DB.listen("estabelecimentos",d=>{S.ests=byId(d);agendar()}),
-    DB.listen("precos",d=>{S.precos=d.sort((a,b)=>a.ts-b.ts);agendar()}),
+    // ts = data do preço (a escolhida no anúncio, ou a do registro); tsReg = quando foi digitado
+    DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar()}),
     DB.listen("realizados",d=>{S.realizados=byId(d);agendar()}),
     DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()}),
     DB.listen("listas",d=>{S.listas=byId(d);agendar()},["membros",u.uid]),
@@ -676,9 +720,17 @@ const chaveReal = (l,pid) => grupoKey(l)+"__"+pid;
 const realizado = (l,pid) => S.realizados[chaveReal(l,pid)];
 const listasDoGrupo = g => Object.values(S.listas).filter(l=>grupoKey(l)===g);
 // preço mais recente de cada estabelecimento para um produto (mais barato primeiro)
+const vencido = r => !!(r.validoAte&&r.validoAte<Date.now());
+const ORIGENS={TV:"📺 TV",INTERNET:"🌐 INTERNET",FOLHETO:"📰 FOLHETO",OUTRO:"📣 OUTRO"};
+// rótulo do tipo do preço: PAGO, VISTO ou ANÚNCIO (com a origem e a validade)
+function rotuloTipo(r){
+  if(r.tipo!=="ANUNCIO") return r.tipo||"";
+  return "ANÚNCIO "+(ORIGENS[r.origem]||"")+(r.validoAte?(vencido(r)?" · VENCIDO":" · ATÉ "+dCurta(r.validoAte)):"");
+}
+const classeTipo = r => r.tipo==="PAGO"?"pago":r.tipo==="ANUNCIO"?"anuncio":"visto";
 function precosPorLoja(pid){
   const ult={};
-  for(const r of S.precos){ if(r.produtoId!==pid) continue; if(!ult[r.estabelecimentoId]||r.ts>=ult[r.estabelecimentoId].ts) ult[r.estabelecimentoId]=r; }
+  for(const r of S.precos){ if(r.produtoId!==pid||vencido(r)) continue; if(!ult[r.estabelecimentoId]||r.ts>=ult[r.estabelecimentoId].ts) ult[r.estabelecimentoId]=r; }
   return Object.values(ult).sort((a,b)=>a.valor-b.valor||b.ts-a.ts);
 }
 function precoNaLoja(pid,estId){ const p=precosPorLoja(pid).find(r=>r.estabelecimentoId===estId); return p?p.valor:null; }
@@ -973,7 +1025,7 @@ function cardItem(L,it,estId){
     const rec=pl.reduce((a,b)=>a.ts>b.ts?a:b).id, varias=pl.length>1;
     precos=`<div class="prices">`+pl.map((x,i)=>{
       const aqui=x.estabelecimentoId===estId;
-      const t=`${aqui?"📍":""}${esc(estNome(x.estabelecimentoId))} ${brl(x.valor)} (${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))})${x.id===rec&&varias?" 🕒":""}`;
+      const t=`${aqui?"📍":""}${esc(estNome(x.estabelecimentoId))} ${brl(x.valor)} (${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.tipo==="ANUNCIO"?" · "+esc(rotuloTipo(x)):""})${x.id===rec&&varias?" 🕒":""}`;
       return i===0&&varias?`<span class="cheap">${t}</span>`:t;
     }).join("<br>")+`</div>`;
   } else precos=`<div class="prices">SEM PREÇO REGISTRADO</div>`;
@@ -1152,21 +1204,24 @@ function linhaPreco(){
   const v=num($("prValor").value), q=num($("prQtd").value), p=S.produtos[pr.pid];
   $("prLinha").innerHTML = pr.tipo==="PAGO" ? `TOTAL DO ITEM: <b>${brl((v||0)*(q||0))}</b>` : `PREÇO VISTO: <b>${brl(v||0)}</b>`;
   $("prBase").textContent = v ? precoBase(p,v) : "";
-  // alertas: comparação com a última vez nesta loja e com a loja mais barata
+  $("prAlerta").innerHTML=alertasPreco(pr.pid,pr.estId,v);
+}
+// alertas: comparação com a última vez nesta loja e com a loja mais barata
+function alertasPreco(pid,estId,v){
   let html="";
-  if(v>0){
-    const aqui=S.precos.filter(r=>r.produtoId===pr.pid&&r.estabelecimentoId===pr.estId).reduce((a,b)=>!a||b.ts>a.ts?b:a,null);
+  if(pid&&estId&&v>0){
+    const aqui=S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId).reduce((a,b)=>!a||b.ts>a.ts?b:a,null);
     if(aqui){
       const d=Math.round((v-aqui.valor)*100)/100;
       if(d>0) html+=`<div class="alerta up">▲ ${brl(d)} MAIS CARO QUE DA ÚLTIMA VEZ AQUI (${brl(aqui.valor)} · ${dCurta(aqui.ts)})</div>`;
       else if(d<0) html+=`<div class="alerta down">▼ ${brl(-d)} MAIS BARATO QUE DA ÚLTIMA VEZ AQUI (${brl(aqui.valor)} · ${dCurta(aqui.ts)})</div>`;
       else html+=`<div class="alerta info">= MESMO PREÇO DA ÚLTIMA VEZ AQUI (${dCurta(aqui.ts)})</div>`;
     }
-    const outra=precosPorLoja(pr.pid).filter(r=>r.estabelecimentoId!==pr.estId)[0];
+    const outra=precosPorLoja(pid).filter(r=>r.estabelecimentoId!==estId)[0];
     if(outra&&outra.valor<v) html+=`<div class="alerta up">${esc(estNome(outra.estabelecimentoId))} ESTÁ ${brl(Math.round((v-outra.valor)*100)/100)} MAIS BARATO (${brl(outra.valor)} · ${dCurta(outra.ts)})</div>`;
     else if(outra&&outra.valor>v) html+=`<div class="alerta down">AQUI ESTÁ ${brl(Math.round((outra.valor-v)*100)/100)} MAIS BARATO QUE NO ${esc(estNome(outra.estabelecimentoId))}</div>`;
   }
-  $("prAlerta").innerHTML=html;
+  return html;
 }
 $("prCancel").onclick=()=>hide("mPreco");
 $("prFoto").onclick=()=>abrirCamera(f=>lerEtiqueta(f));
@@ -1535,6 +1590,7 @@ function renderProdutos(){
         <div class="sub">${esc(p.codigo||"")}${p.barras?" · ▥ "+esc(p.barras):""}</div>
         ${c?`<div class="sub" style="color:var(--accent);font-weight:700">MAIS BARATO: ${esc(estNome(c.estabelecimentoId))} ${brl(c.valor)} (${dCurta(c.ts)} · ${esc(primeiroNome(c.usuarioNome))})${precoBase(p,c.valor)?" · "+precoBase(p,c.valor):""}</div>`:`<div class="sub">SEM PREÇO</div>`}
         ${pl.length>1?`<div class="sub">${pl.length} ESTABELECIMENTOS COM PREÇO</div>`:""}
+        <div class="tags"><button class="tag" data-rp="${p.id}">💲 PREÇO</button></div>
       </div></div>`;
   }).join("")||`<div class="empty">${Object.keys(S.produtos).length?"NADA ENCONTRADO.":"NENHUM PRODUTO CADASTRADO."}</div>`;
 }
@@ -1542,7 +1598,100 @@ $("pBusca").addEventListener("input",agendar);
 $("pBuscaBar").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return; const p=Object.values(S.produtos).find(x=>x.barras===c);
   if(p) abrirProd(p.id); else if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c}); };
 $("btnNovoProd").onclick=()=>abrirProd(null);
-$("produtos").addEventListener("click",e=>{const c=e.target.closest("[data-prod]");if(c)abrirProd(c.dataset.prod)});
+$("produtos").addEventListener("click",e=>{
+  const rp=e.target.closest("[data-rp]"); if(rp){ e.stopPropagation(); abrirPrecoRapido(rp.dataset.rp); return; }
+  const c=e.target.closest("[data-prod]");if(c)abrirProd(c.dataset.prod)});
+$("btnPrecoRapido").onclick=()=>abrirPrecoRapido(null);
+$("pdPreco").onclick=()=>{ const id=pd.id; if(!id) return; hide("mProd"); abrirPrecoRapido(id); };
+
+/* =====================================================================
+   PREÇO RÁPIDO (anúncio de TV, internet, folheto…) — fora de lista
+   ===================================================================== */
+const rp={pid:null};
+const hojeISO = () => new Date().toLocaleDateString("sv-SE"); // AAAA-MM-DD no fuso do aparelho
+const isoParaData = (iso,fim) => { const [a,m,d]=iso.split("-").map(Number); const t=new Date(a,m-1,d);
+  if(fim) t.setHours(23,59,59,999); else { const n=new Date(); t.setHours(n.getHours(),n.getMinutes(),n.getSeconds(),0); } return t.getTime(); };
+function abrirPrecoRapido(pid){
+  rp.pid=pid&&S.produtos[pid]?pid:null;
+  $("rpBusca").value=""; $("rpSug").innerHTML="";
+  rpProdutoUI();
+  rpLojas(lsUltLoja());
+  $("rpValor").value=""; $("rpData").value=hojeISO(); $("rpValido").value=""; $("rpData").max=hojeISO();
+  rpOrigem("TV"); rpAtualizar();
+  show("mPrecoRapido");
+  if(!rp.pid) $("rpBusca").focus();
+}
+function lsUltLoja(){ try{ return localStorage.getItem("lc3.ultLoja")||""; }catch(e){ return ""; } }
+function rpProdutoUI(){
+  const p=rp.pid&&S.produtos[rp.pid];
+  $("rpEscolhido").classList.toggle("hidden",!p); $("rpBuscaWrap").classList.toggle("hidden",!!p);
+  if(p) $("rpEscolhido").innerHTML=`<div class="thumb">${imgProduto(p)}</div><div style="flex:1;min-width:0"><div class="name">${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))} · ${esc(p.codigo||"")}</div></div><button class="small" id="rpTrocar">TROCAR</button>`;
+}
+function rpLojas(sel){
+  const ests=Object.values(S.ests).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+  $("rpLoja").innerHTML=`<option value="">ESCOLHA O ESTABELECIMENTO</option>`+ests.map(e=>`<option value="${e.id}">${esc(e.nome)}</option>`).join("")+`<option value="__novo">+ NOVO ESTABELECIMENTO</option>`;
+  $("rpLoja").value=S.ests[sel]?sel:"";
+}
+function rpOrigem(o){ rp.origem=o; document.querySelectorAll("[data-rpo]").forEach(b=>b.classList.toggle("on",b.dataset.rpo===o)); }
+document.querySelectorAll("[data-rpo]").forEach(b=>b.onclick=()=>rpOrigem(b.dataset.rpo));
+function rpAtualizar(){
+  const v=num($("rpValor").value), p=rp.pid&&S.produtos[rp.pid];
+  $("rpBase").textContent = v&&p ? precoBase(p,v) : "";
+  $("rpAlerta").innerHTML=alertasPreco(rp.pid,$("rpLoja").value,v);
+}
+$("rpValor").addEventListener("input",e=>{
+  const d=e.target.value.replace(/\D/g,"").replace(/^0+/,"").slice(0,8);
+  e.target.value=d?(parseInt(d,10)/100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):"";
+  rpAtualizar();
+});
+$("rpLoja").addEventListener("change",e=>{
+  if(e.target.value==="__novo"){ e.target.value=""; abrirEst(null,id=>{ rpLojas(id); rpAtualizar(); }); return; }
+  rpAtualizar();
+});
+// busca de produto
+$("rpBusca").addEventListener("input",()=>{
+  const q=$("rpBusca").value.trim();
+  if(!q){ $("rpSug").innerHTML=""; return; }
+  const ps=filtrarProdutos(q).slice(0,6);
+  $("rpSug").innerHTML=ps.map(p=>`<div class="pick" data-rps="${p.id}" style="grid-template-columns:56px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+    +`<button class="small" id="rpCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
+});
+$("rpSug").addEventListener("click",e=>{
+  const s=e.target.closest("[data-rps]"); if(s){ rp.pid=s.dataset.rps; rpProdutoUI(); rpAtualizar(); $("rpValor").focus(); return; }
+  if(e.target.id==="rpCriar"){ const nome=up($("rpBusca").value); hide("mPrecoRapido"); abrirProd(null,{nome},id=>reabrirRp(id)); }
+});
+$("rpEscolhido").addEventListener("click",e=>{ if(e.target.id==="rpTrocar"){ rp.pid=null; rpProdutoUI(); $("rpBusca").focus(); rpAtualizar(); } });
+$("rpBarras").onclick=async()=>{
+  const c=await lerCodigoBarras(); if(!c) return;
+  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  if(p){ rp.pid=p.id; rpProdutoUI(); rpAtualizar(); return; }
+  if(!confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) return;
+  hide("mPrecoRapido"); abrirProd(null,{barras:c},id=>reabrirRp(id));
+};
+// volta para o preço rápido depois de cadastrar o produto, mantendo o que já foi preenchido
+function reabrirRp(id){
+  const guardado={loja:$("rpLoja").value,valor:$("rpValor").value,data:$("rpData").value,valido:$("rpValido").value,origem:rp.origem};
+  const tentar=(n)=>{ if(S.produtos[id]||n>20){ rp.pid=S.produtos[id]?id:null; rpProdutoUI(); rpLojas(guardado.loja);
+      $("rpValor").value=guardado.valor; $("rpData").value=guardado.data; $("rpValido").value=guardado.valido; rpOrigem(guardado.origem); rpAtualizar(); show("mPrecoRapido"); }
+    else setTimeout(()=>tentar(n+1),150); };
+  tentar(0);
+}
+$("rpCancel").onclick=()=>hide("mPrecoRapido");
+$("rpSave").onclick=()=>{
+  const p=rp.pid&&S.produtos[rp.pid];
+  if(!p){ alert("ESCOLHA O PRODUTO (BUSQUE, LEIA O CÓDIGO OU CADASTRE)."); return; }
+  const estId=$("rpLoja").value; if(!S.ests[estId]){ alert("ESCOLHA O ESTABELECIMENTO."); $("rpLoja").focus(); return; }
+  const v=num($("rpValor").value); if(!(v>0)){ alert("INFORME O VALOR."); $("rpValor").focus(); return; }
+  const dIso=$("rpData").value||hojeISO();
+  if(dIso>hojeISO()){ alert("A DATA DO PREÇO NÃO PODE SER NO FUTURO. PARA OFERTA FUTURA, USE A DATA DE HOJE E O CAMPO VÁLIDO ATÉ."); return; }
+  const vIso=$("rpValido").value;
+  if(vIso&&vIso<dIso){ alert("“VÁLIDO ATÉ” NÃO PODE SER ANTES DA DATA DO PREÇO."); return; }
+  DB.add("precos",{produtoId:p.id,estabelecimentoId:estId,estNome:estNome(estId),valor:Math.round(v*100)/100,
+    tipo:"ANUNCIO",origem:rp.origem,dataPreco:isoParaData(dIso,false),validoAte:vIso?isoParaData(vIso,true):null,qtd:null,
+    usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:null,listaNome:""});
+  try{ localStorage.setItem("lc3.ultLoja",estId); }catch(e){}
+  hide("mPrecoRapido"); toast("PREÇO DO ANÚNCIO REGISTRADO");
+};
 
 let pd={id:null,foto:null,cb:null};
 $("pdVend").innerHTML=VENDIDO.map(v=>`<option>${v}</option>`).join("");
@@ -1552,7 +1701,7 @@ function abrirProd(id,pre={},cb=null){
   pd={id,foto:p?p.foto||null:null,cb};
   $("pdTitle").textContent=p?"EDITAR PRODUTO":"NOVO PRODUTO";
   $("pdCodigo").textContent=p?(p.codigo||"—"):"GERADO AO SALVAR";
-  $("pdNome").value=p?p.nome:""; $("pdMarca").value=p?(p.marca||""):"";
+  $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):"";
   $("pdVend").value=p?(p.vendidoPor||"UN"):"UN";
   $("pdCQtd").value=p&&p.conteudoQtd?fmtQtd(p.conteudoQtd):""; $("pdCUn").value=p?(p.conteudoUn||""):"";
   $("pdBarras").value=p?(p.barras||""):(pre.barras||""); $("pdObs").value=p?(p.obs||""):"";
@@ -1575,9 +1724,8 @@ function abrirProd(id,pre={},cb=null){
   }
   if(p){
     const rs=S.precos.filter(r=>r.produtoId===p.id).sort((a,b)=>b.ts-a.ts);
-    $("pdHist").innerHTML=rs.map(r=>`<div class="rec"><div>${esc(estNome(r.estabelecimentoId))}<br><small>${dLonga(r.ts)} ${hora(r.ts)} · ${esc(r.usuarioNome)} · <span class="${r.tipo==="PAGO"?"pago":"visto"}">${r.tipo}</span></small></div>
-      <div style="text-align:right">${brl(r.valor)}<br><small>${precoBase(p,r.valor)}</small></div></div>`).join("")||`<div class="hint">NENHUM PREÇO AINDA.</div>`;
-  }
+    $("pdHist").innerHTML=rs.map(r=>`<div class="rec"><div>${esc(estNome(r.estabelecimentoId))}<br><small>${dLonga(r.ts)} ${hora(r.ts)} · ${esc(r.usuarioNome)} · <span class="${classeTipo(r)}">${esc(rotuloTipo(r))}</span></small></div>
+      <div style="text-align:right">${brl(r.valor)}<br><small>${precoBase(p,r.valor)}</small></div></div>`).join("")||`<div class="hint">NENHUM PREÇO AINDA.</div>`;  }
   $("pdDel").classList.toggle("hidden",!p);
   show("mProd");
 }
@@ -1773,7 +1921,7 @@ function renderHist(){
   }else{
     const rs=[...S.precos].sort((a,b)=>b.ts-a.ts).slice(0,300);
     $("hist").innerHTML=rs.map(r=>{const p=S.produtos[r.produtoId];return `<div class="rec"><div><b>${esc(p?p.nome:"PRODUTO REMOVIDO")}</b> ${esc(p?p.marca||"":"")}<br>
-      <small>${esc(estNome(r.estabelecimentoId))} · ${dLonga(r.ts)} ${hora(r.ts)} · ${esc(r.usuarioNome)} · <span class="${r.tipo==="PAGO"?"pago":"visto"}">${r.tipo}</span></small></div>
+      <small>${esc(estNome(r.estabelecimentoId))} · ${dLonga(r.ts)} ${hora(r.ts)} · ${esc(r.usuarioNome)} · <span class="${classeTipo(r)}">${esc(rotuloTipo(r))}</span></small></div>
       <div style="text-align:right">${brl(r.valor)}<br>${r.usuarioUid===eu().uid?`<button class="del" data-delp="${r.id}">APAGAR</button>`:""}</div></div>`}).join("")||`<div class="empty">NENHUM PREÇO REGISTRADO AINDA.</div>`;
   }
 }
@@ -1783,7 +1931,7 @@ $("btnCsv").onclick=()=>{
   const cab=["DATA","HORA","ESTABELECIMENTO","ID PRODUTO","PRODUTO","MARCA","CONTEÚDO","VALOR","TIPO","QTD","REGISTRADO POR","LISTA"];
   const ls=[...S.precos].sort((a,b)=>a.ts-b.ts).map(r=>{const p=S.produtos[r.produtoId]||{};
     return [dLonga(r.ts),hora(r.ts),estNome(r.estabelecimentoId),p.codigo||"",p.nome||"REMOVIDO",p.marca||"",p.conteudoQtd?fmtQtd(p.conteudoQtd)+" "+(p.conteudoUn||""):"",
-      fmtNum(r.valor),r.tipo,r.qtd?fmtQtd(r.qtd):"",r.usuarioNome,r.listaNome||""].map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(";")});
+      fmtNum(r.valor),rotuloTipo(r),r.qtd?fmtQtd(r.qtd):"",r.usuarioNome,r.listaNome||""].map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(";")});
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+cab.join(";")+"\n"+ls.join("\n")],{type:"text/csv;charset=utf-8"}));
   a.download="precos_"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();
 };
@@ -1807,7 +1955,7 @@ function relatorioLista(L){
     const zonasTodas=Object.entries(p.zonas||{}).filter(([e])=>S.ests[e]).map(([e,c])=>`${esc(estNome(e))}: ${esc(zonaRotulo(e,c))}`).join("; ");
     const sit = r ? `<div class="rok">✔ COMPRADO POR ${esc(r.usuarioNome)}<br>${esc(r.estNome||estNome(r.estabelecimentoId))} · ${dLonga(r.ts)} ${hora(r.ts)}${r.valor?`<br>${fmtQtd(r.qtd)} × ${brl(r.valor)} = ${brl(r.total)}`:"<br>SEM VALOR"}${r.listaId!==L.id&&S.listas[r.listaId]?`<br><span class="rs">NA LISTA ${esc(S.listas[r.listaId].nome)}</span>`:""}</div>`
                 : `<div class="rpend">PENDENTE</div>`;
-    const precos = pl.length ? pl.map((x,j)=>`<div class="${j===0&&varias?"bx":""}">${j===0&&varias?"★ ":""}${esc(estNome(x.estabelecimentoId))}: ${brl(x.valor)}${precoBase(p,x.valor)?" ("+precoBase(p,x.valor)+")":""}<br><span class="rs">${dLonga(x.ts)} · ${esc(x.usuarioNome)} · ${x.tipo}</span></div>`).join("") : `<span class="rs">SEM PREÇO REGISTRADO</span>`;
+    const precos = pl.length ? pl.map((x,j)=>`<div class="${j===0&&varias?"bx":""}">${j===0&&varias?"★ ":""}${esc(estNome(x.estabelecimentoId))}: ${brl(x.valor)}${precoBase(p,x.valor)?" ("+precoBase(p,x.valor)+")":""}<br><span class="rs">${dLonga(x.ts)} · ${esc(x.usuarioNome)} · ${esc(rotuloTipo(x))}</span></div>`).join("") : `<span class="rs">SEM PREÇO REGISTRADO</span>`;
     const dica=dicaMarca(p,estSel);
     return `<tr>
       <td>${i+1}</td>
