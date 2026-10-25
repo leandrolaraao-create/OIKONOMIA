@@ -221,6 +221,21 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .menu{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .menu button{text-align:left;padding:13px 14px;font-size:14px;font-weight:700}
 .menu button.danger{border-color:#f0c9c2}
+/* leitura ao vivo */
+.mm{position:relative;height:150px;margin-top:8px;border-radius:12px;overflow:hidden;background:#000}
+.mm video,.scan video{width:100%;height:100%;object-fit:cover;display:block}
+.mira{position:absolute;left:8%;right:8%;top:50%;height:44%;transform:translateY(-50%);border:2px solid rgba(255,255,255,.9);border-radius:10px;box-shadow:0 0 0 999px rgba(0,0,0,.28)}
+.mira::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff3b30;opacity:.85}
+.mira.ok{border-color:#3fe08a}
+.mmMsg{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#fff;font-size:11px;font-weight:800;text-shadow:0 1px 3px #000}
+.mmBtn{position:absolute;top:8px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:16px;padding:0}
+#btnScan.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.scan{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column}
+.scan .vw{position:relative;flex:1;overflow:hidden}
+.scan .mira{height:26%}
+.scan .msg{position:absolute;left:0;right:0;top:18px;text-align:center;color:#fff;font-weight:800;font-size:14px;text-shadow:0 1px 3px #000}
+.scan .bts{display:flex;gap:8px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:#111}
+.scan .bts button{flex:1;background:#222;color:#fff;border-color:#333;padding:12px 4px;font-size:12px}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
 .achado img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex:none}
 .achado .t{flex:1;min-width:0;font-size:12px}
@@ -266,6 +281,13 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
         <div><div class="tl">NESTA LOJA</div><div class="tv" id="tLoja">R$ 0,00</div></div>
         <div><div class="tl">TOTAL DO GRUPO</div><div class="tv sm" id="tGrupo">R$ 0,00</div></div>
         <div><div class="tl">FALTA ~</div><div class="tv sm fut" id="tFalta">R$ 0,00</div></div>
+      </div>
+      <div id="mm" class="mm hidden">
+        <video id="mmVideo" playsinline muted autoplay></video>
+        <div class="mira"></div>
+        <div class="mmMsg" id="mmMsg">APONTE PARA O CÓDIGO DE BARRAS</div>
+        <button id="mmTorch" class="mmBtn hidden" style="left:8px" aria-label="LANTERNA">🔦</button>
+        <button id="mmClose" class="mmBtn" style="right:8px" aria-label="DESLIGAR CÂMERA">✕</button>
       </div>
     </div>
   </header>
@@ -324,7 +346,7 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
   </main>
 
   <div class="actionbar hidden" id="abLista">
-    <button id="btnScan"><span>▥</span>LER CÓDIGO</button>
+    <button id="btnScan"><span>▥</span>MODO MERCADO</button>
     <button id="btnAddProd"><span>➕</span>PRODUTO</button>
     <button id="btnShare"><span>👥</span>COMPARTILHAR</button>
     <button id="btnDist"><span>🔀</span>DISTRIBUIR</button>
@@ -741,7 +763,8 @@ function agendar(){ if(agendado) return; agendado=true; requestAnimationFrame(()
 function mostrar(){
   const L=ui.lista&&S.listas[ui.lista];
   const naLista=ui.aba==="listas"&&(!!L||!!ui.lista);
-  $("vListas").classList.toggle("hidden",!(ui.aba==="listas"&&!L));
+  if(!naLista&&typeof mm!=="undefined"&&mm.ativo) pararModoMercado(); // saiu da lista: desliga a câmera
+  $("vListas").classList.toggle("hidden",!(ui.aba==="listas"&&!ui.lista)); // com uma lista aberta (ou chegando do banco) a tela inicial some
   $("vLista").classList.toggle("hidden",!naLista);
   $("vProdutos").classList.toggle("hidden",ui.aba!=="produtos");
   $("vEsts").classList.toggle("hidden",ui.aba!=="ests");
@@ -1027,12 +1050,48 @@ function registrarRealizado(L,pid,estId,valor,qtd,precoId){
   });
 }
 $("btnAddProd").onclick=()=>abrirPicker("add");
-// ▥ LER: código de barras dentro da lista
-$("btnScan").onclick=async()=>{
+// ▥ MODO MERCADO: câmera ao vivo no topo da lista; é só apontar para o produto
+$("btnScan").onclick=()=>{
+  if(mm.ativo){ pararModoMercado(); return; }
   const L=S.listas[ui.lista]; if(!L||!exigirLoja(L)) return;
-  const c=await lerCodigoBarras(); if(!c) return;
+  iniciarModoMercado();
+};
+const mm={ativo:false,leitor:null,ultimo:"",ultimoEm:0};
+async function iniciarModoMercado(){
+  $("mm").classList.remove("hidden"); $("mmMsg").textContent="LIGANDO A CÂMERA…";
+  $("btnScan").classList.add("on"); $("btnScan").innerHTML="<span>■</span>PARAR CÂMERA";
+  mm.ativo=true;
+  try{
+    mm.leitor=await LeitorAoVivo.iniciar($("mmVideo"),{
+      pausado:()=>document.querySelector(".modal.show")!==null, // não lê com janela aberta
+      aoLer:c=>{
+        const agora=Date.now();
+        if(c===mm.ultimo&&agora-mm.ultimoEm<20000) return false; // mesmo produto: só lê de novo depois de 20 s
+        mm.ultimo=c; mm.ultimoEm=agora;
+        tratarCodigoNaLista(c); return true;
+      },
+      torch:$("mmTorch")
+    });
+    if(!mm.ativo){ mm.leitor.parar(); return; }
+    $("mmMsg").textContent="APONTE PARA O CÓDIGO DE BARRAS";
+  }catch(e){
+    pararModoMercado();
+    alert(e.message||"NÃO FOI POSSÍVEL LIGAR A CÂMERA.");
+  }
+}
+function pararModoMercado(){
+  mm.ativo=false; mm.ultimo="";
+  if(mm.leitor){ mm.leitor.parar(); mm.leitor=null; }
+  $("mm").classList.add("hidden");
+  $("btnScan").classList.remove("on"); $("btnScan").innerHTML="<span>▥</span>MODO MERCADO";
+}
+$("mmClose").onclick=pararModoMercado;
+document.addEventListener("visibilitychange",()=>{ if(document.hidden&&mm.ativo) pararModoMercado(); });
+// o que fazer com um código lido dentro da lista
+function tratarCodigoNaLista(c){
+  const L2=S.listas[ui.lista]; if(!L2) return;
+  if(!lojaSel(L2)){ alert("ESCOLHA PRIMEIRO O ESTABELECIMENTO NO TOPO DA LISTA."); return; }
   const p=Object.values(S.produtos).find(x=>x.barras===c);
-  const L2=S.listas[ui.lista];
   if(p){
     if((L2.itens||[]).some(it=>it.produtoId===p.id)){ abrirPreco(L2,p.id,false); return; }
     if(!confirm(`${p.nome} ${p.marca||""} NÃO ESTÁ NESTA LISTA. ADICIONAR E REGISTRAR O PREÇO?`)) return;
@@ -1176,7 +1235,85 @@ function obterDetector(){
   }
   return detectorP;
 }
-async function lerCodigoBarras(){
+/* ---------- Leitura AO VIVO: câmera traseira ligada, lê sozinho ao apontar ---------- */
+const LeitorAoVivo={
+  async iniciar(video,{aoLer,pausado,torch}){
+    if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)) throw new Error("ESTE NAVEGADOR NÃO PERMITE CÂMERA AO VIVO. USE A OPÇÃO FOTO.");
+    let stream;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}}});
+    }catch(e){
+      const n=e&&e.name;
+      if(n==="NotAllowedError"||n==="SecurityError") throw new Error("A CÂMERA FOI BLOQUEADA. PERMITA O ACESSO À CÂMERA NAS CONFIGURAÇÕES DO NAVEGADOR PARA ESTE SITE.");
+      throw new Error("NÃO FOI POSSÍVEL LIGAR A CÂMERA ("+(n||e)+").");
+    }
+    video.srcObject=stream; video.setAttribute("playsinline",""); video.muted=true;
+    try{ await video.play(); }catch(e){}
+    let leitor;
+    try{ leitor=await obterDetector(); }
+    catch(e){ stream.getTracks().forEach(t=>t.stop()); throw new Error("NÃO FOI POSSÍVEL CARREGAR O LEITOR DE CÓDIGO (SEM INTERNET?)."); }
+    // lanterna, quando o aparelho permite
+    const track=stream.getVideoTracks()[0]; let luz=false;
+    try{ const cap=track.getCapabilities&&track.getCapabilities(); if(torch&&cap&&cap.torch){ torch.classList.remove("hidden");
+      torch.onclick=async()=>{ luz=!luz; try{ await track.applyConstraints({advanced:[{torch:luz}]}); }catch(e){} }; } }catch(e){}
+    const cv=document.createElement("canvas"), cx=cv.getContext("2d",{willReadFrequently:true});
+    let ativo=true, ocupado=false;
+    const mira=video.parentElement.querySelector(".mira");
+    const passo=async()=>{
+      if(!ativo) return;
+      if(!ocupado&&video.readyState>=2&&!(pausado&&pausado())){
+        ocupado=true;
+        try{
+          const vw=video.videoWidth, vh=video.videoHeight;
+          if(vw&&vh){
+            // analisa a faixa central (onde fica a mira), reduzida para ser rápido
+            const sw=vw*0.9, sh=vh*0.5, sx=(vw-sw)/2, sy=(vh-sh)/2, esc=Math.min(1,960/sw);
+            cv.width=Math.round(sw*esc); cv.height=Math.round(sh*esc);
+            cx.drawImage(video,sx,sy,sw,sh,0,0,cv.width,cv.height);
+            const r=await leitor.det.detect(cv);
+            if(ativo&&r&&r.length){
+              const c=String(r[0].rawValue||"").trim();
+              if(c&&aoLer(c)){ try{navigator.vibrate&&navigator.vibrate(90)}catch(e){}
+                if(mira){ mira.classList.add("ok"); setTimeout(()=>mira.classList.remove("ok"),600); } }
+            }
+          }
+        }catch(e){}
+        ocupado=false;
+      }
+      if(ativo) setTimeout(passo,180);
+    };
+    passo();
+    return { parar(){ ativo=false; try{ if(luz) track.applyConstraints({advanced:[{torch:false}]}); }catch(e){}
+      stream.getTracks().forEach(t=>t.stop()); video.srcObject=null; if(torch) torch.classList.add("hidden"); } };
+  }
+};
+
+// ▥ nas outras telas: câmera ao vivo em tela cheia, lê uma vez e fecha (com opções FOTO e DIGITAR)
+function lerCodigoBarras(){
+  obterDetector().catch(()=>{});
+  return new Promise(res=>{
+    const ov=document.createElement("div"); ov.className="scan";
+    ov.innerHTML=`<div class="vw"><video playsinline muted autoplay></video><div class="mira"></div>
+      <div class="msg">APONTE PARA O CÓDIGO DE BARRAS</div>
+      <button class="mmBtn hidden" data-a="luz" style="left:12px;top:56px">🔦</button></div>
+      <div class="bts"><button data-a="foto">📷 FOTO</button><button data-a="dig">⌨ DIGITAR</button><button data-a="x">✕ CANCELAR</button></div>`;
+    document.body.appendChild(ov);
+    let leitor=null, feito=false;
+    const fim=v=>{ if(feito) return; feito=true; if(leitor) leitor.parar(); ov.remove(); res(v); };
+    ov.addEventListener("click",async e=>{
+      const a=e.target.closest("[data-a]"); if(!a||a.dataset.a==="luz") return;
+      if(a.dataset.a==="x") fim(null);
+      else if(a.dataset.a==="dig"){ const v=(prompt("DIGITE O NÚMERO DO CÓDIGO DE BARRAS:")||"").replace(/\D/g,""); if(v) fim(v); }
+      else if(a.dataset.a==="foto"){ if(leitor){leitor.parar();leitor=null;} feito=true; ov.remove(); res(await lerCodigoFoto()); }
+    });
+    LeitorAoVivo.iniciar(ov.querySelector("video"),{aoLer:c=>{ fim(c); return true; }, torch:ov.querySelector('[data-a="luz"]')})
+      .then(l=>{ if(feito) l.parar(); else leitor=l; })
+      .catch(err=>{ if(feito) return; ov.querySelector(".msg").textContent=err.message+" USE FOTO OU DIGITAR."; });
+  });
+}
+
+// leitura por FOTO (alternativa)
+async function lerCodigoFoto(){
   obterDetector().catch(()=>{}); // já começa a preparar o leitor enquanto a câmera abre
   return new Promise(res=>{
     abrirCamera(async f=>{
@@ -1370,6 +1507,7 @@ $("btnFim").onclick=()=>{
 };
 $("fCancel").onclick=()=>hide("mFim");
 $("fOk").onclick=()=>{
+  if(mm.ativo) pararModoMercado();
   const L=S.listas[ui.lista], estId=lojaSel(L);
   const meus=Object.values(S.realizados).filter(r=>r.grupo===grupoKey(L)&&r.estabelecimentoId===estId&&r.usuarioUid===eu().uid);
   const falt=(L.itens||[]).filter(it=>!realizado(L,it.produtoId));
