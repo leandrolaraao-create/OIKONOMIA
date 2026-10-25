@@ -891,7 +891,7 @@ function criarLista(nome,itens,extra={}){
 }
 function abrirLista(id){ ui.lista=id; ui.filtro="all"; setFiltro("all"); mostrar(); }
 $("btnNovaLista").onclick=()=>{
-  const n=up(prompt("NOME DA LISTA:","MERCADO "+dCurta(Date.now()))||"");
+  const n=up(prompt("NOME DA LISTA:","MERCADO "+dLonga(Date.now())+" "+hora(Date.now()))||"");
   if(!n) return;
   abrirPicker("nova",n);
 };
