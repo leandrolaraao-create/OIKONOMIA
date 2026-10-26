@@ -248,6 +248,43 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .scan .msg{position:absolute;left:0;right:0;top:18px;text-align:center;color:#fff;font-weight:800;font-size:14px;text-shadow:0 1px 3px #000}
 .scan .bts{display:flex;gap:8px;padding:12px 12px calc(12px + env(safe-area-inset-bottom));background:#111}
 .scan .bts button{flex:1;background:#222;color:#fff;border-color:#333;padding:12px 4px;font-size:12px}
+/* cartão do item (resumo + comparação em barras) */
+.item2{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.item2.done{background:var(--done)}
+.item2.done .name{text-decoration:line-through;color:var(--muted)}
+.item2 .top{display:flex;gap:12px;padding:12px 12px 8px;align-items:flex-start}
+.item2 .top .info{flex:1;min-width:0}
+.item2 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chipq{font-size:11px;padding:3px 10px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-weight:800;border:none}
+.chipz{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-weight:700;white-space:nowrap}
+.chipz.v{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.resumo2{display:flex;margin:0 12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.resumo2 .bx{flex:1;padding:8px 10px;min-width:0}
+.resumo2 .bx+.bx{border-left:1px solid var(--line)}
+.resumo2 small{display:block;font-size:9.5px;font-weight:800;color:var(--muted);letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.resumo2 b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.resumo2 b.cinza{color:var(--muted);font-size:14px}
+.resumo2 .sub{display:block}
+.resumo2 .selo{display:block;font-size:10px;font-weight:800}
+.resumo2 .ok{background:var(--done)} .resumo2 .ok b,.resumo2 .ok .selo{color:var(--accent)}
+.resumo2 .caro{background:#fdeceb} .resumo2 .caro b,.resumo2 .caro .selo{color:var(--warn)}
+.resumo2 .vazio{padding:10px;font-size:12px;color:var(--muted);font-weight:700}
+.comprado{margin:0 12px;padding:8px 10px;border-radius:12px;background:#fff;border:1px solid #bfe0cc;color:var(--accent);font-size:12px;font-weight:700}
+.exp2{display:block;width:calc(100% - 24px);margin:8px 12px 0;text-align:left;border:none;border-top:1px dashed var(--line);border-radius:0;background:none;padding:7px 0 4px;font-size:11px;font-weight:800;color:var(--tag-ink)}
+.lst2{margin:0 12px}
+.li2{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:12px}
+.li2 .lj{width:104px;font-weight:800;line-height:1.15}
+.li2 .lj small{display:block;font-size:9.5px;font-weight:600;color:var(--muted)}
+.li2 .gr{flex:1;height:6px}
+.li2 .gr i{display:block;height:6px;border-radius:99px}
+.li2 .vl{min-width:78px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.li2 .vl small{display:block;font-size:9.5px}
+.li2.best .lj,.li2.best .vl{color:var(--accent)} .li2.best .gr i{background:var(--accent)}
+.li2.caro .lj,.li2.caro .vl{color:var(--warn)} .li2.caro .gr i{background:var(--warn);opacity:.75}
+.item2 .acts{display:flex;gap:6px;padding:10px 12px 12px}
+.btnComprar{flex:1;height:42px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-weight:800;font-size:13px}
+.btnComprar.sec{background:#fff;color:var(--muted);border:1px solid var(--line)}
+.item2 .ib{width:44px;height:42px;padding:0;font-size:18px;flex:none}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
 .achado img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex:none}
 .achado .t{flex:1;min-width:0;font-size:12px}
@@ -656,7 +693,7 @@ const DB = DEMO ? Local : Fire;
    ESTADO
    ===================================================================== */
 const S = { user:null, usuarios:{}, produtos:{}, ests:{}, precos:[], listas:{}, realizados:{}, finalizacoes:[] };
-const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compras" };
+const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compras", fechados:new Set(), abertos:new Set() };
 let desligar=[];
 const byId = arr => Object.fromEntries(arr.map(d=>[d.id,d]));
 const nomeUsuario = uid => (S.usuarios[uid]||{}).nome || "?";
@@ -1035,36 +1072,64 @@ function renderLista(L){
 }
 function cardItem(L,it,estId){
   const p=S.produtos[it.produtoId];
-  if(!p) return `<div class="item"><div class="thumb">❔</div><div><div class="name">PRODUTO REMOVIDO DO CATÁLOGO</div><div class="tags"><button class="tag vazio" data-qtd="${it.produtoId}">REMOVER DA LISTA</button></div></div><div></div></div>`;
-  const r=realizado(L,p.id);
-  const pl=precosPorLoja(p.id);
-  let precos="";
-  if(pl.length){
-    const rec=pl.reduce((a,b)=>a.ts>b.ts?a:b).id, varias=pl.length>1;
-    precos=`<div class="prices">`+pl.map((x,i)=>{
-      const aqui=x.estabelecimentoId===estId;
-      const t=`${aqui?"📍":""}${esc(estNome(x.estabelecimentoId))} ${brl(x.valor)} (${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.validoAte?" · ATÉ "+dCurta(x.validoAte):""})${x.id===rec&&varias?" 🕒":""}`;
-      return i===0&&varias?`<span class="cheap">${t}</span>`:t;
-    }).join("<br>")+`</div>`;
-  } else precos=`<div class="prices">SEM PREÇO REGISTRADO</div>`;
+  if(!p) return `<div class="item2"><div class="top"><div class="thumb">❔</div><div class="info"><div class="name">PRODUTO REMOVIDO DO CATÁLOGO</div></div></div>
+    <div class="acts"><button class="btnComprar sec" data-qtd="${it.produtoId}">REMOVER DA LISTA</button></div></div>`;
+  const r=realizado(L,p.id), pl=precosPorLoja(p.id), menor=pl[0]||null;
   const z=zonaDe(p,estId);
-  const zt=estId?`<span class="tag${z?"":" vazio"}">${z?"🧭 "+esc(zonaRotulo(estId,z)):"SEM ZONA AQUI"}</span>`:"";
-  const comprado = r ? `<div class="bought">✔ COMPRADO POR ${esc(r.usuarioNome)} · ${esc(r.estNome||estNome(r.estabelecimentoId))}${r.valor?` · ${fmtQtd(r.qtd)} × ${brl(r.valor)} = ${brl(r.total)}`:""} · ${dCurta(r.ts)} ${hora(r.ts)}${r.listaId!==L.id&&S.listas[r.listaId]?` · NA LISTA ${esc(S.listas[r.listaId].nome)}`:""}</div>` : "";
-  return `<div class="item${r?" done":""}">
-    <div class="thumb" data-foto="${p.id}">${imgProduto(p)}</div>
-    <div>
-      <div class="name">${esc(p.nome)}</div>
-      <div class="sub">${esc(descProduto(p))} · ${esc(p.codigo||"")}</div>
-      <div class="meta">QUERO: <b>${fmtQtd(it.qtd||1)}</b></div>
-      ${comprado}${precos}${(()=>{const d=r?"":dicaMarca(p,estId);return d?`<div class="dica">${d}</div>`:""})()}
-      <div class="tags">${zt}<button class="tag vazio" data-qtd="${p.id}">QTD / REMOVER</button></div>
-    </div>
-    <div class="actions">
-      <input type="checkbox" class="chk" data-chk="${p.id}" ${r?"checked":""} aria-label="COMPRADO">
-      <div class="btnrow">
-        <button class="cam" data-cam="${p.id}" aria-label="LER PREÇO">📷</button>
-        <button class="cam" data-dig="${p.id}" aria-label="DIGITAR PREÇO">✏️</button>
+  const chips=`<button class="chipq" data-qtd="${p.id}">QUERO ${fmtQtd(it.qtd||1)}</button>`+
+    (estId?`<span class="chipz${z?"":" v"}">🧭 ${z?esc(zonaRotulo(estId,z)):"SEM ZONA AQUI"}</span>`:"");
+  // ---- resumo: AQUI × MAIS BARATO ----
+  let resumo="";
+  if(r){
+    resumo=`<div class="comprado">✔ COMPRADO POR ${esc(r.usuarioNome)} · ${esc(r.estNome||estNome(r.estabelecimentoId))}${r.valor?`<br><b>${fmtQtd(r.qtd)} × ${brl(r.valor)} = ${brl(r.total)}</b>`:""} · ${dCurta(r.ts)} ${hora(r.ts)}${r.listaId!==L.id&&S.listas[r.listaId]?`<br><small>NA LISTA ${esc(S.listas[r.listaId].nome)}</small>`:""}</div>`;
+  }else if(!menor){
+    resumo=`<div class="resumo2"><div class="vazio">SEM PREÇO REGISTRADO EM NENHUMA LOJA</div></div>`;
+  }else{
+    const aqui=estId?pl.find(x=>x.estabelecimentoId===estId):null;
+    let boxAqui;
+    if(!estId) boxAqui=`<div class="bx"><small>📍 AQUI</small><span class="sub">ESCOLHA A LOJA NO TOPO</span></div>`;
+    else if(!aqui) boxAqui=`<div class="bx"><small>📍 AQUI · ${esc(estNome(estId))}</small><b class="cinza">SEM PREÇO</b><span class="sub">REGISTRE AO COMPRAR</span></div>`;
+    else{
+      const d=Math.round((aqui.valor-menor.valor)*100)/100;
+      boxAqui = d<=0
+        ? `<div class="bx ok"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}</b><span class="selo">✓ O MAIS BARATO</span></div>`
+        : `<div class="bx caro"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}</b><span class="selo">+${brl(d)} MAIS CARO QUE O MENOR</span></div>`;
+    }
+    resumo=`<div class="resumo2">${boxAqui}<div class="bx"><small>MAIS BARATO</small><b>${brl(menor.valor)}</b><span class="sub">${esc(estNome(menor.estabelecimentoId))}</span></div></div>`;
+  }
+  // ---- comparação em barras: menor em verde, mais caras em vermelho ----
+  let comp="";
+  if(pl.length>1||(pl.length===1&&r)){
+    const aberto = r ? ui.abertos.has(p.id) : !ui.fechados.has(p.id);
+    const max=Math.max(...pl.map(x=>x.valor));
+    comp=`<button class="exp2" data-exp="${p.id}">${aberto?"▾":"▸"} COMPARAR ${pl.length} LOJA${pl.length>1?"S":""}</button>`;
+    if(aberto) comp+=`<div class="lst2">`+pl.map((x,i)=>{
+      const best=i===0, d=Math.round((x.valor-menor.valor)*100)/100;
+      const cls = best ? "best" : (d>0?"caro":"best");
+      return `<div class="li2 ${cls}">
+        <span class="lj">${x.estabelecimentoId===estId?"📍":""}${esc(estNome(x.estabelecimentoId))}<small>${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.validoAte?" · ATÉ "+dCurta(x.validoAte):""}</small></span>
+        <span class="gr"><i style="width:${Math.max(4,Math.round(x.valor/max*100))}%"></i></span>
+        <span class="vl">${brl(x.valor)}<small>${best?"★ MENOR":d>0?"+"+brl(d):"= MENOR"}</small></span></div>`;
+    }).join("")+`</div>`;
+  }
+  const dica=r?"":dicaMarca(p,estId);
+  const botao = r
+    ? `<button class="btnComprar sec" data-desfazer="${p.id}" data-chk="${p.id}">↩ DESFAZER COMPRA</button>`
+    : `<button class="btnComprar" data-comprar="${p.id}" data-chk="${p.id}">✔ COMPREI AQUI</button>`;
+  return `<div class="item2${r?" done":""}">
+    <div class="top">
+      <div class="thumb" data-foto="${p.id}">${imgProduto(p)}</div>
+      <div class="info">
+        <div class="name">${esc(p.nome)}</div>
+        <div class="sub">${esc(descProduto(p))}</div>
+        <div class="tags">${chips}</div>
       </div>
+    </div>
+    ${resumo}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
+    <div class="acts">${botao}
+      <button class="ib" data-cam="${p.id}" aria-label="LER PREÇO DA ETIQUETA">📷</button>
+      <button class="ib" data-dig="${p.id}" aria-label="DIGITAR PREÇO">✏️</button>
+      <button class="ib" data-mais="${p.id}" aria-label="MAIS OPÇÕES">⋯</button>
     </div>
   </div>`;
 }
@@ -1090,16 +1155,45 @@ $("itens").addEventListener("click",e=>{
   if((id=pick("cam"))){ if(!exigirLoja(L)) return; abrirPreco(L,id,true); return; }
   if((id=pick("dig"))){ if(!exigirLoja(L)) return; abrirPreco(L,id,false); return; }
   if((id=pick("foto"))){ fotografarProduto(id); return; }
-  if((id=pick("qtd"))){
-    const it=(L.itens||[]).find(x=>x.produtoId===id);
-    const v=prompt("QUANTIDADE DESEJADA (DIGITE 0 PARA REMOVER DA LISTA):",fmtQtd(it?it.qtd:1));
-    if(v===null) return;
-    const q=num(v);
-    if(q===0){ if(confirm("REMOVER ESTE PRODUTO DA LISTA?")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)}); return; }
-    if(!(q>0)) return;
-    DB.update("listas",L.id,{itens:L.itens.map(x=>x.produtoId===id?{...x,qtd:q}:x)});
-  }
+  if((id=pick("comprar"))){ comprarItem(L,id); return; }
+  if((id=pick("desfazer"))){ desfazerCompra(L,id); return; }
+  if((id=pick("exp"))){ // abre/fecha a comparação de lojas do item
+    const comprado=!!realizado(L,id), s=comprado?ui.abertos:ui.fechados;
+    s.has(id)?s.delete(id):s.add(id); agendar(); return; }
+  if((id=pick("mais"))){ maisOpcoesItem(L,id); return; }
+  if((id=pick("qtd"))){ editarQtd(L,id); return; }
 });
+function editarQtd(L,id){
+  const it=(L.itens||[]).find(x=>x.produtoId===id);
+  const v=prompt("QUANTIDADE DESEJADA (DIGITE 0 PARA REMOVER DA LISTA):",fmtQtd(it?it.qtd:1));
+  if(v===null) return;
+  const q=num(v);
+  if(q===0){ if(confirm("REMOVER ESTE PRODUTO DA LISTA?")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)}); return; }
+  if(!(q>0)) return;
+  DB.update("listas",L.id,{itens:L.itens.map(x=>x.produtoId===id?{...x,qtd:q}:x)});
+}
+// ✔ COMPREI AQUI: sem preço nesta loja → exige o valor; com preço → "ainda está esse valor?"
+function comprarItem(L,pid){
+  const estId=exigirLoja(L); if(!estId) return;
+  const ult=precosPorLoja(pid).find(x=>x.estabelecimentoId===estId);
+  if(!ult) abrirPreco(L,pid,false); else abrirAinda(L,pid,ult);
+}
+function desfazerCompra(L,pid){
+  const r=realizado(L,pid); if(!r) return;
+  if(!confirm(`DESFAZER A COMPRA?\nISSO DESFAZ A COMPRA REGISTRADA POR ${r.usuarioNome} EM TODAS AS LISTAS DO GRUPO.\n(O PREÇO CONTINUA NO HISTÓRICO.)`)) return;
+  DB.del("realizados",chaveReal(L,pid));
+}
+// ⋯ do item: quantidade, foto, produto, mandar para outra loja
+function maisOpcoesItem(L,pid){
+  const p=S.produtos[pid]||{}, comprado=!!realizado(L,pid);
+  const ops=[
+    {txt:"🔢  QUANTIDADE / REMOVER DA LISTA", fn:()=>editarQtd(L,pid)},
+    {txt:"🖼  FOTO DO PRODUTO", fn:()=>fotografarProduto(pid)},
+    {txt:"📦  VER / EDITAR PRODUTO", fn:()=>abrirProd(pid)},
+  ];
+  if(!comprado) ops.push({txt:"↪  MANDAR PARA A LISTA DE OUTRA LOJA", fn:()=>{ pr={L,pid,estId:lojaSel(L),tipo:"PAGO"}; $("prValor").value=""; $("prMover").onclick(); }});
+  abrirMenu(p.nome||"ITEM", descProduto(p), ops);
+}
 $("itens").addEventListener("change",e=>{
   const pid=e.target.dataset.chk; if(!pid) return;
   const L=S.listas[ui.lista];
