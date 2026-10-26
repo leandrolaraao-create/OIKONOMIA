@@ -969,7 +969,8 @@ function renderListas(){
   $("listas").innerHTML=lista.map(b=>{
     if(!b.filhos.length) return cardListaHtml(b.pai);
     const aberto=lui.abertos.has(b.k);
-    const topo = b.pai ? cardListaHtml(b.pai) : `<div class="lc" style="cursor:default"><div class="nm">GRUPO ${esc((b.filhos[0].nome.match(/^\d{8}\.\d{6}/)||[""])[0])}</div><div class="st">LISTA ORIGINAL NÃO DISPONÍVEL</div></div>`;
+    const topo = b.pai ? cardListaHtml(b.pai) : `<div class="lc" style="cursor:default"><div class="h"><div class="nm">GRUPO ${esc((b.filhos[0].nome.match(/^\d{8}\.\d{6}/)||[""])[0])}</div>
+      <button class="kebab" data-menug="${esc(b.k)}" aria-label="AÇÕES DO GRUPO">⋮</button></div><div class="st">MATRIZ EXCLUÍDA OU NÃO COMPARTILHADA COM VOCÊ</div></div>`;
     return `<div class="grp">${topo}
       <button class="tog" data-tog="${b.k}"><span>🔀 DISTRIBUÍDA EM ${b.filhos.length} LISTA${b.filhos.length>1?"S":""}</span><span>${aberto?"▲ RECOLHER":"▼ VER"}</span></button>
       ${aberto?`<div class="kids">${b.filhos.map(l=>cardListaHtml(l,true)).join("")}</div>`:""}
@@ -981,6 +982,7 @@ $("btnBuscaL").onclick=()=>{ const i=$("lBusca"); i.classList.toggle("hidden"); 
 $("lBusca").addEventListener("input",e=>{ lui.busca=e.target.value; agendar(); });
 $("listas").addEventListener("click",e=>{
   const m=e.target.closest("[data-menu]"); if(m){ e.stopPropagation(); menuLista(m.dataset.menu); return; }
+  const mg=e.target.closest("[data-menug]"); if(mg){ e.stopPropagation(); menuGrupo(mg.dataset.menug); return; }
   const t=e.target.closest("[data-tog]"); if(t){ const k=t.dataset.tog; lui.abertos.has(k)?lui.abertos.delete(k):lui.abertos.add(k); agendar(); return; }
   const c=e.target.closest("[data-open]"); if(c) abrirLista(c.dataset.open);
 });
@@ -996,6 +998,36 @@ function abrirMenu(titulo,sub,ops){
 // a ação roda no mesmo toque (o celular só abre câmera, galeria e abas novas a partir de um toque direto)
 $("mnOps").addEventListener("click",e=>{ const b=e.target.closest("[data-op]"); if(!b) return; hide("mMenu"); menuAcoes[b.dataset.op](); });
 $("mnClose").onclick=()=>hide("mMenu");
+/* ---------- ⋮ do grupo (quando a matriz não está disponível) ---------- */
+function menuGrupo(g){
+  const ls=listasDoGrupo(g); if(!ls.length) return;
+  abrirMenu("GRUPO "+carimboDoGrupo(g), `${ls.length} LISTA${ls.length>1?"S":""} · MATRIZ EXCLUÍDA OU NÃO COMPARTILHADA COM VOCÊ`, [
+    {txt:"🧩  RECRIAR A MATRIZ", fn:()=>recriarMatriz(g)},
+    {txt:"👥  COMPARTILHAR O GRUPO", fn:()=>{ abrirShare(ls[0].id); $("shGrupo").checked=true; }},
+    {txt:"📄  PDF DO GRUPO", fn:()=>pdfGrupo(g)},
+    {txt:"🗑️  EXCLUIR O GRUPO", perigo:true, fn:()=>excluirGrupo(g)},
+  ]);
+}
+// junta os itens de todas as listas do grupo (sem repetir; a quantidade da LIVRE vale primeiro)
+function recriarMatriz(g){
+  const ls=listasDoGrupo(g).sort((a,b)=>(a.tipo==="LIVRE"?-1:0)-(b.tipo==="LIVRE"?-1:0));
+  const itens=[]; ls.forEach(l=>(l.itens||[]).forEach(i=>{ if(!itens.some(x=>x.produtoId===i.produtoId)) itens.push({...i}); }));
+  const n=up(prompt("NOME DA NOVA MATRIZ:","MATRIZ "+carimboDoGrupo(g))||""); if(!n) return;
+  const membros=[...new Set([eu().uid,...ls.flatMap(l=>l.membros||[])])];
+  DB.add("listas",{nome:n,itens,grupo:g,tipo:"NORMAL",criadoPor:eu().uid,criadoEm:Date.now(),membros});
+  toast(`MATRIZ RECRIADA COM ${itens.length} ITE${itens.length===1?"M":"NS"}`);
+}
+function pdfGrupo(g){
+  const ls=listasDoGrupo(g).sort((a,b)=>(a.tipo==="NORMAL"?-1:a.tipo==="LIVRE"?0:1)-(b.tipo==="NORMAL"?-1:b.tipo==="LIVRE"?0:1));
+  gerarPdf(ls.map(l=>l.id));
+}
+function excluirGrupo(g){
+  const ls=listasDoGrupo(g), minhas=ls.filter(l=>l.criadoPor===eu().uid), outras=ls.length-minhas.length;
+  if(!minhas.length){ alert("NENHUMA LISTA DESTE GRUPO FOI CRIADA POR VOCÊ. SÓ QUEM CRIOU PODE EXCLUIR."); return; }
+  if(!confirm(`EXCLUIR ${minhas.length} LISTA${minhas.length>1?"S":""} DO GRUPO?`+(outras?`\n\n${outras} LISTA${outras>1?"S":""} CRIADA${outras>1?"S":""} POR OUTRAS PESSOAS CONTINUA${outras>1?"M":""}.`:"")+"\n\nOS PREÇOS REGISTRADOS CONTINUAM NO HISTÓRICO.")) return;
+  minhas.forEach(l=>DB.del("listas",l.id));
+  toast("GRUPO EXCLUÍDO");
+}
 function menuLista(id){
   const l=S.listas[id]; if(!l) return;
   const ops=[
@@ -1004,7 +1036,10 @@ function menuLista(id){
     {txt:"👥  COMPARTILHAR",fn:()=>abrirShare(l.id)},
     {txt:"📄  EXPORTAR PDF",fn:()=>gerarPdf([l.id])},
   ];
+  const ehMatriz = l.grupo && l.tipo==="NORMAL" && listasDoGrupo(l.grupo).length>1;
+  if(ehMatriz) ops.push({txt:"📄  PDF DO GRUPO", fn:()=>pdfGrupo(l.grupo)});
   if(l.criadoPor===eu().uid) ops.push({txt:"🗑️  EXCLUIR",perigo:true,fn:()=>{ if(confirm(`EXCLUIR A LISTA “${l.nome}”?\n\nOS PREÇOS REGISTRADOS CONTINUAM NO HISTÓRICO.`)) DB.del("listas",l.id); }});
+  if(ehMatriz) ops.push({txt:"🗑️  EXCLUIR O GRUPO INTEIRO",perigo:true,fn:()=>excluirGrupo(l.grupo)});
   abrirMenu(l.nome,`CRIADA POR ${nomeUsuario(l.criadoPor)} EM ${dLonga(l.criadoEm)}`,ops);
 }
 $("btnMenuListas").onclick=()=>abrirMenu("LISTAS","",[
