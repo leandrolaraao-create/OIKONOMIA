@@ -181,8 +181,6 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .rec small{color:var(--muted)}
 .rec .del{border:none;background:none;color:var(--warn);padding:0 4px;font-size:11px}
 .pago{color:var(--accent);font-weight:800}
-.anuncio{color:var(--gold);font-weight:800}
-.seg button{font-size:12px;padding:9px 4px}
 .visto{color:var(--tag-ink);font-weight:800}
 .alerta{border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin:6px 0}
 .alerta.up{background:#fdeceb;color:var(--warn)}
@@ -395,8 +393,7 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 
 <!-- Preço rápido (anúncio) -->
 <div class="modal" id="mPrecoRapido"><div class="sheet">
-  <h2>💲 REGISTRAR PREÇO DE ANÚNCIO</h2>
-  <div class="hint">PREÇO VISTO NA TV, NA INTERNET OU EM FOLHETO, FORA DO MERCADO.</div>
+  <h2>💲 REGISTRAR PREÇO</h2>
   <div class="sect">PRODUTO</div>
   <div id="rpEscolhido" class="prow hidden" style="grid-template-columns:56px 1fr auto"></div>
   <div id="rpBuscaWrap">
@@ -412,13 +409,6 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
   </div>
   <div class="hint" id="rpBase"></div>
   <div id="rpAlerta"></div>
-  <div class="sect">ONDE VIU</div>
-  <div class="seg">
-    <button data-rpo="TV">📺 TV</button>
-    <button data-rpo="INTERNET">🌐 INTERNET</button>
-    <button data-rpo="FOLHETO">📰 FOLHETO</button>
-    <button data-rpo="OUTRO">📣 OUTRO</button>
-  </div>
   <div class="row">
     <label class="f">DATA DO PREÇO<input id="rpData" type="date"></label>
     <label class="f">VÁLIDO ATÉ (OPCIONAL)<input id="rpValido" type="date"></label>
@@ -721,13 +711,12 @@ const realizado = (l,pid) => S.realizados[chaveReal(l,pid)];
 const listasDoGrupo = g => Object.values(S.listas).filter(l=>grupoKey(l)===g);
 // preço mais recente de cada estabelecimento para um produto (mais barato primeiro)
 const vencido = r => !!(r.validoAte&&r.validoAte<Date.now());
-const ORIGENS={TV:"📺 TV",INTERNET:"🌐 INTERNET",FOLHETO:"📰 FOLHETO",OUTRO:"📣 OUTRO"};
-// rótulo do tipo do preço: PAGO, VISTO ou ANÚNCIO (com a origem e a validade)
+// rótulo do tipo do preço: PAGO ou VISTO (com a validade, quando houver)
 function rotuloTipo(r){
-  if(r.tipo!=="ANUNCIO") return r.tipo||"";
-  return "ANÚNCIO "+(ORIGENS[r.origem]||"")+(r.validoAte?(vencido(r)?" · VENCIDO":" · ATÉ "+dCurta(r.validoAte)):"");
+  const t=r.tipo==="PAGO"?"PAGO":"VISTO";
+  return t+(r.validoAte?(vencido(r)?" · VENCIDO":" · ATÉ "+dCurta(r.validoAte)):"");
 }
-const classeTipo = r => r.tipo==="PAGO"?"pago":r.tipo==="ANUNCIO"?"anuncio":"visto";
+const classeTipo = r => r.tipo==="PAGO"?"pago":"visto";
 function precosPorLoja(pid){
   const ult={};
   for(const r of S.precos){ if(r.produtoId!==pid||vencido(r)) continue; if(!ult[r.estabelecimentoId]||r.ts>=ult[r.estabelecimentoId].ts) ult[r.estabelecimentoId]=r; }
@@ -1025,7 +1014,7 @@ function cardItem(L,it,estId){
     const rec=pl.reduce((a,b)=>a.ts>b.ts?a:b).id, varias=pl.length>1;
     precos=`<div class="prices">`+pl.map((x,i)=>{
       const aqui=x.estabelecimentoId===estId;
-      const t=`${aqui?"📍":""}${esc(estNome(x.estabelecimentoId))} ${brl(x.valor)} (${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.tipo==="ANUNCIO"?" · "+esc(rotuloTipo(x)):""})${x.id===rec&&varias?" 🕒":""}`;
+      const t=`${aqui?"📍":""}${esc(estNome(x.estabelecimentoId))} ${brl(x.valor)} (${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.validoAte?" · ATÉ "+dCurta(x.validoAte):""})${x.id===rec&&varias?" 🕒":""}`;
       return i===0&&varias?`<span class="cheap">${t}</span>`:t;
     }).join("<br>")+`</div>`;
   } else precos=`<div class="prices">SEM PREÇO REGISTRADO</div>`;
@@ -1605,7 +1594,7 @@ $("btnPrecoRapido").onclick=()=>abrirPrecoRapido(null);
 $("pdPreco").onclick=()=>{ const id=pd.id; if(!id) return; hide("mProd"); abrirPrecoRapido(id); };
 
 /* =====================================================================
-   PREÇO RÁPIDO (anúncio de TV, internet, folheto…) — fora de lista
+   REGISTRAR PREÇO — de qualquer produto, em qualquer estabelecimento, fora de lista
    ===================================================================== */
 const rp={pid:null};
 const hojeISO = () => new Date().toLocaleDateString("sv-SE"); // AAAA-MM-DD no fuso do aparelho
@@ -1617,7 +1606,7 @@ function abrirPrecoRapido(pid){
   rpProdutoUI();
   rpLojas(lsUltLoja());
   $("rpValor").value=""; $("rpData").value=hojeISO(); $("rpValido").value=""; $("rpData").max=hojeISO();
-  rpOrigem("TV"); rpAtualizar();
+  rpAtualizar();
   show("mPrecoRapido");
   if(!rp.pid) $("rpBusca").focus();
 }
@@ -1632,8 +1621,6 @@ function rpLojas(sel){
   $("rpLoja").innerHTML=`<option value="">ESCOLHA O ESTABELECIMENTO</option>`+ests.map(e=>`<option value="${e.id}">${esc(e.nome)}</option>`).join("")+`<option value="__novo">+ NOVO ESTABELECIMENTO</option>`;
   $("rpLoja").value=S.ests[sel]?sel:"";
 }
-function rpOrigem(o){ rp.origem=o; document.querySelectorAll("[data-rpo]").forEach(b=>b.classList.toggle("on",b.dataset.rpo===o)); }
-document.querySelectorAll("[data-rpo]").forEach(b=>b.onclick=()=>rpOrigem(b.dataset.rpo));
 function rpAtualizar(){
   const v=num($("rpValor").value), p=rp.pid&&S.produtos[rp.pid];
   $("rpBase").textContent = v&&p ? precoBase(p,v) : "";
@@ -1670,9 +1657,9 @@ $("rpBarras").onclick=async()=>{
 };
 // volta para o preço rápido depois de cadastrar o produto, mantendo o que já foi preenchido
 function reabrirRp(id){
-  const guardado={loja:$("rpLoja").value,valor:$("rpValor").value,data:$("rpData").value,valido:$("rpValido").value,origem:rp.origem};
+  const guardado={loja:$("rpLoja").value,valor:$("rpValor").value,data:$("rpData").value,valido:$("rpValido").value};
   const tentar=(n)=>{ if(S.produtos[id]||n>20){ rp.pid=S.produtos[id]?id:null; rpProdutoUI(); rpLojas(guardado.loja);
-      $("rpValor").value=guardado.valor; $("rpData").value=guardado.data; $("rpValido").value=guardado.valido; rpOrigem(guardado.origem); rpAtualizar(); show("mPrecoRapido"); }
+      $("rpValor").value=guardado.valor; $("rpData").value=guardado.data; $("rpValido").value=guardado.valido; rpAtualizar(); show("mPrecoRapido"); }
     else setTimeout(()=>tentar(n+1),150); };
   tentar(0);
 }
@@ -1687,10 +1674,10 @@ $("rpSave").onclick=()=>{
   const vIso=$("rpValido").value;
   if(vIso&&vIso<dIso){ alert("“VÁLIDO ATÉ” NÃO PODE SER ANTES DA DATA DO PREÇO."); return; }
   DB.add("precos",{produtoId:p.id,estabelecimentoId:estId,estNome:estNome(estId),valor:Math.round(v*100)/100,
-    tipo:"ANUNCIO",origem:rp.origem,dataPreco:isoParaData(dIso,false),validoAte:vIso?isoParaData(vIso,true):null,qtd:null,
+    tipo:"VISTO",dataPreco:isoParaData(dIso,false),validoAte:vIso?isoParaData(vIso,true):null,qtd:null,
     usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:null,listaNome:""});
   try{ localStorage.setItem("lc3.ultLoja",estId); }catch(e){}
-  hide("mPrecoRapido"); toast("PREÇO DO ANÚNCIO REGISTRADO");
+  hide("mPrecoRapido"); toast("PREÇO REGISTRADO");
 };
 
 let pd={id:null,foto:null,cb:null};
