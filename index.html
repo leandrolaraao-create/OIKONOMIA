@@ -1163,14 +1163,49 @@ $("itens").addEventListener("click",e=>{
   if((id=pick("mais"))){ maisOpcoesItem(L,id); return; }
   if((id=pick("qtd"))){ editarQtd(L,id); return; }
 });
+/* ---------- itens nas listas de um grupo ----------
+   - adicionou numa filha de LOJA: entra nela e também na MATRIZ e na LIVRE (e sai de outra loja, uma loja por vez)
+   - adicionou na MATRIZ ou na LIVRE: entra nas duas, sem loja
+   - quantidade alterada em qualquer lista do grupo vale para todas */
+const listasVisaoGeral = g => listasDoGrupo(g).filter(l=>l.tipo==="NORMAL"||l.tipo==="LIVRE");
+function adicionarItens(L,novos){
+  L=S.listas[L.id]||L;
+  // item que já está no grupo mantém a quantidade de lá
+  if(L.grupo){
+    const ref=[...listasVisaoGeral(L.grupo),...listasDoGrupo(L.grupo)];
+    novos=novos.map(n=>{ for(const l of ref){ const x=(l.itens||[]).find(i=>i.produtoId===n.produtoId); if(x) return {...n,qtd:x.qtd}; } return n; });
+  }
+  const alvo=[L];
+  if(L.grupo) listasVisaoGeral(L.grupo).forEach(l=>{ if(!alvo.some(a=>a.id===l.id)) alvo.push(l); });
+  alvo.forEach(l=>{
+    const faltam=novos.filter(n=>!(l.itens||[]).some(x=>x.produtoId===n.produtoId));
+    if(faltam.length) DB.update("listas",l.id,{itens:[...(l.itens||[]),...faltam.map(n=>({...n}))]});
+  });
+  if(L.grupo&&L.tipo==="LOJA"){ // uma loja por vez
+    listasDoGrupo(L.grupo).filter(l=>l.tipo==="LOJA"&&l.id!==L.id).forEach(l=>{
+      const fica=(l.itens||[]).filter(x=>!novos.some(n=>n.produtoId===x.produtoId));
+      if(fica.length!==(l.itens||[]).length) DB.update("listas",l.id,{itens:fica});
+    });
+  }
+  const jaTem=(L.itens||[]).map(x=>x.produtoId);
+  return [...(L.itens||[]),...novos.filter(n=>!jaTem.includes(n.produtoId))];
+}
 function editarQtd(L,id){
   const it=(L.itens||[]).find(x=>x.produtoId===id);
   const v=prompt("QUANTIDADE DESEJADA (DIGITE 0 PARA REMOVER DA LISTA):",fmtQtd(it?it.qtd:1));
   if(v===null) return;
   const q=num(v);
-  if(q===0){ if(confirm("REMOVER ESTE PRODUTO DA LISTA?")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)}); return; }
+  const doGrupo = L.grupo ? listasDoGrupo(L.grupo).filter(l=>(l.itens||[]).some(x=>x.produtoId===id)) : [L];
+  if(q===0){
+    if(L.grupo&&L.tipo==="LOJA"){
+      if(confirm("TIRAR ESTE PRODUTO DA LISTA DESTA LOJA?\n(ELE CONTINUA NA MATRIZ E NA LIVRE.)")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)});
+    }else if(L.grupo){
+      if(confirm("REMOVER DE TODAS AS LISTAS DO GRUPO?\n(MATRIZ, LIVRE E LISTAS DE LOJA)")) doGrupo.forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).filter(x=>x.produtoId!==id)}));
+    }else if(confirm("REMOVER ESTE PRODUTO DA LISTA?")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)});
+    return;
+  }
   if(!(q>0)) return;
-  DB.update("listas",L.id,{itens:L.itens.map(x=>x.produtoId===id?{...x,qtd:q}:x)});
+  doGrupo.forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).map(x=>x.produtoId===id?{...x,qtd:q}:x)}));
 }
 // ✔ COMPREI AQUI: sem preço nesta loja → exige o valor; com preço → "ainda está esse valor?"
 function comprarItem(L,pid){
@@ -1263,13 +1298,12 @@ function tratarCodigoNaLista(c){
   if(p){
     if((L2.itens||[]).some(it=>it.produtoId===p.id)){ abrirPreco(L2,p.id,false); return; }
     if(!confirm(`${p.nome} ${p.marca||""} NÃO ESTÁ NESTA LISTA. ADICIONAR E REGISTRAR O PREÇO?`)) return;
-    const itens=[...(L2.itens||[]),{produtoId:p.id,qtd:1}];
-    DB.update("listas",L2.id,{itens}); abrirPreco({...L2,itens},p.id,false); return;
+    const itens=adicionarItens(L2,[{produtoId:p.id,qtd:1}]);
+    abrirPreco({...L2,itens},p.id,false); return;
   }
   if(!confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR O PRODUTO E COLOCAR NA LISTA?`)) return;
   abrirProd(null,{barras:c},id=>{
-    const L3=S.listas[ui.lista]; const itens=[...(L3.itens||[]),{produtoId:id,qtd:1}];
-    DB.update("listas",L3.id,{itens});
+    const L3=S.listas[ui.lista]; const itens=adicionarItens(L3,[{produtoId:id,qtd:1}]);
     setTimeout(()=>{ if(S.produtos[id]) abrirPreco({...L3,itens},id,false); },150);
   });
 };
@@ -1730,7 +1764,7 @@ $("pkBtns").addEventListener("click",e=>{
   const id=e.target.id; if(!id) return;
   const itens=Object.entries(pk.sel).map(([produtoId,qtd])=>({produtoId,qtd}));
   if(id==="pkCancel"){ hide("mPick"); return; }
-  if(id==="pkAdd"){ const L=S.listas[ui.lista]; if(itens.length) DB.update("listas",L.id,{itens:[...(L.itens||[]),...itens]}); hide("mPick"); return; }
+  if(id==="pkAdd"){ const L=S.listas[ui.lista]; if(itens.length) adicionarItens(L,itens); hide("mPick"); return; }
   if(id==="pkSo"||id==="pkDist"){
     if(!itens.length && !confirm("NENHUM PRODUTO MARCADO. CRIAR A LISTA VAZIA?")) return;
     const nova=criarLista(pk.nome,itens); hide("mPick");
