@@ -106,6 +106,8 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .actionbar{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:6;background:var(--bg);border-top:1px solid var(--line);padding:8px 10px;display:flex;gap:6px}
 .actionbar button{flex:1;min-width:0;padding:7px 2px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700}
 .actionbar button span{font-size:18px;line-height:1}
+.actionbar{gap:5px;padding:8px 8px}.actionbar button{font-size:9.5px;letter-spacing:-.01em}
+.actionbar button{hyphens:manual;line-height:1.15;text-align:center;padding-left:1px;padding-right:1px}
 /* cartões */
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
 .card.click{cursor:pointer}
@@ -204,6 +206,28 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .mes{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
 /* tela LISTAS */
 .lfil{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.lrseg{display:flex;gap:6px;margin-bottom:10px}.lrseg button{flex:1;border-radius:999px;padding:8px;font-size:12px;font-weight:800}
+.lrseg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
+.rcard .n{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-weight:800;font-size:15px}
+.rcard .m{font-size:12px;color:var(--muted);font-weight:600;margin-top:3px}
+.rcard .c{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.rcard .c b{color:var(--accent);font-size:15px}
+.rthumbs{display:flex;gap:4px;margin-top:8px}.rthumbs span{width:32px;height:32px;border-radius:7px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:15px;background:#fff;overflow:hidden}
+.rthumbs span img{width:100%;height:100%;object-fit:contain}
+.ring{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.ring .thumb{width:40px;height:40px;font-size:18px;border-radius:8px}
+.ring .x{flex:1;min-width:0}.ring .x b{font-size:13px;display:block}.ring .x small{font-size:11px;color:var(--muted);font-weight:600}
+.ring .q{border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:13px;white-space:nowrap;background:#fff}
+.ring .v{font-size:13px;font-weight:800;min-width:50px;text-align:right;font-variant-numeric:tabular-nums}
+.ring .rm{border:none;background:none;color:var(--warn);font-size:16px;padding:4px}
+.ring.tem{opacity:.45}.ring.tem .x b{text-decoration:line-through}
+.ring input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--accent)}
+.rctot{margin-top:10px;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rctot span{font-size:11px;font-weight:700;color:var(--muted)}.rctot b{font-size:19px;color:var(--accent);white-space:nowrap}
+.rlpes{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.fav{color:#c2185b}
+.favbtn{border:none;background:none;font-size:20px;padding:2px 6px;color:#c9cec8;line-height:1}.favbtn.on{color:#c2185b;background:none;border:none}
 .lfil button{font-size:11px;padding:7px 12px;border-radius:999px}
 .lfil .sep{flex:1}
 .lfil .ico{padding:6px 10px;font-size:15px}
@@ -340,6 +364,27 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 #pqValor:focus{outline:none}
 .zsel{display:flex;gap:6px;align-items:center}.zsel select{flex:1;min-width:0}.zsel button{flex:none;width:44px;height:42px;padding:0;font-size:17px}
 #pqSalvar{flex:2;white-space:nowrap}
+.rksec{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin:14px 0 6px;display:flex;justify-content:space-between;gap:8px}
+.rkr{display:grid;grid-template-columns:24px 1fr auto;gap:4px 8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.rkr .pos{font-weight:800;color:var(--muted);font-size:13px}
+.rkr .n{font-weight:800;font-size:14px;min-width:0}.rkr .n small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+.rkr .v{text-align:right;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}.rkr .v small{display:block;font-size:10.5px;font-weight:700}
+.rkr .bar{grid-column:2/4;height:6px;border-radius:99px;background:var(--chip);overflow:hidden}.rkr .bar i{display:block;height:100%;border-radius:99px;background:#9aa39c}
+.rkr.caro .v{color:var(--warn)} .rkr.caro .bar i{background:var(--warn);opacity:.75}
+.rkr.best .n,.rkr.best .v{color:var(--accent)} .rkr.best .bar i{background:var(--accent)}
+.rkr.inc{opacity:.8}.rkr.inc .bar i{background:repeating-linear-gradient(45deg,#c9cec8 0 4px,#e6e9e4 4px 8px)}
+.rkflag{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:99px;background:#fff4d6;color:#8a5a00;margin-left:4px;vertical-align:1px}
+.rkdist{margin-top:12px;background:var(--done);border:1px solid #bfe0cc;border-radius:14px;padding:12px}
+.rkdist .t{display:flex;justify-content:space-between;align-items:baseline;font-weight:800}
+.rkdist .t b{font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums}
+.rkdist .s{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+.rkeco{display:flex;gap:8px;margin-top:10px}
+.rkeco div{flex:1;background:#fff;border-radius:10px;padding:8px 10px;font-size:10.5px;font-weight:700;color:var(--muted)}
+.rkeco b{display:block;font-size:17px;color:var(--accent);font-variant-numeric:tabular-nums}
+.rkwarn{margin-top:10px;font-size:11.5px;font-weight:700;color:#8a5a00;background:#fff4d6;border-radius:10px;padding:8px 10px}
+.rknota{font-size:11px;color:var(--muted);font-weight:600;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:8px}
+.rktog{display:flex;gap:6px;margin-top:12px}.rktog button{flex:1;border-radius:99px;padding:7px;font-size:11px;font-weight:800}
+.rktog button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .hdif{font-size:12px;font-weight:700;margin:6px 0 0;min-height:16px}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
 .achado img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex:none}
@@ -400,7 +445,9 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <main>
     <section id="vListas">
       <div id="demoTop" class="demo hidden">MODO DEMONSTRAÇÃO: DADOS SÓ NESTE APARELHO.</div>
-      <div class="lfil">
+      <div class="lrseg"><button data-lr="listas" class="on">🧾 LISTAS</button><button data-lr="receitas">📖 RECEITAS</button></div>
+      <div id="receitas" class="hidden"></div>
+      <div class="lfil" id="lfilBar">
         <button data-lf="abertas" class="on">ABERTAS</button>
         <button data-lf="completas">COMPLETAS</button>
         <button data-lf="todas">TODAS</button>
@@ -479,8 +526,9 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="actionbar hidden" id="abLista">
     <button id="btnScan"><span>▥</span>MODO MERCADO</button>
     <button id="btnAddProd"><span>➕</span>PRODUTO</button>
-    <button id="btnShare"><span>👥</span>COMPARTILHAR</button>
+    <button id="btnShare"><span>👥</span>COMPAR&shy;TILHAR</button>
     <button id="btnDist"><span>🔀</span>DISTRIBUIR</button>
+    <button id="btnRank"><span>🏆</span>RANK</button>
     <button id="btnFim" class="primary"><span>✔</span>FINALIZAR</button>
   </div>
 
@@ -705,6 +753,48 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="btns"><button id="qtCancel">CANCELAR</button><button id="qtOk" class="primary">OK</button></div>
 </div></div>
 
+<!-- 🏆 RANK: se comprasse tudo em um só lugar × distribuindo -->
+<div class="modal" id="mRank"><div class="sheet">
+  <h2 id="rkTit" style="margin:0"></h2>
+  <div class="hint" id="rkSub"></div>
+  <div id="rkBody"></div>
+  <div class="rktog" id="rkTog"><button data-rkm="lista" class="on">LISTA INTEIRA</button><button data-rkm="cesta">CESTA EM COMUM</button></div>
+  <div class="btns"><button id="rkFechar">FECHAR</button></div>
+</div></div>
+
+<!-- 📖 Receita -->
+<div class="modal" id="mRec"><div class="sheet">
+  <h2 id="rcTit" style="margin:0">RECEITA</h2>
+  <label class="f">NOME<input id="rcNome" placeholder="EX.: LASANHA À BOLONHESA" autocomplete="off"></label>
+  <div class="row">
+    <label class="f">CRIADA EM<input id="rcData" disabled></label>
+    <label class="f">SERVE (PESSOAS)<input id="rcServe" inputmode="numeric" placeholder="4"></label>
+  </div>
+  <label class="f">OBSERVAÇÕES<textarea id="rcObs" rows="2" placeholder="MODO DE PREPARO, DICAS…"></textarea></label>
+  <div class="sect" id="rcIngTit">INGREDIENTES</div>
+  <div id="rcItens"></div>
+  <div class="search" style="margin-top:8px"><input id="rcBusca" placeholder="+ INGREDIENTE: BUSCAR NOME OU MARCA" autocomplete="off"><button id="rcBarras" class="cam" title="LER CÓDIGO DE BARRAS">▥</button></div>
+  <div id="rcSug"></div>
+  <div id="rcCusto"></div>
+  <div class="btns">
+    <button id="rcDel" class="danger hidden">EXCLUIR</button>
+    <button id="rcCancel">CANCELAR</button>
+    <button id="rcSave">SALVAR</button>
+    <button id="rcLista" class="primary">➕ NA LISTA</button>
+  </div>
+</div></div>
+
+<!-- Receita → lista -->
+<div class="modal" id="mRecLista"><div class="sheet">
+  <h2 id="rlTit" style="margin:0"></h2>
+  <label class="f" style="margin-top:8px">PARA QUAL LISTA?<select id="rlLista"></select></label>
+  <div class="rlpes"><span>QUANTAS PESSOAS?</span><div class="stepq"><button id="rlMenos">−</button><span id="rlPes">4</span><button id="rlMais">+</button></div></div>
+  <div class="hint" id="rlFator"></div>
+  <div class="sect" id="rlSec">DESMARQUE O QUE JÁ TEM</div>
+  <div id="rlItens"></div>
+  <div class="btns"><button id="rlCancel">CANCELAR</button><button id="rlOk" class="primary">➕ COLOCAR</button></div>
+</div></div>
+
 <div class="modal" id="mMenu"><div class="sheet">
   <h2 id="mnTitle"></h2>
   <div class="hint" id="mnSub"></div>
@@ -860,7 +950,7 @@ const DB = DEMO ? Local : Fire;
 /* =====================================================================
    ESTADO
    ===================================================================== */
-const S = { user:null, usuarios:{}, produtos:{}, ests:{}, precos:[], listas:{}, realizados:{}, finalizacoes:[] };
+const S = { user:null, usuarios:{}, produtos:{}, ests:{}, precos:[], listas:{}, realizados:{}, finalizacoes:[], receitas:{} };
 const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compras", fechados:new Set(), abertos:new Set() };
 let desligar=[];
 const byId = arr => Object.fromEntries(arr.map(d=>[d.id,d]));
@@ -926,6 +1016,7 @@ async function entrou(u){
     DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar()}),
     DB.listen("realizados",d=>{S.realizados=byId(d);agendar()}),
     DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()}),
+    DB.listen("receitas",d=>{S.receitas=byId(d);agendar()}),
     DB.listen("listas",d=>{S.listas=byId(d);agendar();setTimeout(limparFilhasVazias,0)},["membros",u.uid]),
   ];
   mostrar();
@@ -996,6 +1087,8 @@ function dicaMarca(p,estId){
   let melhor=null;
   outrasMarcas(p).forEach(o=>{const b=melhorBase(o); if(b&&b.un===meu.un&&b.v<meu.v*0.995&&(!melhor||b.v<melhor.b.v)) melhor={o,b}});
   if(!melhor) return "";
+  if(p.favorito){ const pc=Math.round((1-melhor.b.v/meu.v)*100);
+    return `❤️ ${esc(p.marca||"FAVORITO")} ${brl(meu.v)}/${meu.un} · ${esc(melhor.o.marca||"OUTRA MARCA")} ${brl(melhor.b.v)}/${melhor.b.un} NO ${esc(estNome(melhor.b.estId))} (−${pc}%)`; }
   return `💡 ${esc(melhor.o.marca||"OUTRA MARCA")}${melhor.o.conteudoQtd?" "+fmtQtd(melhor.o.conteudoQtd)+" "+esc(melhor.o.conteudoUn||""):""} SAI MAIS BARATO: ${brl(melhor.b.v)}/${melhor.b.un} EM ${esc(estNome(melhor.b.estId))} (ESTE: ${brl(meu.v)}/${meu.un})`;
 }
 // produtos que costumam ser comprados: comprados em 2+ compras (grupos) diferentes
@@ -1049,6 +1142,11 @@ function mostrar(){
   const home=ui.aba==="listas"&&!L&&!ui.lista;
   $("btnMenuListas").classList.toggle("hidden",!home);
   $("btnNovaLista").classList.toggle("hidden",!home);
+  const rec=ui.lr==="receitas";
+  $("receitas").classList.toggle("hidden",!rec); $("listas").classList.toggle("hidden",rec);
+  $("lfilBar").classList.toggle("hidden",rec); if(rec) $("lBusca").classList.add("hidden");
+  $("btnMenuListas").classList.toggle("hidden",!home||rec);
+  document.querySelectorAll("[data-lr]").forEach(b=>b.classList.toggle("on",b.dataset.lr===(ui.lr||"listas")));
   document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("on",b.dataset.tab===ui.aba));
   renderAtual(); window.scrollTo(0,0);
 }
@@ -1062,6 +1160,7 @@ function renderAtual(){
       if(ui.listaVista===ui.lista){ ui.lista=null; toast("ESTA LISTA FOI EXCLUÍDA OU O ACESSO FOI RETIRADO"); mostrar(); return; }
       $("itens").innerHTML=`<div class="empty">CARREGANDO…</div>`;
     }
+    else if(ui.lr==="receitas") renderReceitas();
     else renderListas();
   }
   else if(ui.aba==="produtos") renderProdutos();
@@ -1223,7 +1322,9 @@ function criarLista(nome,itens,extra={}){
   return {id,...dados};
 }
 function abrirLista(id){ ui.lista=id; ui.filtro="all"; setFiltro("all"); mostrar(); }
+document.querySelectorAll("[data-lr]").forEach(b=>b.onclick=()=>{ ui.lr=b.dataset.lr; mostrar(); });
 $("btnNovaLista").onclick=()=>{
+  if(ui.lr==="receitas"){ abrirRec(null); return; }
   const n=up(prompt("NOME DA LISTA:","MERCADO "+dLonga(Date.now())+" "+hora(Date.now()))||"");
   if(!n) return;
   abrirPicker("nova",n);
@@ -1919,6 +2020,254 @@ $("qtCancel").onclick=()=>{ hide("mQtd"); qt=null; };
 $("qtOk").onclick=()=>{ if(!qt) return; const q=qtLer(); if(!q){ alert("INFORME A QUANTIDADE."); return; }
   const cb=qt.cb; hide("mQtd"); qt=null; cb(q); };
 $("qtValor").addEventListener("keydown",e=>{ if(e.key==="Enter") $("qtOk").click(); });
+
+
+/* ---------- ❤️ favorito da casa (uma marca por produto; fica na posição de preço dela) ---------- */
+function ordemPreco(p){ const b=melhorBase(p); if(b) return b.v; const c=precosPorLoja(p.id)[0]; return c?c.valor:1e9; }
+function marcarFavorito(id){
+  const p=S.produtos[id]; if(!p) return;
+  const liga=!p.favorito;
+  [p,...outrasMarcas(p)].forEach(x=>{ const quer = liga && x.id===id; if(!!x.favorito!==quer) DB.update("produtos",x.id,{favorito:quer}); });
+  toast(liga?`❤️ ${p.marca||p.nome} É O FAVORITO DA CASA`:"FAVORITO REMOVIDO");
+}
+$("pdMarcas").addEventListener("click",e=>{
+  const b=e.target.closest("[data-fav]"); if(!b) return;
+  marcarFavorito(b.dataset.fav);
+  const liga=!b.classList.contains("on");
+  $("pdMarcas").querySelectorAll("[data-fav]").forEach(x=>x.classList.toggle("on",liga&&x===b));
+});
+
+/* ---------- 📖 RECEITAS ---------- */
+function custoReceita(itens,fator=1){
+  const ok=itens.filter(i=>S.produtos[i.produtoId]);
+  const precos={}; ok.forEach(i=>{ precos[i.produtoId]={}; precosPorLoja(i.produtoId).forEach(r=>{ precos[i.produtoId][r.estabelecimentoId]=r.valor; }); });
+  const comPreco=ok.filter(i=>Object.keys(precos[i.produtoId]).length);
+  const lojas=[...new Set(comPreco.flatMap(i=>Object.keys(precos[i.produtoId])))].filter(e=>S.ests[e]);
+  let melhor=null;
+  lojas.forEach(e=>{ if(ok.every(i=>precos[i.produtoId][e]!=null)){ const t=ok.reduce((s,i)=>s+precos[i.produtoId][e]*(+i.qtd||1)*fator,0); if(!melhor||t<melhor.total) melhor={estId:e,total:t}; } });
+  const linha={};
+  if(melhor) ok.forEach(i=>{ linha[i.produtoId]=precos[i.produtoId][melhor.estId]*(+i.qtd||1)*fator; });
+  else comPreco.forEach(i=>{ linha[i.produtoId]=Math.min(...Object.values(precos[i.produtoId]))*(+i.qtd||1)*fator; });
+  const total=Object.values(linha).reduce((a,b)=>a+b,0);
+  return {estId:melhor?melhor.estId:null,total:Math.round(total*100)/100,linha,n:ok.length,com:comPreco.length};
+}
+function renderReceitas(){
+  const rs=Object.values(S.receitas).sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+  $("receitas").innerHTML = rs.length ? rs.map(r=>{
+    const its=(r.itens||[]).filter(i=>S.produtos[i.produtoId]);
+    const c=custoReceita(its);
+    return `<div class="rcard" data-rcid="${r.id}">
+      <div class="n"><span>${esc(r.nome)}</span><button class="kebab" data-rcmenu="${r.id}" style="border:none;background:none;padding:0 4px;font-size:20px">⋮</button></div>
+      <div class="m">${r.serve?`SERVE ${r.serve} · `:""}${its.length} INGREDIENTE${its.length===1?"":"S"} · CRIADA ${dLonga(r.criadoEm)}${r.criadoPorNome?" · "+esc(primeiroNome(r.criadoPorNome)):""}</div>
+      ${its.length?`<div class="rthumbs">${its.slice(0,6).map(i=>`<span>${imgProduto(S.produtos[i.produtoId])}</span>`).join("")}${its.length>6?`<span style="font-size:10px;font-weight:800">+${its.length-6}</span>`:""}</div>`:""}
+      <div class="c"><span>${c.com?(c.estId?"CUSTO ESTIMADO · "+esc(estNome(c.estId)):`CUSTO ESTIMADO (MAIS BARATO DE CADA)${c.com<c.n?" · "+(c.n-c.com)+" SEM PREÇO":""}`):"SEM PREÇOS AINDA"}</span>${c.com?`<b>${brl(c.total)}</b>`:""}</div>
+    </div>`; }).join("")
+    : `<div class="empty">NENHUMA RECEITA AINDA.<br>TOQUE NO <b>+</b> PARA CRIAR A PRIMEIRA.</div>`;
+}
+$("receitas").addEventListener("click",e=>{
+  const m=e.target.closest("[data-rcmenu]");
+  if(m){ e.stopPropagation(); const r=S.receitas[m.dataset.rcmenu]; if(!r) return;
+    abrirMenu(r.nome,`CRIADA EM ${dLonga(r.criadoEm)}`,[
+      {txt:"✏️  ABRIR / EDITAR",fn:()=>abrirRec(r.id)},
+      {txt:"➕  COLOCAR NA LISTA",fn:()=>abrirRecLista(r.id)},
+      {txt:"⧉  DUPLICAR",fn:()=>{ DB.add("receitas",{...r,id:undefined,nome:up(r.nome+" (CÓPIA)"),criadoEm:Date.now(),criadoPor:eu().uid,criadoPorNome:eu().nome}); toast("RECEITA DUPLICADA"); }},
+      {txt:"🗑️  EXCLUIR",perigo:true,fn:()=>{ if(confirm(`EXCLUIR A RECEITA “${r.nome}”?`)) DB.del("receitas",r.id); }},
+    ]); return; }
+  const c=e.target.closest("[data-rcid]"); if(c) abrirRec(c.dataset.rcid);
+});
+let rc=null;
+function abrirRec(id){
+  const r=id?S.receitas[id]:null;
+  rc={id,itens:r?(r.itens||[]).map(i=>({...i})):[],criadoEm:r?r.criadoEm:Date.now()};
+  $("rcTit").textContent=r?"RECEITA":"NOVA RECEITA";
+  $("rcNome").value=r?r.nome:""; $("rcServe").value=r&&r.serve?r.serve:""; $("rcObs").value=r?(r.obs||""):"";
+  $("rcData").value=dLonga(rc.criadoEm); $("rcBusca").value=""; $("rcSug").innerHTML="";
+  $("rcDel").classList.toggle("hidden",!r);
+  renderRecItens(); show("mRec"); if(!r) setTimeout(()=>$("rcNome").focus(),60);
+}
+function renderRecItens(){
+  if(!rc) return;
+  const c=custoReceita(rc.itens);
+  $("rcIngTit").textContent=`INGREDIENTES (${rc.itens.length})`;
+  $("rcItens").innerHTML=rc.itens.map((i,k)=>{ const p=S.produtos[i.produtoId];
+    if(!p) return `<div class="ring"><div class="thumb">❔</div><div class="x"><b>PRODUTO REMOVIDO</b></div><button class="rm" data-rcrm="${k}">✕</button></div>`;
+    const v=c.linha[p.id];
+    return `<div class="ring"><div class="thumb">${imgProduto(p)}</div><div class="x"><b>${esc(p.nome)}</b><small>${p.favorito?"❤️ ":""}${esc(descProduto(p))}</small></div>
+      <button class="q" data-rcq="${k}">${fmtMedida(p,+i.qtd||1)}</button><span class="v">${v!=null?vNum2(v):"—"}</span><button class="rm" data-rcrm="${k}" aria-label="TIRAR">✕</button></div>`; }).join("")
+    || `<div class="hint" style="margin:6px 0">BUSQUE OU LEIA O CÓDIGO PARA ADICIONAR OS INGREDIENTES.</div>`;
+  $("rcCusto").innerHTML = c.com ? `<div class="rctot"><span>CUSTO ESTIMADO${c.estId?" NO "+esc(estNome(c.estId))+" (MAIS BARATO)":" (MAIS BARATO DE CADA)"}<br>${c.com} DE ${c.n} COM PREÇO</span><b>${brl(c.total)}</b></div>` : "";
+}
+function rcAdicionar(pid){
+  if(!rc||!S.produtos[pid]) return;
+  if(rc.itens.some(i=>i.produtoId===pid)){ toast("JÁ ESTÁ NA RECEITA"); return; }
+  const m=medidaDe(S.produtos[pid]);
+  rc.itens.push({produtoId:pid,qtd:m?deFino(m,100):1}); $("rcBusca").value=""; $("rcSug").innerHTML=""; renderRecItens();
+}
+$("rcBusca").addEventListener("input",()=>{
+  const q=$("rcBusca").value.trim(); if(!q){ $("rcSug").innerHTML=""; return; }
+  const ps=filtrarProdutos(q).slice(0,8);
+  $("rcSug").innerHTML=ps.map(p=>`<div class="pick" data-rcs="${p.id}" style="grid-template-columns:48px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${p.favorito?'<span class="fav">❤️ </span>':""}${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+    +`<button class="small" id="rcCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
+});
+$("rcSug").addEventListener("click",e=>{
+  const s=e.target.closest("[data-rcs]"); if(s){ rcAdicionar(s.dataset.rcs); return; }
+  if(e.target.id==="rcCriar"){ const nome=up($("rcBusca").value);
+    abrirProd(null,{nome},id=>{ const t=n=>{ if(S.produtos[id]) rcAdicionar(id); else if(n<30) setTimeout(()=>t(n+1),100); }; t(0); }); }
+});
+$("rcBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return;
+  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  if(p){ rcAdicionar(p.id); return; }
+  if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c},id=>{ const t=n=>{ if(S.produtos[id]) rcAdicionar(id); else if(n<30) setTimeout(()=>t(n+1),100); }; t(0); });
+};
+$("rcItens").addEventListener("click",e=>{
+  const rm=e.target.closest("[data-rcrm]"); if(rm){ rc.itens.splice(+rm.dataset.rcrm,1); renderRecItens(); return; }
+  const q=e.target.closest("[data-rcq]"); if(q){ const it=rc.itens[+q.dataset.rcq]; abrirQtd(it.produtoId,+it.qtd||1,v=>{ it.qtd=v; renderRecItens(); }); }
+});
+function salvarRec(){
+  const nome=up($("rcNome").value); if(!nome){ alert("INFORME O NOME DA RECEITA."); $("rcNome").focus(); return null; }
+  const serve=parseInt($("rcServe").value,10);
+  const dados={nome,serve:serve>0?serve:null,obs:up($("rcObs").value),itens:rc.itens.filter(i=>S.produtos[i.produtoId]).map(i=>({produtoId:i.produtoId,qtd:+i.qtd||1})),atualizadoPor:eu().uid,atualizadoEm:Date.now()};
+  if(rc.id) DB.update("receitas",rc.id,dados);
+  else rc.id=DB.add("receitas",{...dados,criadoEm:rc.criadoEm,criadoPor:eu().uid,criadoPorNome:eu().nome});
+  return rc.id;
+}
+$("rcCancel").onclick=()=>{ hide("mRec"); rc=null; };
+$("rcSave").onclick=()=>{ if(salvarRec()){ hide("mRec"); rc=null; toast("RECEITA SALVA"); } };
+$("rcDel").onclick=()=>{ if(!rc||!rc.id) return; const r=S.receitas[rc.id]; if(!confirm(`EXCLUIR A RECEITA “${r?r.nome:""}”?`)) return; DB.del("receitas",rc.id); hide("mRec"); rc=null; };
+$("rcLista").onclick=()=>{
+  if(!rc) return; if(!rc.itens.some(i=>S.produtos[i.produtoId])){ alert("ADICIONE OS INGREDIENTES PRIMEIRO."); return; }
+  const id=salvarRec(); if(!id) return;
+  const fixo={id,nome:up($("rcNome").value),serve:parseInt($("rcServe").value,10)||null,itens:rc.itens.map(i=>({...i}))};
+  hide("mRec"); rc=null; abrirRecLista(id,fixo);
+};
+/* receita → lista: escolhe a lista, multiplica pelas pessoas, desmarca o que já tem */
+let rl=null;
+function abrirRecLista(id,fixo){
+  const r=fixo||S.receitas[id]; if(!r) return;
+  const itens=(r.itens||[]).filter(i=>S.produtos[i.produtoId]);
+  if(!itens.length){ alert("ESTA RECEITA NÃO TEM INGREDIENTES."); return; }
+  const serve=r.serve||1;
+  rl={r,itens,serve,pes:serve,tira:new Set()};
+  const ls=Object.values(S.listas).filter(l=>!(l.tipo==="LOJA")).sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+  const abertaAgora=ui.lista&&S.listas[ui.lista]?ui.lista:"";
+  $("rlLista").innerHTML=`<option value="__nova">+ NOVA LISTA</option>`+ls.map(l=>`<option value="${l.id}">${esc(l.nome)}${l.tipo==="LIVRE"?" (LIVRE)":l.grupo?" (MATRIZ)":""}</option>`).join("");
+  $("rlLista").value=abertaAgora&&S.listas[abertaAgora]&&S.listas[abertaAgora].tipo!=="LOJA"?abertaAgora:(ls[0]?ls[0].id:"__nova");
+  $("rlTit").textContent=r.nome;
+  renderRecLista(); show("mRecLista");
+}
+function rlFator(){ return rl.r.serve ? rl.pes/rl.r.serve : rl.pes; }
+function renderRecLista(){
+  if(!rl) return;
+  const f=rlFator(), lid=$("rlLista").value, L=S.listas[lid];
+  const grupo = L ? (L.grupo?listasDoGrupo(L.grupo):[L]) : [];
+  const qtdNaLista=pid=>{ for(const l of grupo){ const x=(l.itens||[]).find(i=>i.produtoId===pid); if(x) return +x.qtd||1; } return null; };
+  $("rlPes").textContent=rl.pes;
+  $("rlFator").textContent = rl.r.serve ? `RECEITA SERVE ${rl.r.serve} → QUANTIDADES × ${fmtQtd(Math.round(f*100)/100)}` : "SEM RENDIMENTO NA RECEITA: CADA + MULTIPLICA A RECEITA INTEIRA";
+  const n=rl.itens.filter(i=>!rl.tira.has(i.produtoId)).length;
+  $("rlSec").textContent=`DESMARQUE O QUE JÁ TEM · ${n} DE ${rl.itens.length}`;
+  $("rlItens").innerHTML=rl.itens.map(i=>{ const p=S.produtos[i.produtoId], q=Math.round((+i.qtd||1)*f*1e6)/1e6, tem=rl.tira.has(p.id), ja=qtdNaLista(p.id);
+    return `<label class="ring${tem?" tem":""}"><input type="checkbox" data-rlc="${p.id}" ${tem?"":"checked"}><div class="x"><b>${esc(p.nome)}</b><small>${tem?"JÁ TENHO":ja!=null?`JÁ NA LISTA: ${fmtMedida(p,ja)} → FICA ${fmtMedida(p,Math.round((ja+q)*1e6)/1e6)}`:esc(descProduto(p))}</small></div><span class="q">${fmtMedida(p,q)}</span></label>`; }).join("");
+  $("rlOk").textContent = n ? `➕ COLOCAR ${n} ITE${n===1?"M":"NS"}` : "NADA PARA COLOCAR";
+  $("rlOk").disabled=!n;
+}
+$("rlItens").addEventListener("change",e=>{ const c=e.target.closest("[data-rlc]"); if(!c) return; c.checked?rl.tira.delete(c.dataset.rlc):rl.tira.add(c.dataset.rlc); renderRecLista(); });
+$("rlLista").addEventListener("change",renderRecLista);
+$("rlMais").onclick=()=>{ rl.pes++; renderRecLista(); };
+$("rlMenos").onclick=()=>{ if(rl.pes>1){ rl.pes--; renderRecLista(); } };
+$("rlCancel").onclick=()=>{ hide("mRecLista"); rl=null; };
+$("rlOk").onclick=()=>{
+  if(!rl) return;
+  const f=rlFator();
+  const add=rl.itens.filter(i=>!rl.tira.has(i.produtoId)).map(i=>({produtoId:i.produtoId,qtd:Math.round((+i.qtd||1)*f*1e6)/1e6}));
+  if(!add.length) return;
+  let lid=$("rlLista").value;
+  if(lid==="__nova"){
+    const nome=up(prompt("NOME DA NOVA LISTA:",rl.r.nome+" "+dLonga(Date.now()))||""); if(!nome) return;
+    const L=criarLista(nome,add);
+    hide("mRecLista"); rl=null; toast(`${add.length} ITENS NA LISTA ${nome}`); abrirLista(L.id); return;
+  }
+  const L=S.listas[lid]; if(!L) return;
+  // grava cada lista do grupo uma vez só: soma onde o item já existe; itens novos entram na lista escolhida e na matriz/livre
+  const grupo=L.grupo?listasDoGrupo(L.grupo):[L];
+  const existe=pid=>grupo.some(l=>(l.itens||[]).some(x=>x.produtoId===pid));
+  const inc={}, novos=[];
+  add.forEach(a=>{ if(existe(a.produtoId)) inc[a.produtoId]=a.qtd; else novos.push(a); });
+  grupo.forEach(l=>{
+    let mudou=false;
+    let itens=(l.itens||[]).map(x=>{ if(inc[x.produtoId]!=null){ mudou=true; return {...x,qtd:Math.round(((+x.qtd||1)+inc[x.produtoId])*1e6)/1e6}; } return x; });
+    if(l.id===L.id||(L.grupo&&(l.tipo==="NORMAL"||l.tipo==="LIVRE"))){ const falt=novos.filter(n=>!itens.some(x=>x.produtoId===n.produtoId)); if(falt.length){ itens=[...itens,...falt.map(n=>({...n}))]; mudou=true; } }
+    if(mudou) DB.update("listas",l.id,{itens});
+  });
+  hide("mRecLista"); rl=null; toast(`${add.length} ITENS COLOCADOS EM ${semCarimbo(L.nome)}`); ui.lr="listas"; abrirLista(L.id);
+};
+/* ---------- 🏆 RANK: quanto sairia comprar tudo em cada mercado × distribuindo ---------- */
+let rk=null;
+function itensDoGrupoRank(L){
+  const g=grupoKey(L), mapa={};
+  const fontes = L.grupo ? [...listasVisaoGeral(g), ...listasDoGrupo(g)] : [L];
+  fontes.forEach(l=>(l.itens||[]).forEach(it=>{ if(S.produtos[it.produtoId]&&!mapa[it.produtoId]) mapa[it.produtoId]=+it.qtd||1; }));
+  return Object.entries(mapa).map(([pid,q])=>({pid,q}));
+}
+function calcRank(L,modo){
+  const itens=itensDoGrupoRank(L), agora=Date.now();
+  const precos={}; // pid -> {estId: valor}
+  itens.forEach(({pid})=>{ precos[pid]={}; precosPorLoja(pid).filter(r=>agora-r.ts<=JANELA_REF).forEach(r=>{ precos[pid][r.estabelecimentoId]=r.valor; }); });
+  const semPreco=itens.filter(i=>!Object.keys(precos[i.pid]).length);
+  let base=itens.filter(i=>Object.keys(precos[i.pid]).length);
+  const lojas=[...new Set(base.flatMap(i=>Object.keys(precos[i.pid])))].filter(e=>S.ests[e]);
+  let foraCesta=[];
+  if(modo==="cesta"){ foraCesta=base.filter(i=>!lojas.every(e=>precos[i.pid][e]!=null)); base=base.filter(i=>lojas.every(e=>precos[i.pid][e]!=null)); }
+  const n=base.length;
+  const porLoja=lojas.map(e=>{ let t=0,c=0; const falta=[];
+    base.forEach(i=>{ const v=precos[i.pid][e]; if(v!=null){ t+=v*i.q; c++; } else falta.push(S.produtos[i.pid].nome); });
+    return {estId:e,total:Math.round(t*100)/100,cob:c,falta}; });
+  // distribuindo: cada item no mais barato (já comprado: o que foi pago)
+  let dist=0; const usadas={};
+  base.forEach(i=>{ const r=realizado(L,i.pid);
+    if(r&&r.total){ dist+=r.total; usadas[r.estabelecimentoId]=(usadas[r.estabelecimentoId]||0)+1; return; }
+    const [e,v]=Object.entries(precos[i.pid]).sort((a,b)=>a[1]-b[1])[0]; dist+=v*i.q; usadas[e]=(usadas[e]||0)+1; });
+  dist=Math.round(dist*100)/100;
+  const completos=porLoja.filter(x=>x.cob===n&&n>0).sort((a,b)=>b.total-a.total);
+  const incompletos=porLoja.filter(x=>x.cob<n).sort((a,b)=>b.cob-a.cob||a.total-b.total);
+  return {n,itens,semPreco,foraCesta,completos,incompletos,dist,usadas,nLojas:lojas.length};
+}
+function renderRank(){
+  if(!rk) return; const L=S.listas[rk.lid]; if(!L) return;
+  const R=calcRank(L,rk.modo);
+  $("rkTit").textContent=semCarimbo(L.nome)||L.nome;
+  $("rkSub").textContent=`${R.itens.length} ITE${R.itens.length===1?"M":"NS"}${L.grupo?" NO GRUPO":""} · PREÇOS DOS ÚLTIMOS 30 DIAS`;
+  document.querySelectorAll("[data-rkm]").forEach(b=>b.classList.toggle("on",b.dataset.rkm===rk.modo));
+  if(!R.n){ $("rkBody").innerHTML=`<div class="empty">${rk.modo==="cesta"?"NENHUM ITEM TEM PREÇO EM TODOS OS MERCADOS.":"NENHUM ITEM DESTA LISTA TEM PREÇO RECENTE."}</div>`+
+      (R.semPreco.length?`<div class="rknota">SEM PREÇO EM NENHUM MERCADO: ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`:""); return; }
+  const max=Math.max(...R.completos.map(x=>x.total),...R.incompletos.map(x=>x.total),R.dist);
+  const melhor=R.completos.length?R.completos[R.completos.length-1]:null, pior=R.completos.length?R.completos[0]:null;
+  const linha=(x,i,cls,extra)=>{ const d=Math.round((x.total-R.dist)*100)/100;
+    return `<div class="rkr ${cls}"><span class="pos">${i}</span><span class="n">${esc(estNome(x.estId))}${cls==="best"?" ★":""}${extra}</span>
+      <span class="v">${brl(x.total)}<small>${cls==="inc"?"INCOMPLETO":(d>0?"+"+brl(d):"= DISTRIBUINDO")}</small></span>
+      <span class="bar"><i style="width:${Math.max(4,Math.round(x.total/max*100))}%"></i></span></div>`; };
+  let h=`<div class="rksec"><span>${rk.modo==="cesta"?`CESTA EM COMUM NOS ${R.nLojas} MERCADOS`:"SE COMPRASSE TUDO EM UM SÓ LUGAR"}</span><span>${R.n} ITE${R.n===1?"M":"NS"}</span></div>`;
+  if(R.completos.length) h+=R.completos.map((x,i)=>{ const cls = x===melhor?"best": (x===pior&&R.completos.length>1?"caro":"");
+      return linha(x,(i+1)+"º",cls,`<small>${rk.modo==="cesta"?"":x.cob+"/"+R.n+" ITENS"}${x===melhor?(rk.modo==="cesta"?"":" · ")+"MELHOR LOJA ÚNICA":""}</small>`); }).join("");
+  else h+=`<div class="rknota">NENHUM MERCADO TEM PREÇO DE TODOS OS ${R.n} ITENS. VEJA OS INCOMPLETOS ABAIXO OU USE "CESTA EM COMUM".</div>`;
+  if(R.incompletos.length){
+    h+=`<div class="rksec"><span>SEM PREÇO DE TODOS OS ITENS</span><span></span></div>`;
+    h+=R.incompletos.map(x=>linha(x,"—","inc",`<span class="rkflag">${x.cob}/${R.n} ITENS</span><small>FALTA${x.falta.length>1?"M":""}: ${esc(x.falta.slice(0,3).join(", "))}${x.falta.length>3?" +"+(x.falta.length-3):""}</small>`)).join("");
+  }
+  if(rk.modo==="cesta"&&R.foraCesta.length) h+=`<div class="rknota">FORA DA COMPARAÇÃO (SEM PREÇO EM TODOS): ${R.foraCesta.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`;
+  const usadas=Object.entries(R.usadas).sort((a,b)=>b[1]-a[1]);
+  h+=`<div class="rkdist"><div class="t"><span>DISTRIBUINDO${rk.modo==="cesta"?" A CESTA":""}</span><b>${brl(R.dist)}</b></div>
+    <div class="s">CADA ITEM NO MAIS BARATO · ${usadas.map(([e,c])=>`${esc(estNome(e))} (${c})`).join(" + ")}</div>`;
+  if(melhor){
+    const e1=Math.round((melhor.total-R.dist)*100)/100, e2=Math.round((pior.total-R.dist)*100)/100;
+    h+=`<div class="rkeco"><div>ECONOMIA vs MELHOR LOJA<b>${brl(Math.max(0,e1))}</b>${esc(estNome(melhor.estId))}</div>${R.completos.length>1?`<div>ECONOMIA vs MAIS CARA<b>${brl(Math.max(0,e2))}</b>${esc(estNome(pior.estId))}</div>`:""}</div></div>`;
+    if(usadas.length>1&&e1<10) h+=`<div class="rkwarn">⚠ DISTRIBUIR ECONOMIZA ${brl(Math.max(0,e1))} E EXIGE ${usadas.length} MERCADOS. COMPENSA A IDA?</div>`;
+  } else h+=`</div>`;
+  if(R.semPreco.length) h+=`<div class="rknota">SEM PREÇO RECENTE EM NENHUM MERCADO (FORA DA CONTA): ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`;
+  $("rkBody").innerHTML=h;
+}
+$("btnRank").onclick=()=>{ const L=S.listas[ui.lista]; if(!L) return; rk={lid:L.id,modo:"lista"}; renderRank(); show("mRank"); };
+$("rkTog").addEventListener("click",e=>{ const b=e.target.closest("[data-rkm]"); if(!b||!rk) return; rk.modo=b.dataset.rkm; renderRank(); });
+$("rkFechar").onclick=()=>{ hide("mRank"); rk=null; };
 /* ---------- toque no MAIS BARATO: confirma e move para a lista da loja mais barata ---------- */
 let mv=null;
 function abrirMoverMenor(L,pid){
@@ -2185,7 +2534,7 @@ function abrirPicker(modo,nome){
 function filtrarProdutos(q){
   q=up(q);
   return Object.values(S.produtos).filter(p=>!q||[p.nome,p.marca,p.codigo,p.barras,p.obs].some(v=>up(v).includes(q)))
-    .sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR")||up(a.marca).localeCompare(up(b.marca),"pt-BR"));
+    .sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR")||ordemPreco(a)-ordemPreco(b)||up(a.marca).localeCompare(up(b.marca),"pt-BR"));
 }
 function renderPicker(){
   let ps=filtrarProdutos($("pkBusca").value);
@@ -2200,8 +2549,8 @@ function renderPicker(){
     return `<div class="pick">
       <input type="checkbox" data-pk="${p.id}" ${s||ja?"checked":""} ${ja?"disabled":""}>
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name" style="font-size:13px">${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}</div>
-        ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}</div>`:""}</div>
+      <div><div class="name" style="font-size:13px">${p.favorito?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}</div>
+        ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}${precoBase(p,pl.valor)?" · "+precoBase(p,pl.valor):""}</div>`:""}</div>
       <input class="q" data-pkq="${p.id}" inputmode="decimal" value="${s?fmtQtd(s):""}" placeholder="QTD" ${ja?"disabled":""}>
     </div>`;
   }).join("")||`<div class="empty">NADA ENCONTRADO.</div>`;
@@ -2402,7 +2751,7 @@ function renderProdutos(){
     const c=pl[0];
     return `<div class="card click prow" data-prod="${p.id}">
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name">${esc(p.nome)}</div>
+      <div><div class="name">${p.favorito?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}</div>
         <div class="sub">${esc(descProduto(p))}</div>
         <div class="sub">${esc(p.codigo||"")}${p.barras?" · ▥ "+esc(p.barras):""}</div>
         ${c?`<div class="sub" style="color:var(--accent);font-weight:700">MAIS BARATO: ${esc(estNome(c.estabelecimentoId))} ${brl(c.valor)} (${dCurta(c.ts)} · ${esc(primeiroNome(c.usuarioNome))})${precoBase(p,c.valor)?" · "+precoBase(p,c.valor):""}</div>`:`<div class="sub">SEM PREÇO</div>`}
@@ -2533,7 +2882,7 @@ function abrirProd(id,pre={},cb=null){
   if(om.length){
     const linhas=[p,...om].map(x=>{const b=melhorBase(x), c=precosPorLoja(x.id)[0];return {x,b,c}})
       .sort((a,b)=>(a.b?a.b.v:1e9)-(b.b?b.b.v:1e9));
-    $("pdMarcas").innerHTML=linhas.map(({x,b,c},i)=>`<div class="rec"><div>${i===0&&b?"★ ":""}${x.id===p.id?"👉 ":""}<b>${esc(x.marca||"SEM MARCA")}</b> ${x.conteudoQtd?fmtQtd(x.conteudoQtd)+" "+esc(x.conteudoUn||""):""}<br>
+    $("pdMarcas").innerHTML=linhas.map(({x,b,c},i)=>`<div class="rec"><button type="button" class="favbtn${x.favorito?" on":""}" data-fav="${x.id}" aria-label="FAVORITO DA CASA">♥</button><div style="flex:1">${i===0&&b?"★ ":""}${x.id===p.id?"👉 ":""}<b>${esc(x.marca||"SEM MARCA")}</b>${x.favorito?' <span class="fav" style="font-size:10px;font-weight:800">FAVORITO DA CASA</span>':""} ${x.conteudoQtd?fmtQtd(x.conteudoQtd)+" "+esc(x.conteudoUn||""):""}<br>
       <small>${c?esc(estNome(c.estabelecimentoId))+" · "+brl(c.valor):"SEM PREÇO"}</small></div>
       <div style="text-align:right" class="${i===0&&b?"pago":""}">${b?brl(b.v)+"/"+b.un:"—"}</div></div>`).join("");
   }
