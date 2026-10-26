@@ -758,7 +758,7 @@ async function entrou(u){
     DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar()}),
     DB.listen("realizados",d=>{S.realizados=byId(d);agendar()}),
     DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()}),
-    DB.listen("listas",d=>{S.listas=byId(d);agendar()},["membros",u.uid]),
+    DB.listen("listas",d=>{S.listas=byId(d);agendar();setTimeout(limparFilhasVazias,0)},["membros",u.uid]),
   ];
   mostrar();
 }
@@ -1203,6 +1203,26 @@ $("itens").addEventListener("click",e=>{
    - adicionou na MATRIZ ou na LIVRE: entra nas duas, sem loja
    - quantidade alterada em qualquer lista do grupo vale para todas */
 const listasVisaoGeral = g => listasDoGrupo(g).filter(l=>l.tipo==="NORMAL"||l.tipo==="LIVRE");
+// grava os itens de uma lista; lista de LOJA que fica vazia é excluída (LIVRE e MATRIZ nunca)
+function salvarItens(l,itens){
+  if(l.tipo==="LOJA"&&l.grupo&&!itens.length){
+    if(l.criadoPor===eu().uid){
+      DB.del("listas",l.id);
+      if(ui.lista===l.id){ ui.lista=null; ui.listaVista=null; mostrar(); toast("A LISTA DA LOJA FICOU VAZIA E FOI EXCLUÍDA"); }
+    } else DB.update("listas",l.id,{itens:[]}); // só quem criou pode excluir; ela some quando o criador abrir o app
+    return;
+  }
+  DB.update("listas",l.id,{itens});
+}
+// limpeza: listas de LOJA vazias criadas por mim (inclusive esvaziadas por outra pessoa)
+let limpando=false;
+function limparFilhasVazias(){
+  if(limpando||!S.user) return; limpando=true;
+  try{
+    Object.values(S.listas).filter(l=>l.tipo==="LOJA"&&l.grupo&&!(l.itens||[]).length&&l.criadoPor===eu().uid&&Date.now()-(l.criadoEm||0)>5000)
+      .forEach(l=>{ DB.del("listas",l.id); if(ui.lista===l.id){ ui.lista=null; ui.listaVista=null; } });
+  } finally { limpando=false; }
+}
 function adicionarItens(L,novos){
   L=S.listas[L.id]||L;
   // item que já está no grupo mantém a quantidade de lá
@@ -1219,7 +1239,7 @@ function adicionarItens(L,novos){
   if(L.grupo&&L.tipo==="LOJA"){ // uma loja por vez
     listasDoGrupo(L.grupo).filter(l=>l.tipo==="LOJA"&&l.id!==L.id).forEach(l=>{
       const fica=(l.itens||[]).filter(x=>!novos.some(n=>n.produtoId===x.produtoId));
-      if(fica.length!==(l.itens||[]).length) DB.update("listas",l.id,{itens:fica});
+      if(fica.length!==(l.itens||[]).length) salvarItens(l,fica);
     });
   }
   const jaTem=(L.itens||[]).map(x=>x.produtoId);
@@ -1233,9 +1253,9 @@ function editarQtd(L,id){
   const doGrupo = L.grupo ? listasDoGrupo(L.grupo).filter(l=>(l.itens||[]).some(x=>x.produtoId===id)) : [L];
   if(q===0){
     if(L.grupo&&L.tipo==="LOJA"){
-      if(confirm("TIRAR ESTE PRODUTO DA LISTA DESTA LOJA?\n(ELE CONTINUA NA MATRIZ E NA LIVRE.)")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)});
+      if(confirm("TIRAR ESTE PRODUTO DA LISTA DESTA LOJA?\n(ELE CONTINUA NA MATRIZ E NA LIVRE.)")) salvarItens(L,L.itens.filter(x=>x.produtoId!==id));
     }else if(L.grupo){
-      if(confirm("REMOVER DE TODAS AS LISTAS DO GRUPO?\n(MATRIZ, LIVRE E LISTAS DE LOJA)")) doGrupo.forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).filter(x=>x.produtoId!==id)}));
+      if(confirm("REMOVER DE TODAS AS LISTAS DO GRUPO?\n(MATRIZ, LIVRE E LISTAS DE LOJA)")) doGrupo.forEach(l=>salvarItens(l,(l.itens||[]).filter(x=>x.produtoId!==id)));
     }else if(confirm("REMOVER ESTE PRODUTO DA LISTA?")) DB.update("listas",L.id,{itens:L.itens.filter(x=>x.produtoId!==id)});
     return;
   }
@@ -1555,7 +1575,7 @@ function mandarParaLoja(L,pid,v,destinoEst){
   const it={...((L.itens||[]).find(x=>x.produtoId===pid)||{produtoId:pid,qtd:1})};
   // o item sai de qualquer outra lista de loja do grupo (uma loja por vez)
   listasDoGrupo(g).filter(l=>ehLoja(l)&&l.estabelecimentoId!==destinoEst&&(l.itens||[]).some(x=>x.produtoId===pid))
-    .forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).filter(x=>x.produtoId!==pid)}));
+    .forEach(l=>salvarItens(l,(l.itens||[]).filter(x=>x.produtoId!==pid)));
   let nomeDestino="SÓ NA LIVRE";
   if(destinoEst){
     const f=listasDoGrupo(g).find(l=>ehLoja(l)&&l.estabelecimentoId===destinoEst);
@@ -1813,8 +1833,11 @@ $("pkBtns").addEventListener("click",e=>{
    ===================================================================== */
 let plano=null;
 function abrirDistribuir(L){
-  const itens=L.itens||[];
-  if(!itens.length){alert("A LISTA ESTÁ VAZIA.");return}
+  L=S.listas[L.id]||L;
+  const todos=L.itens||[];
+  if(!todos.length){alert("A LISTA ESTÁ VAZIA.");return}
+  const itens=todos.filter(it=>!realizado(L,it.produtoId)); // comprados não são redistribuídos
+  if(!itens.length){alert("TODOS OS ITENS DESTA LISTA JÁ FORAM COMPRADOS.");return}
   const grupos={}, sem=[];
   itens.forEach(it=>{
     const pl=precosPorLoja(it.produtoId);
@@ -1822,38 +1845,74 @@ function abrirDistribuir(L){
     const r=pl[0]; (grupos[r.estabelecimentoId]=grupos[r.estabelecimentoId]||[]).push({it,valor:r.valor,ts:r.ts});
   });
   plano={L,grupos,sem};
+  // listas que o grupo já tem (para reaproveitar)
+  const existentes=L.grupo?listasDoGrupo(L.grupo):[];
+  const lojaExiste=eid=>existentes.some(l=>l.tipo==="LOJA"&&l.estabelecimentoId===eid);
+  const temLivre=existentes.some(l=>l.tipo==="LIVRE");
+  const ondeEsta=pid=>{ const l=existentes.find(x=>x.tipo==="LOJA"&&(x.itens||[]).some(i=>i.produtoId===pid)); return l?l.estabelecimentoId:null; };
   const nome=pid=>esc((S.produtos[pid]||{}).nome||"?");
-  let html=`<div class="dgroup"><div class="dh"><span>LISTADECOMPRAS (LIVRE)</span><span>${itens.length} ITENS</span></div><div class="di"><span>TODOS OS ITENS, PARA COMPRAR ONDE QUISER</span></div></div>`;
+  let html=`<div class="dgroup"><div class="dh"><span>LIVRE (TODOS OS ITENS)</span><span>${temLivre?"LISTA EXISTENTE":"NOVA LISTA"}</span></div><div class="di"><span>TODOS OS ITENS, PARA COMPRAR ONDE QUISER</span></div></div>`;
+  let criar=temLivre?0:1, atualizar=temLivre?1:0;
   html+=Object.keys(grupos).sort((a,b)=>estNome(a).localeCompare(estNome(b),"pt-BR")).map(eid=>{
-    const g=grupos[eid], tot=g.reduce((s,x)=>s+x.valor*(x.it.qtd||1),0);
-    return `<div class="dgroup"><div class="dh"><span>${esc(estNome(eid))}</span><span>${g.length} ITENS · ~${brl(tot)}</span></div>
-      ${g.map(x=>`<div class="di"><span>${nome(x.it.produtoId)} × ${fmtQtd(x.it.qtd||1)}</span><b>${brl(x.valor)} · ${dCurta(x.ts)}</b></div>`).join("")}</div>`;
+    const g=grupos[eid], tot=g.reduce((s,x)=>s+x.valor*(x.it.qtd||1),0), existe=lojaExiste(eid);
+    existe?atualizar++:criar++;
+    return `<div class="dgroup"><div class="dh"><span>${esc(estNome(eid))} · ${existe?"LISTA EXISTENTE":"NOVA LISTA"}</span><span>${g.length} ITENS · ~${brl(tot)}</span></div>
+      ${g.map(x=>{ const de=ondeEsta(x.it.produtoId); const mv=de&&de!==eid?` <small>(SAI DO ${esc(estNome(de))})</small>`:"";
+        return `<div class="di"><span>${nome(x.it.produtoId)} × ${fmtQtd(x.it.qtd||1)}${mv}</span><b>${brl(x.valor)} · ${dCurta(x.ts)}</b></div>`; }).join("")}</div>`;
   }).join("");
   if(sem.length) html+=`<div class="dgroup"><div class="dh"><span>SEM PREÇO (SÓ NA LIVRE)</span><span>${sem.length} ITENS</span></div>${sem.map(it=>`<div class="di"><span>${nome(it.produtoId)}</span></div>`).join("")}</div>`;
+  const repetidas=Object.values(existentes.filter(l=>l.tipo==="LOJA").reduce((m,l)=>((m[l.estabelecimentoId]=(m[l.estabelecimentoId]||0)+1),m),{})).some(n=>n>1);
+  if(repetidas) html+=`<div class="hint" style="margin-top:6px">LISTAS REPETIDAS DA MESMA LOJA SERÃO JUNTADAS NUMA SÓ.</div>`;
   $("dPrev").innerHTML=html;
-  const n=1+Object.keys(grupos).length;
-  $("dOk").textContent=`CRIAR ${n} LISTA${n>1?"S":""}`;
+  $("dOk").textContent = [criar?`CRIAR ${criar}`:"", atualizar?`ATUALIZAR ${atualizar}`:""].filter(Boolean).join(" · ") || "DISTRIBUIR";
   show("mDist");
 }
 $("btnDist").onclick=()=>{ const L=S.listas[ui.lista]; if(L) abrirDistribuir(L); };
 $("dCancel").onclick=()=>{ hide("mDist"); if(plano&&!ui.lista) abrirLista(plano.L.id); };
-$("dOk").onclick=()=>{
-  const {L,grupos}=plano, a=new Date();
-  const carimbo=`${a.getFullYear()}${p2(a.getMonth()+1)}${p2(a.getDate())}.${p2(a.getHours())}${p2(a.getMinutes())}${p2(a.getSeconds())}`;
-  const grupo=L.grupo||("g_"+L.id);
-  const membros=L.membros||[eu().uid];
-  if(!L.grupo){
-    DB.update("listas",L.id,{grupo});
-    // compras já registradas na lista original passam a valer para o grupo
-    Object.entries(S.realizados).filter(([k,r])=>r.grupo===L.id).forEach(([k,r])=>{ DB.set("realizados",grupo+"__"+r.produtoId,{...r,grupo}); DB.del("realizados",k); });
-  }
-  const base={criadoPor:eu().uid,criadoEm:Date.now(),membros,grupo,origem:L.id};
-  DB.add("listas",{...base,nome:`${carimbo}.LISTADECOMPRAS`,tipo:"LIVRE",itens:(L.itens||[]).map(x=>({...x}))});
-  Object.keys(grupos).forEach(eid=>{
-    DB.add("listas",{...base,nome:`${carimbo}.${estNome(eid)}`,tipo:"LOJA",estabelecimentoId:eid,itens:grupos[eid].map(x=>({...x.it}))});
+// junta as listas repetidas da mesma loja no grupo (fica a mais antiga); devolve loja → {lista, itens}
+function juntarRepetidas(g){
+  const lojas={}, apagar=[];
+  listasDoGrupo(g).filter(l=>l.tipo==="LOJA").sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0)).forEach(l=>{
+    const k=l.estabelecimentoId;
+    if(!lojas[k]){ lojas[k]={lista:l,itens:(l.itens||[]).map(x=>({...x})),mudou:false}; return; }
+    (l.itens||[]).forEach(i=>{ if(!lojas[k].itens.some(x=>x.produtoId===i.produtoId)){ lojas[k].itens.push({...i}); lojas[k].mudou=true; } });
+    apagar.push(l);
   });
+  return {lojas,apagar};
+}
+$("dOk").onclick=()=>{
+  const {L,grupos,sem}=plano;
+  const primeira=!L.grupo;
+  const grupo=garantirGrupo(L);
+  const carimbo=primeira?(()=>{const a=new Date();return `${a.getFullYear()}${p2(a.getMonth()+1)}${p2(a.getDate())}.${p2(a.getHours())}${p2(a.getMinutes())}${p2(a.getSeconds())}`})():carimboDoGrupo(grupo);
+  const membros=L.membros||[eu().uid];
+  const base={criadoPor:eu().uid,criadoEm:Date.now(),membros,grupo,origem:(primeira?L.id:((matrizDoGrupo(grupo)||L).id))};
+  const {lojas,apagar}=primeira?{lojas:{},apagar:[]}:juntarRepetidas(grupo);
+  // LIVRE: cria se não existir; se existir, recebe os itens que faltam.
+  // Sempre com TODOS os itens do grupo (matriz primeiro), não só os da lista de onde se distribuiu.
+  const livre=primeira?null:listasDoGrupo(grupo).find(l=>l.tipo==="LIVRE");
+  const todosDoGrupo=[];
+  [L,...(primeira?[]:listasDoGrupo(grupo).sort((a,b)=>(a.tipo==="NORMAL"?-1:0)-(b.tipo==="NORMAL"?-1:0)))].forEach(l=>(l.itens||[]).forEach(i=>{
+    if(!todosDoGrupo.some(x=>x.produtoId===i.produtoId)) todosDoGrupo.push({...i}); }));
+  if(!livre) DB.add("listas",{...base,nome:`${carimbo}.LISTADECOMPRAS`,tipo:"LIVRE",itens:todosDoGrupo});
+  else{ const falt=todosDoGrupo.filter(i=>!(livre.itens||[]).some(x=>x.produtoId===i.produtoId)); if(falt.length) DB.update("listas",livre.id,{itens:[...(livre.itens||[]),...falt]}); }
+  // cada item vai para a lista da loja mais barata, saindo de outra loja (uma loja por vez)
+  Object.keys(grupos).forEach(eid=>{
+    grupos[eid].forEach(({it})=>{
+      Object.entries(lojas).forEach(([k,o])=>{ if(k!==eid){ const n=o.itens.length; o.itens=o.itens.filter(x=>x.produtoId!==it.produtoId); if(o.itens.length!==n) o.mudou=true; } });
+      if(!lojas[eid]) lojas[eid]={lista:null,itens:[],mudou:true};
+      if(!lojas[eid].itens.some(x=>x.produtoId===it.produtoId)){ lojas[eid].itens.push({...it}); lojas[eid].mudou=true; }
+    });
+  });
+  let criadas=0, atualizadas=0;
+  Object.entries(lojas).forEach(([eid,o])=>{
+    if(!o.lista){ DB.add("listas",{...base,nome:`${carimbo}.${estNome(eid)}`,tipo:"LOJA",estabelecimentoId:eid,itens:o.itens}); criadas++; }
+    else if(o.mudou){ salvarItens(o.lista,o.itens); atualizadas++; }
+  });
+  apagar.forEach(l=>{ if(l.criadoPor===eu().uid) DB.del("listas",l.id); else DB.update("listas",l.id,{itens:[]}); });
+  if(!livre) criadas++;
   hide("mDist"); ui.lista=null; mostrar();
-  toast(`${1+Object.keys(grupos).length} LISTAS CRIADAS`);
+  toast([criadas?`${criadas} LISTA${criadas>1?"S":""} CRIADA${criadas>1?"S":""}`:"", atualizadas?`${atualizadas} ATUALIZADA${atualizadas>1?"S":""}`:"", apagar.length?`${apagar.length} REPETIDA${apagar.length>1?"S":""} JUNTADA${apagar.length>1?"S":""}`:""].filter(Boolean).join(" · ")||"NADA MUDOU");
 };
 
 /* =====================================================================
