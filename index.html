@@ -377,6 +377,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 </div>
 
 <input type="file" id="camInput" accept="image/*" capture="environment" class="hidden">
+<input type="file" id="galInput" accept="image/*" class="hidden">
 
 <!-- Preço -->
 <div class="modal" id="mPreco"><div class="sheet">
@@ -944,7 +945,8 @@ function abrirMenu(titulo,sub,ops){
   $("mnOps").innerHTML=ops.map((o,i)=>{ menuAcoes[i]=o.fn; return `<button data-op="${i}" class="${o.perigo?"danger":""}">${o.txt}</button>`; }).join("");
   show("mMenu");
 }
-$("mnOps").addEventListener("click",e=>{ const b=e.target.closest("[data-op]"); if(!b) return; hide("mMenu"); setTimeout(()=>menuAcoes[b.dataset.op](),50); });
+// a ação roda no mesmo toque (o celular só abre câmera, galeria e abas novas a partir de um toque direto)
+$("mnOps").addEventListener("click",e=>{ const b=e.target.closest("[data-op]"); if(!b) return; hide("mMenu"); menuAcoes[b.dataset.op](); });
 $("mnClose").onclick=()=>hide("mMenu");
 function menuLista(id){
   const l=S.listas[id]; if(!l) return;
@@ -1174,8 +1176,32 @@ function reduzir(file,max,q){
     img.onerror=rej; img.src=URL.createObjectURL(file);
   });
 }
+// galeria do celular (sem forçar a câmera)
+let galCb=null;
+function abrirGaleria(cb){ galCb=cb; $("galInput").value=""; $("galInput").click(); }
+$("galInput").addEventListener("change",e=>{ const f=e.target.files[0]; if(f&&galCb) galCb(f); });
+// Google Imagens já filtrado por cor branca (fotos de catálogo com fundo branco)
+const urlGoogleFundoBranco = termos => "https://www.google.com/search?tbm=isch&tbs=ic:specific,isc:white&q="+encodeURIComponent(termos);
+function termosFoto(nome,marca,cq,cu){
+  const c = cq ? `${fmtQtd(cq)} ${cu||""}`.trim() : "";
+  return [nome,marca,c].map(x=>String(x||"").trim()).filter(Boolean).join(" ").toLowerCase();
+}
+// menu da foto do produto: câmera, Google (fundo branco) ou galeria
+function menuFoto(termos,aoEscolher){
+  abrirMenu("FOTO DO PRODUTO", termos?"BUSCA NO GOOGLE: "+up(termos)+" EMBALAGEM":"", [
+    {txt:"📷  TIRAR FOTO", fn:()=>abrirCamera(aoEscolher)},
+    {txt:"🌐  PROCURAR NO GOOGLE (FUNDO BRANCO)", fn:()=>{
+      if(!termos){ alert("PREENCHA O NOME DO PRODUTO PRIMEIRO."); return; }
+      window.open(urlGoogleFundoBranco(termos+" embalagem"),"_blank");
+      toast("SEGURE O DEDO NA IMAGEM → BAIXAR IMAGEM. DEPOIS VOLTE E USE 📁 GALERIA");
+    }},
+    {txt:"📁  ESCOLHER DA GALERIA", fn:()=>abrirGaleria(aoEscolher)},
+  ]);
+}
 function fotografarProduto(pid){
-  abrirCamera(async f=>{ const foto=await reduzir(f,360,0.72); DB.update("produtos",pid,{foto,atualizadoPor:eu().uid,atualizadoEm:Date.now()}); toast("FOTO SALVA"); });
+  const p=S.produtos[pid]; if(!p) return;
+  menuFoto(termosFoto(p.nome,p.marca,p.conteudoQtd,p.conteudoUn), async f=>{
+    const foto=await reduzir(f,360,0.72); DB.update("produtos",pid,{foto,atualizadoPor:eu().uid,atualizadoEm:Date.now()}); toast("FOTO SALVA"); });
 }
 
 /* =====================================================================
@@ -1774,7 +1800,8 @@ $("pdOutroTam").onclick=()=>{
   setTimeout(()=>$("pdCQtd").focus(),100);
 };
 function fotoPd(){ $("pdFoto").innerHTML=pd.foto?`<img src="${pd.foto}" alt="">`:"TOQUE PARA FOTOGRAFAR"; }
-$("pdFoto").onclick=()=>abrirCamera(async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } });
+$("pdFoto").onclick=()=>menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value),
+  async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } });
 $("pdLerBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(c){ $("pdBarras").value=c; consultarBase(c); } };
 
 /* ---------- Ficha do produto pelo código de barras (Open Food Facts e bases irmãs) ----------
