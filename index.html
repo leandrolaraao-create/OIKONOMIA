@@ -380,6 +380,16 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 <input type="file" id="galInput" accept="image/*" class="hidden">
 
 <!-- Preço -->
+<!-- Ainda está esse valor? -->
+<div class="modal" id="mAinda"><div class="sheet">
+  <h2 id="aiNome"></h2>
+  <div class="hint" id="aiSub"></div>
+  <div class="sum" id="aiPergunta" style="display:block;font-size:15px;line-height:1.5"></div>
+  <button id="aiSim" class="primary" style="width:100%;padding:14px;margin-top:4px"></button>
+  <button id="aiNao" style="width:100%;padding:12px;margin-top:8px">✏️ NÃO, MUDOU: INFORMAR O PREÇO</button>
+  <button id="aiCancel" style="width:100%;padding:12px;margin-top:8px">CANCELAR</button>
+</div></div>
+
 <div class="modal" id="mPreco"><div class="sheet">
   <h2 id="prNome"></h2>
   <div class="hint" id="prSub"></div>
@@ -396,6 +406,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   </div>
   <div class="line-total" id="prLinha"></div>
   <div id="prAlerta"></div>
+  <button id="prMover" style="width:100%;margin-top:4px;font-size:12px">↪ NÃO VOU COMPRAR AQUI: MOVER PARA OUTRA LISTA</button>
   <div class="hint" id="prBase"></div>
   <div class="btns">
     <button id="prFoto">📷 FOTO</button>
@@ -1089,9 +1100,11 @@ $("itens").addEventListener("change",e=>{
   const L=S.listas[ui.lista];
   const r=realizado(L,pid);
   if(e.target.checked){
-    const estId=exigirLoja(L); if(!estId){e.target.checked=false;return}
-    const it=L.itens.find(x=>x.produtoId===pid);
-    registrarRealizado(L,pid,estId,null,it?it.qtd:1,null);
+    e.target.checked=false; // só fica marcado depois de informar/confirmar o preço
+    const estId=exigirLoja(L); if(!estId) return;
+    const ult=precosPorLoja(pid).find(x=>x.estabelecimentoId===estId);
+    if(!ult) abrirPreco(L,pid,false);   // sem preço nesta loja: exige o valor
+    else abrirAinda(L,pid,ult);         // com preço: pergunta se ainda está esse valor
   }else if(r){
     if(!confirm(`DESMARCAR?\nISSO DESFAZ A COMPRA REGISTRADA POR ${r.usuarioNome} EM TODAS AS LISTAS DO GRUPO.\n(O PREÇO CONTINUA NO HISTÓRICO.)`)){e.target.checked=true;return}
     DB.del("realizados",chaveReal(L,pid));
@@ -1291,6 +1304,56 @@ $("prSave").onclick=()=>{
   if(tipo==="PAGO") registrarRealizado(L,pid,estId,Math.round(v*100)/100,q,precoId);
   hide("mPreco"); toast(tipo==="PAGO"?"COMPRA REGISTRADA":"PREÇO REGISTRADO");
 };
+
+/* ---------- "AINDA ESTÁ ESSE VALOR?" ao marcar como comprado ---------- */
+let ainda=null;
+function abrirAinda(L,pid,ult){
+  const p=S.produtos[pid], it=(L.itens||[]).find(x=>x.produtoId===pid), q=it?it.qtd:1;
+  ainda={L,pid,ult,q};
+  $("aiNome").textContent=p.nome;
+  $("aiSub").textContent=[descProduto(p),"QTD "+fmtQtd(q)].filter(Boolean).join(" · ");
+  $("aiPergunta").innerHTML=`<b>${esc(estNome(ult.estabelecimentoId))}</b> · ÚLTIMO PREÇO: <b>${brl(ult.valor)}</b><br><small>${dLonga(ult.ts)} · ${esc(ult.usuarioNome)} · ${esc(rotuloTipo(ult))}</small><br>AINDA ESTÁ ESSE VALOR?`;
+  $("aiSim").textContent=`✔ SIM, COMPREI POR ${brl(ult.valor)}${q!==1?" (×"+fmtQtd(q)+" = "+brl(ult.valor*q)+")":""}`;
+  show("mAinda");
+}
+$("aiSim").onclick=()=>{
+  const {L,pid,ult,q}=ainda, estId=ult.estabelecimentoId;
+  const precoId=DB.add("precos",{produtoId:pid,estabelecimentoId:estId,estNome:estNome(estId),valor:ult.valor,tipo:"PAGO",qtd:q,
+    usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:L.id,listaNome:L.nome});
+  registrarRealizado(L,pid,estId,ult.valor,q,precoId);
+  hide("mAinda"); toast("COMPRA REGISTRADA");
+};
+$("aiNao").onclick=()=>{ const {L,pid}=ainda; hide("mAinda"); abrirPreco(L,pid,false); };
+$("aiCancel").onclick=()=>hide("mAinda");
+
+/* ---------- MOVER PARA OUTRA LISTA (não vou comprar aqui) ---------- */
+$("prMover").onclick=()=>{
+  const {L,pid,estId}=pr, v=num($("prValor").value);
+  const outras=Object.values(S.listas).filter(l=>l.id!==L.id);
+  if(!outras.length){ alert("VOCÊ NÃO TEM OUTRA LISTA. CRIE UMA NA TELA LISTAS."); return; }
+  const g=grupoKey(L);
+  const preco=l=>l.estabelecimentoId?precoNaLoja(pid,l.estabelecimentoId):null;
+  const precos=outras.map(preco).filter(x=>x!=null);
+  const menor=precos.length?Math.min(...precos):null;
+  const ord=outras.sort((a,b)=>((grupoKey(b)===g)-(grupoKey(a)===g))||((preco(a)??1e9)-(preco(b)??1e9))||(ultimaMov(b)-ultimaMov(a))).slice(0,12);
+  const ops=ord.map(l=>{
+    const pv=preco(l);
+    const info = l.estabelecimentoId ? (pv!=null?` · ${brl(pv)}${pv===menor?" ★":""}`:" · SEM PREÇO") : "";
+    const ja=(l.itens||[]).some(x=>x.produtoId===pid);
+    return {txt:`↪  ${esc(l.nome)}${info}${ja?" · JÁ TEM":""}`, fn:()=>moverItem(L,l,pid,v)};
+  });
+  abrirMenu("MOVER PARA QUAL LISTA?", `${(S.produtos[pid]||{}).nome||""} SAI DE “${L.nome}”`, ops);
+};
+function moverItem(origem,destino,pid,v){
+  const o=S.listas[origem.id], d=S.listas[destino.id]; if(!o||!d) return;
+  // guarda o preço que foi digitado aqui, se houver, como VISTO
+  if(v>0&&pr.estId) DB.add("precos",{produtoId:pid,estabelecimentoId:pr.estId,estNome:estNome(pr.estId),valor:Math.round(v*100)/100,tipo:"VISTO",qtd:null,
+    usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:o.id,listaNome:o.nome});
+  const it=(o.itens||[]).find(x=>x.produtoId===pid)||{produtoId:pid,qtd:1};
+  DB.update("listas",o.id,{itens:(o.itens||[]).filter(x=>x.produtoId!==pid)});
+  if(!(d.itens||[]).some(x=>x.produtoId===pid)) DB.update("listas",d.id,{itens:[...(d.itens||[]),{...it}]});
+  hide("mPreco"); toast(`MOVIDO PARA ${d.nome}`);
+}
 /* OCR */
 let workerP=null;
 function carregarTesseract(){ if(window.Tesseract) return Promise.resolve();
