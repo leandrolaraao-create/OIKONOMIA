@@ -317,6 +317,25 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .forafoot .sec2{color:var(--accent);border-color:var(--accent);background:#fff}
 .item2.flash{animation:flash 2s ease-out}
 @keyframes flash{0%,60%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.pqzbar{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:12px;font-weight:800;text-align:left}
+.pqzbar b{flex:1;min-width:0}.pqzbar span{color:var(--tag-ink)}
+.pqrow{display:flex;gap:8px;margin-top:10px}.pqrow button{flex:1;padding:11px 4px;font-size:12px;font-weight:800}
+#pqBuscaWrap{margin-top:10px}
+.pqsec{display:flex;justify-content:space-between;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin:16px 2px 6px}
+.pqv{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pqr{display:flex;gap:10px;align-items:center;padding:9px 12px;cursor:pointer}.pqr+.pqr{border-top:1px solid var(--line)}
+.pqr .thumb{width:42px;height:42px;font-size:20px;border-radius:8px}
+.pqr .m{flex:1;min-width:0}.pqr .n{font-weight:800;font-size:13px}.pqr .s{font-size:11px;color:var(--muted)}
+.pqr .v{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}.pqr .v small{display:block;font-size:10px}
+.pqtop{display:flex;gap:12px;align-items:center}.pqtop .thumb{width:60px;height:60px}
+.pqlast{margin:10px 0;background:var(--bg);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pqlast b{color:var(--ink)}
+.pqzs{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pqzs button{border-radius:99px;padding:7px 12px;font-size:12px;font-weight:700}
+.pqzs button.on{background:var(--tag);border-color:var(--tag-ink);color:var(--tag-ink)}
+.pqzs button.add{border-style:dashed;color:var(--accent);border-color:var(--accent)}
+#pqValor:focus{outline:none}
+#pqSalvar{flex:2;white-space:nowrap}
 .hdif{font-size:12px;font-weight:700;margin:6px 0 0;min-height:16px}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
 .achado img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex:none}
@@ -401,6 +420,29 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
       <div id="itens"></div>
     </section>
 
+    <section id="vPesq" class="hidden">
+      <div class="storeRow"><select id="pqLoja"></select></div>
+      <button id="pqLigar" class="primary" style="width:100%;padding:14px;margin-top:8px">📷 LIGAR CÂMERA E COMEÇAR</button>
+      <div id="pq" class="mm hidden" style="height:170px">
+        <video id="pqVideo" playsinline muted autoplay></video>
+        <div class="mira"></div>
+        <div class="mmMsg" id="pqMsg">APONTE PARA O CÓDIGO DE BARRAS</div>
+        <button id="pqTorch" class="mmBtn hidden" style="left:8px" aria-label="LANTERNA">🔦</button>
+        <button id="pqClose" class="mmBtn" style="right:8px" aria-label="DESLIGAR CÂMERA">✕</button>
+      </div>
+      <button id="pqZonaBar" class="pqzbar"></button>
+      <div class="pqrow">
+        <button id="pqBuscar">🔍 BUSCAR SEM CÓDIGO</button>
+        <button id="pqNovo">➕ PRODUTO NOVO</button>
+      </div>
+      <div id="pqBuscaWrap" class="hidden">
+        <input id="pqBusca" placeholder="NOME, MARCA OU CÓDIGO" autocomplete="off">
+        <div id="pqSug"></div>
+      </div>
+      <div class="pqsec"><span id="pqConta">NESTA VISITA</span><span id="pqHoje"></span></div>
+      <div id="pqVisita"></div>
+    </section>
+
     <section id="vProdutos" class="hidden">
       <div class="search">
         <input id="pBusca" placeholder="BUSCAR NOME, MARCA, ID OU CÓDIGO">
@@ -440,6 +482,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 
   <nav class="tabbar">
     <button data-tab="listas" class="on"><span>🧾</span>LISTAS</button>
+    <button data-tab="pesq"><span>🏷️</span>PESQUISA</button>
     <button data-tab="produtos"><span>📦</span>PRODUTOS</button>
     <button data-tab="ests"><span>🏪</span>ESTABELEC.</button>
     <button data-tab="hist"><span>📊</span>HISTÓRICO</button>
@@ -458,6 +501,23 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <button id="aiSim" class="primary" style="width:100%;padding:14px;margin-top:4px"></button>
   <button id="aiNao" style="width:100%;padding:12px;margin-top:8px">✏️ NÃO, MUDOU: INFORMAR O PREÇO</button>
   <button id="aiCancel" style="width:100%;padding:12px;margin-top:8px">CANCELAR</button>
+</div></div>
+
+<!-- Pesquisa de preços: preço + zona do produto lido -->
+<div class="modal" id="mPq"><div class="sheet">
+  <div class="pqtop"><div class="thumb" id="pqThumb"></div><div style="flex:1;min-width:0"><h2 id="pqNome" style="margin:0"></h2><div class="hint" id="pqSub"></div></div></div>
+  <div class="pqlast" id="pqLast"></div>
+  <div class="row big">
+    <label class="f">PREÇO (R$)<input id="pqValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f" style="flex:.85">VÁLIDO ATÉ (OPCIONAL)<input id="pqValido" type="date"></label>
+  </div>
+  <div class="hdif" id="pqDif"></div>
+  <div class="sect" id="pqZTit">ZONA</div>
+  <div class="pqzs" id="pqZs"></div>
+  <div class="btns">
+    <button id="pqPular">PULAR</button>
+    <button id="pqSalvar" class="primary">SALVAR E CONTINUAR ▸</button>
+  </div>
 </div></div>
 
 <!-- Modo mercado: produto lido que não está na lista -->
@@ -944,6 +1004,8 @@ function mostrar(){
   $("vListas").classList.toggle("hidden",!(ui.aba==="listas"&&!ui.lista)); // com uma lista aberta (ou chegando do banco) a tela inicial some
   $("vLista").classList.toggle("hidden",!naLista);
   $("vProdutos").classList.toggle("hidden",ui.aba!=="produtos");
+  $("vPesq").classList.toggle("hidden",ui.aba!=="pesq");
+  if(ui.aba!=="pesq"&&typeof pq!=="undefined"&&pq.ativo) pararPesquisa(); // saiu da aba: desliga a câmera
   $("vEsts").classList.toggle("hidden",ui.aba!=="ests");
   $("vHist").classList.toggle("hidden",ui.aba!=="hist");
   $("abLista").classList.toggle("hidden",!naLista);
@@ -969,9 +1031,10 @@ function renderAtual(){
     else renderListas();
   }
   else if(ui.aba==="produtos") renderProdutos();
+  else if(ui.aba==="pesq") renderPesq();
   else if(ui.aba==="ests") renderEsts();
   else renderHist();
-  const titulos={listas:L?L.nome:"LISTAS",produtos:"PRODUTOS",ests:"ESTABELECIMENTOS",hist:"HISTÓRICO"};
+  const titulos={listas:L?L.nome:"LISTAS",produtos:"PRODUTOS",ests:"ESTABELECIMENTOS",hist:"HISTÓRICO",pesq:"PESQUISA DE PREÇOS"};
   $("title").textContent=titulos[ui.aba];
   $("title").classList.toggle("edit",ui.aba==="listas"&&!!L);
 }
@@ -1446,7 +1509,7 @@ function pararModoMercado(){
   $("btnScan").classList.remove("on"); $("btnScan").innerHTML="<span>▥</span>MODO MERCADO";
 }
 $("mmClose").onclick=pararModoMercado;
-document.addEventListener("visibilitychange",()=>{ if(document.hidden&&mm.ativo) pararModoMercado(); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden&&mm.ativo) pararModoMercado(); if(document.hidden&&pq.ativo) pararPesquisa(); });
 // o que fazer com um código lido dentro da lista
 function tratarCodigoNaLista(c){
   const L2=S.listas[ui.lista]; if(!L2) return;
@@ -2518,6 +2581,198 @@ $("pdDel").onclick=()=>{
   if(!confirm(`EXCLUIR ${p.codigo} · ${p.nome} DO CATÁLOGO?\n\nOS PREÇOS CONTINUAM NO HISTÓRICO, MAS O PRODUTO APARECE COMO REMOVIDO NAS LISTAS.`)) return;
   DB.del("produtos",pd.id); hide("mProd");
 };
+
+
+/* =====================================================================
+   PESQUISA DE PREÇOS: escolhe a loja, liga a câmera e vai registrando preço + zona
+   ===================================================================== */
+const pq={ativo:false,leitor:null,ultimo:"",ultimoEm:0,estId:"",zona:"",visita:[],extra:[],abre:null};
+(function(){ try{ const g=JSON.parse(localStorage.getItem("lc3.pesq")||"{}");
+  pq.estId=g.estId||""; pq.zona=g.zona||"";
+  if(g.dia===hojeISO()) pq.visita=g.visita||[]; }catch(e){} })();
+function pqGuardar(){ try{ localStorage.setItem("lc3.pesq",JSON.stringify({estId:pq.estId,zona:pq.zona,visita:pq.visita,dia:hojeISO()})); }catch(e){} }
+function pqZonas(estId){ // zonas da loja + as recém-criadas que ainda estão chegando do banco
+  const z=[...(((S.ests[estId]||{}).zonas)||[])];
+  pq.extra.filter(x=>x.estId===estId&&!z.some(y=>y.codigo===x.codigo)).forEach(x=>z.push({codigo:x.codigo,descricao:x.descricao}));
+  return z;
+}
+function renderPesq(){
+  const ests=Object.values(S.ests).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+  if(pq.estId&&!S.ests[pq.estId]) pq.estId="";
+  $("pqLoja").innerHTML=`<option value="">ESCOLHA O MERCADO</option>`+ests.map(e=>`<option value="${e.id}">${esc(e.nome)}</option>`).join("")+`<option value="__novo">+ NOVO ESTABELECIMENTO</option>`;
+  $("pqLoja").value=pq.estId;
+  $("pqLigar").classList.toggle("hidden",pq.ativo);
+  $("pqZonaBar").innerHTML=`🧭 <b>ZONA ATUAL: ${pq.zona?esc(zonaRotuloPq(pq.estId,pq.zona)):"SEM ZONA"}</b><span>TROCAR ▾</span>`;
+  $("pqZonaBar").classList.toggle("hidden",!pq.estId);
+  // visita de hoje
+  const regs=pq.visita.map(id=>S.precos.find(r=>r.id===id)).filter(Boolean).sort((a,b)=>(b.tsReg||b.ts)-(a.tsReg||a.ts));
+  $("pqConta").textContent=`NESTA VISITA · ${regs.length} PREÇO${regs.length===1?"":"S"}`;
+  $("pqHoje").textContent="HOJE "+dCurta(Date.now());
+  $("pqVisita").innerHTML = regs.length ? `<div class="pqv">`+regs.map(r=>{
+      const p=S.produtos[r.produtoId]||{nome:"PRODUTO REMOVIDO"};
+      const ant=S.precos.filter(x=>x.produtoId===r.produtoId&&x.estabelecimentoId===r.estabelecimentoId&&x.id!==r.id&&x.ts<r.ts).sort((a,b)=>b.ts-a.ts)[0];
+      const z=p.zonas&&p.zonas[r.estabelecimentoId];
+      const d=ant?Math.round((r.valor-ant.valor)*100)/100:null;
+      const tag = ant==null?`<small class="muted">NOVO</small>`:d>0?`<small style="color:var(--warn)">▲ ${vNum2(d)}</small>`:d<0?`<small style="color:var(--accent)">▼ ${vNum2(-d)}</small>`:`<small class="muted">=</small>`;
+      return `<div class="pqr" data-pqr="${r.id}"><div class="thumb">${imgProduto(p)}</div><div class="m"><div class="n">${esc(p.nome)}</div>
+        <div class="s">${esc(estNome(r.estabelecimentoId))}${z?" · "+esc(zonaRotuloPq(r.estabelecimentoId,z)):""} · ${ant?"ERA "+vNum2(ant.valor)+" ("+dCurta(ant.ts)+")":"1º PREÇO NESTA LOJA"}</div></div>
+        <div class="v">${vNum2(r.valor)}${tag}</div></div>`; }).join("")+`</div>`
+    : `<div class="empty">${pq.estId?"LIGUE A CÂMERA E APONTE PARA OS PRODUTOS.":"ESCOLHA O MERCADO, LIGUE A CÂMERA E APONTE PARA OS PRODUTOS."}<br>CADA PREÇO SALVO APARECE AQUI.</div>`;
+}
+function zonaRotuloPq(estId,cod){ const z=pqZonas(estId).find(x=>x.codigo===cod); return z&&z.descricao?`${cod} · ${z.descricao}`:cod; }
+function pqExigeLoja(){ if(pq.estId&&S.ests[pq.estId]) return true; alert("ESCOLHA PRIMEIRO O MERCADO."); $("pqLoja").focus(); return false; }
+$("pqLoja").addEventListener("change",e=>{
+  if(e.target.value==="__novo"){ e.target.value=pq.estId; abrirEst(null,id=>esperarEst(id,()=>{ pq.estId=id; pq.zona=""; pqGuardar(); agendar(); })); return; }
+  if(e.target.value!==pq.estId){ pq.estId=e.target.value; pq.zona=""; pqGuardar(); }
+  agendar();
+});
+// câmera
+$("pqLigar").onclick=()=>{ if(!pqExigeLoja()) return; iniciarPesquisa(); };
+async function iniciarPesquisa(){
+  $("pq").classList.remove("hidden"); $("pqLigar").classList.add("hidden"); $("pqMsg").textContent="LIGANDO A CÂMERA…";
+  pq.ativo=true;
+  try{
+    pq.leitor=await LeitorAoVivo.iniciar($("pqVideo"),{
+      pausado:()=>document.querySelector(".modal.show")!==null,
+      aoLer:c=>{ const agora=Date.now();
+        if(c===pq.ultimo&&agora-pq.ultimoEm<20000) return false;
+        pq.ultimo=c; pq.ultimoEm=agora; tratarCodigoPesquisa(c); return true; },
+      torch:$("pqTorch")
+    });
+    if(!pq.ativo){ pq.leitor.parar(); pq.leitor=null; return; }
+    $("pqMsg").textContent="APONTE PARA O CÓDIGO DE BARRAS";
+  }catch(e){ pararPesquisa(); alert(e.message||"NÃO FOI POSSÍVEL LIGAR A CÂMERA."); }
+}
+function pararPesquisa(){
+  pq.ativo=false; pq.ultimo="";
+  if(pq.leitor){ pq.leitor.parar(); pq.leitor=null; }
+  $("pq").classList.add("hidden"); $("pqLigar").classList.remove("hidden");
+}
+$("pqClose").onclick=pararPesquisa;
+function tratarCodigoPesquisa(c){
+  if(!pqExigeLoja()) return;
+  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  if(p){ abrirPq(p.id); return; }
+  pqCadastrar({barras:c});
+}
+// produto novo: o MESMO cadastro da aba PRODUTOS, com a zona desta loja já marcada; depois abre o preço
+function pqCadastrar(pre){
+  if(!pqExigeLoja()) return;
+  abrirProd(null,{...pre,zonas:pq.zona?{[pq.estId]:pq.zona}:{}},id=>{
+    const tentar=n=>{ if(S.produtos[id]) abrirPq(id); else if(n<30) setTimeout(()=>tentar(n+1),100); };
+    tentar(0);
+  });
+  if(pq.zona){ const sel=document.querySelector(`#pdZonas [data-zona="${pq.estId}"]`);
+    if(sel&&![...sel.options].some(o=>o.value===pq.zona)){ const o=document.createElement("option"); o.value=pq.zona; o.textContent=zonaRotuloPq(pq.estId,pq.zona); sel.appendChild(o); sel.value=pq.zona; } }
+}
+$("pqNovo").onclick=()=>pqCadastrar({});
+// busca sem código (hortifruti, pão, granel…)
+$("pqBuscar").onclick=()=>{ const w=$("pqBuscaWrap"); w.classList.toggle("hidden"); if(!w.classList.contains("hidden")){ $("pqBusca").value=""; $("pqSug").innerHTML=""; $("pqBusca").focus(); } };
+$("pqBusca").addEventListener("input",()=>{
+  const q=$("pqBusca").value.trim();
+  if(!q){ $("pqSug").innerHTML=""; return; }
+  const ps=filtrarProdutos(q).slice(0,8);
+  $("pqSug").innerHTML=ps.map(p=>`<div class="pick" data-pqs="${p.id}" style="grid-template-columns:56px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+    +`<button class="small" id="pqCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
+});
+$("pqSug").addEventListener("click",e=>{
+  const s=e.target.closest("[data-pqs]");
+  if(s){ if(!pqExigeLoja()) return; $("pqBuscaWrap").classList.add("hidden"); abrirPq(s.dataset.pqs); return; }
+  if(e.target.id==="pqCriar"){ const nome=up($("pqBusca").value); $("pqBuscaWrap").classList.add("hidden"); pqCadastrar({nome}); }
+});
+// zona atual (fica "presa" até trocar)
+function novaZona(estId,cb){
+  const desc=prompt("NOME DA NOVA ZONA (EX.: CORREDOR 5 · BEBIDAS):",""); if(desc===null) return;
+  const zs=pqZonas(estId);
+  const n=Math.max(0,...zs.map(z=>parseInt(String(z.codigo).replace(/\D/g,""),10)||0))+1;
+  const z={codigo:"ZONA"+String(n).padStart(3,"0"),descricao:up(desc.trim())};
+  pq.extra.push({...z,estId});
+  DB.update("estabelecimentos",estId,{zonas:[...(((S.ests[estId]||{}).zonas)||[]).map(x=>({codigo:x.codigo,descricao:x.descricao||""})),z],atualizadoPor:eu().uid,atualizadoEm:Date.now()});
+  toast("ZONA "+z.codigo+" CRIADA NO "+estNome(estId));
+  cb(z.codigo);
+}
+$("pqZonaBar").onclick=()=>{
+  if(!pqExigeLoja()) return;
+  const ops=pqZonas(pq.estId).map(z=>({txt:`${z.codigo===pq.zona?"✓ ":""}${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}`,fn:()=>{ pq.zona=z.codigo; pqGuardar(); agendar(); }}));
+  ops.push({txt:`${pq.zona?"":"✓ "}SEM ZONA`,fn:()=>{ pq.zona=""; pqGuardar(); agendar(); }});
+  ops.push({txt:"➕  NOVA ZONA",fn:()=>novaZona(pq.estId,c=>{ pq.zona=c; pqGuardar(); agendar(); })});
+  abrirMenu("ZONA ATUAL NO "+estNome(pq.estId),"OS PRÓXIMOS PRODUTOS JÁ VÊM COM ESTA ZONA",ops);
+};
+// janela de preço + zona
+function abrirPq(pid,precoId){
+  const p=S.produtos[pid]; if(!p) return;
+  const estId=pq.estId, edit=precoId?S.precos.find(r=>r.id===precoId):null;
+  const zDoProd=(p.zonas||{})[estId]||"";
+  pq.abre={pid,estId,precoId:edit?edit.id:null,zona:edit?zDoProd:(zDoProd||pq.zona),zOrig:zDoProd};
+  $("pqThumb").innerHTML=imgProduto(p); $("pqNome").textContent=p.nome;
+  $("pqSub").textContent=[descProduto(p),estNome(estId)].filter(Boolean).join(" · ");
+  const ult=S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId&&(!edit||r.id!==edit.id)).sort((a,b)=>b.ts-a.ts)[0]||null;
+  pq.abre.ult=ult;
+  const outra=precosPorLoja(pid).filter(r=>r.estabelecimentoId!==estId)[0];
+  $("pqLast").innerHTML=`<span>${ult?`ÚLTIMO AQUI: <b>${vNum2(ult.valor)}</b> (${dCurta(ult.ts)})`:"1º PREÇO NESTA LOJA"}</span>`+
+    (outra?`<span>MENOR: <b style="color:var(--accent)">${esc(estNome(outra.estabelecimentoId))} ${vNum2(outra.valor)}</b></span>`:"");
+  $("pqValor").value=edit?vNum2(edit.valor):""; $("pqValido").value=""; $("pqValido").min=hojeISO();
+  if(edit&&edit.validoAte) $("pqValido").value=new Date(edit.validoAte).toLocaleDateString("sv-SE");
+  $("pqSalvar").textContent=edit?"SALVAR CORREÇÃO":"SALVAR E CONTINUAR ▸";
+  $("pqZTit").textContent="ZONA NO "+estNome(estId);
+  pqDif(); renderPqZonas(); show("mPq"); setTimeout(()=>$("pqValor").focus(),60);
+}
+function renderPqZonas(){
+  const a=pq.abre; if(!a) return;
+  $("pqZs").innerHTML=pqZonas(a.estId).map(z=>`<button data-pqz="${esc(z.codigo)}" class="${z.codigo===a.zona?"on":""}">${z.codigo===a.zona?"✓ ":""}${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}</button>`).join("")
+    +`<button data-pqz="" class="${a.zona?"":"on"}">${a.zona?"":"✓ "}SEM ZONA</button><button class="add" data-pqznova>+ NOVA ZONA</button>`;
+}
+$("pqZs").addEventListener("click",e=>{
+  const a=pq.abre; if(!a) return;
+  if(e.target.closest("[data-pqznova]")){ novaZona(a.estId,c=>{ a.zona=c; renderPqZonas(); }); return; }
+  const b=e.target.closest("[data-pqz]"); if(b){ a.zona=b.dataset.pqz; renderPqZonas(); }
+});
+function pqDif(){
+  const a=pq.abre, v=num($("pqValor").value), u=a&&a.ult;
+  if(!v||!u){ $("pqDif").innerHTML=""; return; }
+  const d=Math.round((v-u.valor)*100)/100;
+  $("pqDif").innerHTML = d>0?`<span style="color:var(--warn)">▲ +${brl(d)} DESDE ${dCurta(u.ts)}</span>`:d<0?`<span style="color:var(--accent)">▼ −${brl(-d)} DESDE ${dCurta(u.ts)}</span>`:`<span class="muted">= MESMO PREÇO DE ${dCurta(u.ts)}</span>`;
+}
+$("pqValor").addEventListener("input",e=>{
+  const d=e.target.value.replace(/\D/g,"").replace(/^0+/,"").slice(0,8);
+  e.target.value=d?(parseInt(d,10)/100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):"";
+  pqDif();
+});
+$("pqPular").onclick=()=>{ hide("mPq"); pq.abre=null; };
+$("pqSalvar").onclick=()=>{
+  const a=pq.abre; if(!a) return;
+  const v=num($("pqValor").value); if(!(v>0)){ alert("INFORME O PREÇO."); $("pqValor").focus(); return; }
+  const vIso=$("pqValido").value;
+  if(vIso&&vIso<hojeISO()){ alert("“VÁLIDO ATÉ” NÃO PODE SER ANTES DE HOJE."); return; }
+  const validoAte=vIso?isoParaData(vIso,true):null;
+  if(a.precoId){
+    DB.update("precos",a.precoId,{valor:Math.round(v*100)/100,validoAte});
+  }else{
+    const id=DB.add("precos",{produtoId:a.pid,estabelecimentoId:a.estId,estNome:estNome(a.estId),valor:Math.round(v*100)/100,
+      tipo:"VISTO",dataPreco:Date.now(),validoAte,qtd:null,usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:null,listaNome:"PESQUISA"});
+    pq.visita.push(id);
+  }
+  // zona do produto nesta loja
+  if(a.zona!==a.zOrig){
+    const p=S.produtos[a.pid], zonas={...((p&&p.zonas)||{})};
+    if(a.zona) zonas[a.estId]=a.zona; else delete zonas[a.estId];
+    DB.update("produtos",a.pid,{zonas,atualizadoPor:eu().uid,atualizadoEm:Date.now()});
+  }
+  if(!a.precoId){ pq.zona=a.zona; }
+  pqGuardar(); hide("mPq"); pq.abre=null; toast(a.precoId?"PREÇO CORRIGIDO":"PREÇO SALVO"); agendar();
+};
+// tocar numa linha da visita: corrigir ou apagar
+$("pqVisita").addEventListener("click",e=>{
+  const row=e.target.closest("[data-pqr]"); if(!row) return;
+  const r=S.precos.find(x=>x.id===row.dataset.pqr); if(!r) return;
+  const p=S.produtos[r.produtoId]||{};
+  const ops=[];
+  if(S.produtos[r.produtoId]&&r.usuarioUid===eu().uid) ops.push({txt:"✏️  CORRIGIR PREÇO / ZONA",fn:()=>{ pq.estId=r.estabelecimentoId; abrirPq(r.produtoId,r.id); }});
+  if(r.usuarioUid===eu().uid) ops.push({txt:"🗑  APAGAR ESTE PREÇO",fn:()=>{ if(!confirm(`APAGAR O PREÇO ${brl(r.valor)} DE ${p.nome||"PRODUTO"}?`)) return;
+    DB.del("precos",r.id); pq.visita=pq.visita.filter(x=>x!==r.id); pqGuardar(); agendar(); }});
+  if(S.produtos[r.produtoId]) ops.push({txt:"📦  VER / EDITAR PRODUTO",fn:()=>abrirProd(r.produtoId)});
+  abrirMenu(p.nome||"PREÇO",`${estNome(r.estabelecimentoId)} · ${brl(r.valor)}`,ops);
+});
 
 /* =====================================================================
    ESTABELECIMENTOS E ZONAS
