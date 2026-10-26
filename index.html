@@ -181,6 +181,15 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .rec small{color:var(--muted)}
 .rec .del{border:none;background:none;color:var(--warn);padding:0 4px;font-size:11px}
 .pago{color:var(--accent);font-weight:800}
+.cmpBox{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0}
+.cmpH{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.03em;margin-bottom:4px}
+.cmpL{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:12px}
+.cmpL:first-of-type{border-top:none}
+.cmpL.aqui{background:var(--chip);margin:0 -10px;padding:5px 10px}
+.cmpL small{color:var(--muted);font-size:10px}
+.dif{font-weight:800;font-size:12px;white-space:nowrap}
+.dif.up{color:var(--warn)}
+.dif.down{color:var(--accent)}
 .visto{color:var(--tag-ink);font-weight:800}
 .alerta{border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin:6px 0}
 .alerta.up{background:#fdeceb;color:var(--warn)}
@@ -1041,7 +1050,7 @@ function cardItem(L,it,estId){
 }
 $("selLoja").addEventListener("change",e=>{
   const L=S.listas[ui.lista]; if(!L) return;
-  if(e.target.value==="__novo"){ e.target.value=lojaSel(L); abrirEst(null,id=>{setLojaSel(L,id);agendar()}); return; }
+  if(e.target.value==="__novo"){ e.target.value=lojaSel(L); abrirEst(null,id=>esperarEst(id,()=>{setLojaSel(L,id);agendar()})); return; }
   setLojaSel(L,e.target.value);
   const est=S.ests[e.target.value];
   if(est&&(est.zonas||[]).length) setOrdem("zona"); // rota pelas zonas da loja
@@ -1206,11 +1215,27 @@ function alertasPreco(pid,estId,v){
       else if(d<0) html+=`<div class="alerta down">▼ ${brl(-d)} MAIS BARATO QUE DA ÚLTIMA VEZ AQUI (${brl(aqui.valor)} · ${dCurta(aqui.ts)})</div>`;
       else html+=`<div class="alerta info">= MESMO PREÇO DA ÚLTIMA VEZ AQUI (${dCurta(aqui.ts)})</div>`;
     }
-    const outra=precosPorLoja(pid).filter(r=>r.estabelecimentoId!==estId)[0];
-    if(outra&&outra.valor<v) html+=`<div class="alerta up">${esc(estNome(outra.estabelecimentoId))} ESTÁ ${brl(Math.round((v-outra.valor)*100)/100)} MAIS BARATO (${brl(outra.valor)} · ${dCurta(outra.ts)})</div>`;
-    else if(outra&&outra.valor>v) html+=`<div class="alerta down">AQUI ESTÁ ${brl(Math.round((outra.valor-v)*100)/100)} MAIS BARATO QUE NO ${esc(estNome(outra.estabelecimentoId))}</div>`;
   }
-  return html;
+  return html+comparacaoLojas(pid,estId,v);
+}
+// quadro com o preço mais recente (válido) em cada estabelecimento, comparado ao valor digitado
+function comparacaoLojas(pid,estId,v){
+  if(!pid) return "";
+  const pl=precosPorLoja(pid);
+  if(!pl.length) return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS</div><div class="hint">AINDA NÃO HÁ PREÇO DESTE PRODUTO EM NENHUM ESTABELECIMENTO.</div></div>`;
+  const p=S.produtos[pid];
+  const linhas=pl.map((r,i)=>{
+    let dif="";
+    if(v>0){
+      const d=Math.round((r.valor-v)*100)/100;
+      dif = d>0 ? `<span class="dif up">▲ +${brl(d)}</span>` : d<0 ? `<span class="dif down">▼ −${brl(-d)}</span>` : `<span class="dif">= IGUAL</span>`;
+    }
+    const marca=(r.estabelecimentoId===estId?"📍":"")+(i===0&&pl.length>1?"★ ":"");
+    return `<div class="cmpL${r.estabelecimentoId===estId?" aqui":""}">
+      <div><b>${marca}${esc(estNome(r.estabelecimentoId))}</b> ${brl(r.valor)}${precoBase(p,r.valor)?` <small>(${precoBase(p,r.valor)})</small>`:""}<br>
+        <small>${dLonga(r.ts)} · ${esc(r.usuarioNome)} · ${esc(rotuloTipo(r))}</small></div>${dif}</div>`;
+  }).join("");
+  return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS${v>0?" · COMPARADO AO SEU VALOR":""}</div>${linhas}</div>`;
 }
 $("prCancel").onclick=()=>hide("mPreco");
 $("prFoto").onclick=()=>abrirCamera(f=>lerEtiqueta(f));
@@ -1632,7 +1657,7 @@ $("rpValor").addEventListener("input",e=>{
   rpAtualizar();
 });
 $("rpLoja").addEventListener("change",e=>{
-  if(e.target.value==="__novo"){ e.target.value=""; abrirEst(null,id=>{ rpLojas(id); rpAtualizar(); }); return; }
+  if(e.target.value==="__novo"){ e.target.value=""; abrirEst(null,id=>esperarEst(id,()=>{ rpLojas(id); rpAtualizar(); })); return; }
   rpAtualizar();
 });
 // busca de produto
@@ -1833,6 +1858,11 @@ function renderEsts(){
 $("btnNovoEst").onclick=()=>abrirEst(null);
 $("ests").addEventListener("click",e=>{const c=e.target.closest("[data-est]");if(c)abrirEst(c.dataset.est)});
 let es={id:null,zonas:[],cb:null};
+// espera o estabelecimento recém-criado chegar do banco antes de selecioná-lo
+function esperarEst(id,cb,n=0){
+  if(S.ests[id]||n>40) { cb(); return; }
+  setTimeout(()=>esperarEst(id,cb,n+1),100);
+}
 function abrirEst(id,cb=null){
   const e=id?S.ests[id]:null;
   es={id,zonas:e?(e.zonas||[]).map(z=>({...z})):[],cb};
