@@ -896,7 +896,7 @@ function statusLista(l){
 function cardListaHtml(l,filho){
   const s=statusLista(l);
   const nome = filho ? (l.tipo==="LIVRE"?"LIVRE (TODOS OS ITENS)":semCarimbo(l.nome)) : l.nome;
-  const tipo = filho ? "" : l.grupo&&l.tipo==="NORMAL" ? "" : l.tipo==="LIVRE"?"LIVRE":l.tipo==="LOJA"?"LOJA":"";
+  const tipo = filho ? "" : l.grupo&&l.tipo==="NORMAL" ? "MATRIZ" : l.tipo==="LIVRE"?"LIVRE":l.tipo==="LOJA"?"LOJA":"";
   const mem=(l.membros||[]);
   const avs = mem.length>1 ? `<div class="avs">${mem.slice(0,4).map(u=>`<span class="av${u===eu().uid?" me":""}" title="${esc(nomeUsuario(u))}">${esc(iniciais(nomeUsuario(u)))}</span>`).join("")}${mem.length>4?`<span class="av">+${mem.length-4}</span>`:""}</div>` : "";
   return `<div class="lc${s.completa?" done":""}" data-open="${l.id}">
@@ -1007,7 +1007,10 @@ function renderLista(L){
   sel.value=estId;
   const grupo=listasDoGrupo(grupoKey(L));
   const membros=(L.membros||[]).map(nomeUsuario);
-  $("lMeta").innerHTML=`CRIADA POR ${esc(nomeUsuario(L.criadoPor))} · ${dLonga(L.criadoEm)}`+(membros.length>1?` · 👥 ${membros.map(esc).join(", ")}`:"")+(grupo.length>1?` · GRUPO COM ${grupo.length} LISTAS`:"");
+  const mz=L.grupo?matrizDoGrupo(L.grupo):null;
+  const parentesco = !L.grupo ? "" : (L.tipo==="NORMAL" ? ` · <b>MATRIZ</b> DE ${grupo.length-1} LISTA${grupo.length-1===1?"":"S"}`
+    : (mz ? ` · FILHA DE: <a href="#" data-goto="${mz.id}"><b>${esc(mz.nome)}</b></a>` : ` · GRUPO COM ${grupo.length} LISTAS`));
+  $("lMeta").innerHTML=`CRIADA POR ${esc(nomeUsuario(L.criadoPor))} · ${dLonga(L.criadoEm)}`+(membros.length>1?` · 👥 ${membros.map(esc).join(", ")}`:"")+parentesco;
   const itens=L.itens||[];
   const reais=itens.map(it=>realizado(L,it.produtoId)).filter(Boolean);
   $("tLoja").textContent=brl(reais.filter(r=>r.estabelecimentoId===estId).reduce((s,r)=>s+(r.total||0),0));
@@ -1065,6 +1068,8 @@ function cardItem(L,it,estId){
     </div>
   </div>`;
 }
+// "FILHA DE: …" leva até a matriz
+$("lMeta").addEventListener("click",e=>{ const a=e.target.closest("[data-goto]"); if(!a) return; e.preventDefault(); abrirLista(a.dataset.goto); });
 $("selLoja").addEventListener("change",e=>{
   const L=S.listas[ui.lista]; if(!L) return;
   if(e.target.value==="__novo"){ e.target.value=lojaSel(L); abrirEst(null,id=>esperarEst(id,()=>{setLojaSel(L,id);agendar()})); return; }
@@ -1228,6 +1233,8 @@ function abrirPreco(L,pid,comCamera){
   const ult=precoNaLoja(pid,estId);
   $("prSub").textContent=`${descProduto(p)} · ${estNome(estId)}`+(ult?` · ÚLTIMO AQUI: ${brl(ult)}`:"");
   setTipo("PAGO");
+  $("prMover").textContent = ehLoja(L) ? "↪ NÃO VOU COMPRAR AQUI: MOVER PARA OUTRA LOJA" : "↪ NÃO VOU COMPRAR AQUI: MANDAR PARA A LISTA DE OUTRA LOJA";
+  $("prMover").classList.toggle("hidden", !!realizado(L,pid)); // já comprado: não há o que mover
   $("prValor").value=""; $("prQtd").value=fmtQtd(it?it.qtd:1);
   $("prPrev").classList.add("hidden"); $("prStatus").classList.add("hidden"); $("prChipsWrap").classList.add("hidden");
   linhaPreco(); show("mPreco");
@@ -1326,33 +1333,78 @@ $("aiSim").onclick=()=>{
 $("aiNao").onclick=()=>{ const {L,pid}=ainda; hide("mAinda"); abrirPreco(L,pid,false); };
 $("aiCancel").onclick=()=>hide("mAinda");
 
-/* ---------- MOVER PARA OUTRA LISTA (não vou comprar aqui) ---------- */
+/* ---------- MOVER / MANDAR PARA A LISTA DE OUTRA LOJA (sempre dentro do grupo) ----------
+   - de uma lista de LOJA: o item sai dela e vai para a filha escolhida (ou fica só na livre)
+   - da LIVRE ou da MATRIZ: o item continua nelas e também vai para a filha escolhida
+   - de uma lista comum: ela vira MATRIZ e nasce a filha da loja escolhida
+   Um item fica em uma lista de loja por vez. */
+const JANELA_REF = 30*864e5; // preço só vale como "mais barato" se tiver até 30 dias
+const ehLoja = l => l.tipo==="LOJA";
+const matrizDoGrupo = g => listasDoGrupo(g).find(l=>l.tipo==="NORMAL");
+function carimboDoGrupo(g){
+  for(const l of listasDoGrupo(g)){ const m=String(l.nome||"").match(/^\d{8}\.\d{6}/); if(m) return m[0]; }
+  const a=new Date(); return `${a.getFullYear()}${p2(a.getMonth()+1)}${p2(a.getDate())}.${p2(a.getHours())}${p2(a.getMinutes())}${p2(a.getSeconds())}`;
+}
+// transforma a lista em matriz (cria o grupo) se ainda não tiver; devolve a chave do grupo
+function garantirGrupo(L){
+  if(L.grupo) return L.grupo;
+  const grupo="g_"+L.id;
+  DB.update("listas",L.id,{grupo});
+  Object.entries(S.realizados).filter(([k,r])=>r.grupo===L.id).forEach(([k,r])=>{ DB.set("realizados",grupo+"__"+r.produtoId,{...r,grupo}); DB.del("realizados",k); });
+  return grupo;
+}
 $("prMover").onclick=()=>{
-  const {L,pid,estId}=pr, v=num($("prValor").value);
-  const outras=Object.values(S.listas).filter(l=>l.id!==L.id);
-  if(!outras.length){ alert("VOCÊ NÃO TEM OUTRA LISTA. CRIE UMA NA TELA LISTAS."); return; }
-  const g=grupoKey(L);
-  const preco=l=>l.estabelecimentoId?precoNaLoja(pid,l.estabelecimentoId):null;
-  const precos=outras.map(preco).filter(x=>x!=null);
-  const menor=precos.length?Math.min(...precos):null;
-  const ord=outras.sort((a,b)=>((grupoKey(b)===g)-(grupoKey(a)===g))||((preco(a)??1e9)-(preco(b)??1e9))||(ultimaMov(b)-ultimaMov(a))).slice(0,12);
-  const ops=ord.map(l=>{
-    const pv=preco(l);
-    const info = l.estabelecimentoId ? (pv!=null?` · ${brl(pv)}${pv===menor?" ★":""}`:" · SEM PREÇO") : "";
-    const ja=(l.itens||[]).some(x=>x.produtoId===pid);
-    return {txt:`↪  ${esc(l.nome)}${info}${ja?" · JÁ TEM":""}`, fn:()=>moverItem(L,l,pid,v)};
+  const {L,pid,estId}=pr, v=num($("prValor").value), g=grupoKey(L);
+  const filhas=(L.grupo?listasDoGrupo(g):[]).filter(l=>ehLoja(l)&&l.id!==L.id&&l.estabelecimentoId!==estId);
+  // loja mais barata: preço válido dos últimos 30 dias, fora a loja onde você está
+  const recentes=precosPorLoja(pid).filter(r=>r.estabelecimentoId!==estId&&Date.now()-r.ts<=JANELA_REF);
+  const melhor=recentes[0]||null;
+  const filhaDe=eid=>filhas.find(l=>l.estabelecimentoId===eid);
+  const ops=[];
+  if(melhor){
+    const f=filhaDe(melhor.estabelecimentoId);
+    ops.push(f ? {txt:`★  MOVER PARA ${esc(semCarimbo(f.nome))} · MAIS BARATO: ${brl(melhor.valor)}`, fn:()=>mandarParaLoja(L,pid,v,f.estabelecimentoId)}
+               : {txt:`★  CRIAR LISTA DO ${esc(estNome(melhor.estabelecimentoId))} · MAIS BARATO: ${brl(melhor.valor)}`, fn:()=>mandarParaLoja(L,pid,v,melhor.estabelecimentoId)});
+  }
+  filhas.filter(f=>!melhor||f.estabelecimentoId!==melhor.estabelecimentoId).forEach(f=>{
+    const pv=precoNaLoja(pid,f.estabelecimentoId);
+    ops.push({txt:`↪  ${esc(semCarimbo(f.nome))} · ${pv!=null?brl(pv):"SEM PREÇO"}`, fn:()=>mandarParaLoja(L,pid,v,f.estabelecimentoId)});
   });
-  abrirMenu("MOVER PARA QUAL LISTA?", `${(S.produtos[pid]||{}).nome||""} SAI DE “${L.nome}”`, ops);
+  ops.push({txt:"🏪  OUTRA LOJA…", fn:()=>{
+    const usadas=new Set([estId,...filhas.map(f=>f.estabelecimentoId)]);
+    const lojas=Object.values(S.ests).filter(e=>!usadas.has(e.id)).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+    if(!lojas.length){ alert("NÃO HÁ OUTRO ESTABELECIMENTO CADASTRADO SEM LISTA NESTE GRUPO."); return; }
+    abrirMenu("CRIAR LISTA EM QUAL LOJA?", "",
+      lojas.map(e=>{ const pv=precoNaLoja(pid,e.id); return {txt:`➕  ${esc(e.nome)} · ${pv!=null?brl(pv):"SEM PREÇO"}`, fn:()=>mandarParaLoja(L,pid,v,e.id)}; }));
+  }});
+  if(ehLoja(L)) ops.push({txt:"⤴  TIRAR DESTA LOJA (FICA SÓ NA LIVRE)", fn:()=>mandarParaLoja(L,pid,v,null)});
+  const p=S.produtos[pid]||{};
+  abrirMenu(ehLoja(L)?"MOVER PARA QUAL LOJA?":"MANDAR PARA QUAL LOJA?",
+    ehLoja(L)?`${p.nome||""} SAI DE “${semCarimbo(L.nome)}”`:`${p.nome||""} CONTINUA NESTA LISTA E VAI TAMBÉM PARA A LISTA DA LOJA`, ops);
 };
-function moverItem(origem,destino,pid,v){
-  const o=S.listas[origem.id], d=S.listas[destino.id]; if(!o||!d) return;
-  // guarda o preço que foi digitado aqui, se houver, como VISTO
+// destinoEst = loja da filha de destino (cria a filha se não existir); null = só tirar da loja atual
+function mandarParaLoja(L,pid,v,destinoEst){
+  L=S.listas[L.id]; if(!L) return;
+  // guarda o preço digitado aqui, se houver, como VISTO
   if(v>0&&pr.estId) DB.add("precos",{produtoId:pid,estabelecimentoId:pr.estId,estNome:estNome(pr.estId),valor:Math.round(v*100)/100,tipo:"VISTO",qtd:null,
-    usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:o.id,listaNome:o.nome});
-  const it=(o.itens||[]).find(x=>x.produtoId===pid)||{produtoId:pid,qtd:1};
-  DB.update("listas",o.id,{itens:(o.itens||[]).filter(x=>x.produtoId!==pid)});
-  if(!(d.itens||[]).some(x=>x.produtoId===pid)) DB.update("listas",d.id,{itens:[...(d.itens||[]),{...it}]});
-  hide("mPreco"); toast(`MOVIDO PARA ${d.nome}`);
+    usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:L.id,listaNome:L.nome});
+  const g=garantirGrupo(L);
+  const it={...((L.itens||[]).find(x=>x.produtoId===pid)||{produtoId:pid,qtd:1})};
+  // o item sai de qualquer outra lista de loja do grupo (uma loja por vez)
+  listasDoGrupo(g).filter(l=>ehLoja(l)&&l.estabelecimentoId!==destinoEst&&(l.itens||[]).some(x=>x.produtoId===pid))
+    .forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).filter(x=>x.produtoId!==pid)}));
+  let nomeDestino="SÓ NA LIVRE";
+  if(destinoEst){
+    const f=listasDoGrupo(g).find(l=>ehLoja(l)&&l.estabelecimentoId===destinoEst);
+    if(f){ if(!(f.itens||[]).some(x=>x.produtoId===pid)) DB.update("listas",f.id,{itens:[...(f.itens||[]),it]}); nomeDestino=f.nome; }
+    else{
+      const m=matrizDoGrupo(g)||L;
+      nomeDestino=`${carimboDoGrupo(g)}.${estNome(destinoEst)}`;
+      DB.add("listas",{nome:nomeDestino,tipo:"LOJA",estabelecimentoId:destinoEst,itens:[it],grupo:g,origem:m.id,
+        membros:L.membros||[eu().uid],criadoPor:eu().uid,criadoEm:Date.now()});
+    }
+  }
+  hide("mPreco"); toast(destinoEst?`ENVIADO PARA ${nomeDestino}`:"TIRADO DESTA LOJA: FICA SÓ NA LIVRE");
 }
 /* OCR */
 let workerP=null;
