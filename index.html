@@ -289,10 +289,13 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .item2 .ib.del svg{width:21px;height:21px;display:block;margin:auto}
 .stepq{display:flex;align-items:center;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;flex:none}
 .stepq button{border:none;background:none;width:28px;height:40px;padding:0;font-size:20px;color:var(--ink)}
-.stepq span{min-width:20px;text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
-.resumo2 .mult{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stepq span{min-width:20px;text-align:center;font-size:17px;font-variant-numeric:tabular-nums;cursor:pointer;white-space:nowrap}
+.stepq.med span{font-size:13px;font-weight:700}
+.stepq.med button{width:24px}
+.resumo2 b .pu{display:inline;font-size:11px;font-weight:700;margin-left:1px;letter-spacing:0;color:inherit}
+.resumo2 .mult{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);font-variant-numeric:tabular-nums}
 .resumo2 .mult b2{font-weight:800;color:var(--ink)}
-.resumo2 .mult i{font-style:normal;font-weight:800}
+.resumo2 .mult i{font-style:normal;font-weight:800;white-space:nowrap}
 .resumo2 .mult .up{color:var(--warn)} .resumo2 .mult .dn{color:var(--accent)}
 .resumo2 .mb b{color:var(--accent)} .resumo2 .mb .selo{color:var(--accent)}
 .resumo2 .mb.tap{position:relative;cursor:pointer}
@@ -509,7 +512,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="pqtop"><div class="thumb" id="pqThumb"></div><div style="flex:1;min-width:0"><h2 id="pqNome" style="margin:0"></h2><div class="hint" id="pqSub"></div></div></div>
   <div class="pqlast" id="pqLast"></div>
   <div class="row big">
-    <label class="f">PREÇO (R$)<input id="pqValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f"><span id="pqValorLb">PREÇO (R$)</span><input id="pqValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
     <label class="f" style="flex:.85">VÁLIDO ATÉ (OPCIONAL)<input id="pqValido" type="date"></label>
   </div>
   <div class="hdif" id="pqDif"></div>
@@ -552,7 +555,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="hint" id="hsSub"></div>
   <div class="hgraf" id="hsGraf"></div>
   <div class="row big">
-    <label class="f">PREÇO NOVO (R$)<input id="hsValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f"><span id="hsValorLb">PREÇO NOVO (R$)</span><input id="hsValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
     <label class="f" style="flex:.8">DATA<input id="hsData" type="date"></label>
   </div>
   <div class="hdif" id="hsDif"></div>
@@ -573,8 +576,8 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div id="prStatus" class="status hidden"></div>
   <div id="prChipsWrap" class="hidden"><div class="hint">VALORES ENCONTRADOS (TOQUE PARA ESCOLHER):</div><div class="chips" id="prChips"></div></div>
   <div class="row big">
-    <label class="f">VALOR UNITÁRIO (R$)<input id="prValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
-    <label class="f" style="flex:.6">QUANTIDADE<input id="prQtd" inputmode="decimal"></label>
+    <label class="f"><span id="prValorLb">VALOR UNITÁRIO (R$)</span><input id="prValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f" style="flex:.6"><span id="prQtdLb">QUANTIDADE</span><input id="prQtd" inputmode="decimal"></label>
   </div>
   <div class="line-total" id="prLinha"></div>
   <div id="prAlerta"></div>
@@ -692,6 +695,16 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 </div></div>
 
 <!-- Menu de ações (⋮) -->
+<!-- Quantidade: número + medida -->
+<div class="modal" id="mQtd"><div class="sheet">
+  <h2 id="qtNome" style="margin:0"></h2>
+  <div class="hint" id="qtSub"></div>
+  <label class="f" style="margin-top:10px">QUANTIDADE<input id="qtValor" inputmode="decimal" autocomplete="off"></label>
+  <div class="seg" id="qtUn"></div>
+  <div class="hint" id="qtPrev"></div>
+  <div class="btns"><button id="qtCancel">CANCELAR</button><button id="qtOk" class="primary">OK</button></div>
+</div></div>
+
 <div class="modal" id="mMenu"><div class="sheet">
   <h2 id="mnTitle"></h2>
   <div class="hint" id="mnSub"></div>
@@ -752,6 +765,26 @@ const dCurta = ts => new Date(ts).toLocaleDateString("pt-BR",{day:"2-digit",mont
 const dLonga = ts => new Date(ts).toLocaleDateString("pt-BR");
 const hora = ts => new Date(ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 const p2 = n => String(n).padStart(2,"0");
+/* ---------- produtos vendidos por peso/volume: quantidade guardada na unidade de venda (KG, G ou L) ---------- */
+const MEDIDA={KG:{fino:"G",grosso:"KG",fator:1000,base:"grosso"},G:{fino:"G",grosso:"KG",fator:1000,base:"fino"},L:{fino:"ML",grosso:"L",fator:1000,base:"grosso"}};
+const medidaDe = p => p&&MEDIDA[p.vendidoPor]?MEDIDA[p.vendidoPor]:null;
+const unVenda = p => medidaDe(p)?p.vendidoPor:"";
+// quantidade na unidade fina (g / ml)
+const emFino = (m,q) => m.base==="grosso"?q*m.fator:q;
+const deFino = (m,f) => m.base==="grosso"?f/m.fator:f;
+function fmtMedida(p,q){
+  const m=medidaDe(p); if(!m) return fmtQtd(q);
+  const f=Math.round(emFino(m,+q||0)*100)/100;
+  return f<m.fator ? `${fmtQtd(Math.round(f))} ${m.fino}` : `${fmtQtd(Math.round(f/m.fator*1000)/1000)} ${m.grosso}`;
+}
+// passo do − / +: 10 g abaixo de 100 g, 100 g a partir daí
+function passoMedida(p,q,dir){
+  const m=medidaDe(p); if(!m){ const n=Math.round((q+dir)*1000)/1000; return n<1?null:n; }
+  let f=Math.round(emFino(m,q)); const st=(dir>0?f>=100:f>100)?100:10;
+  f = dir>0 ? Math.floor(f/st)*st+st : Math.ceil(f/st)*st-st;
+  if(f<10) return null;
+  return Math.round(deFino(m,f)*1e6)/1e6;
+}
 const primeiroNome = n => up(n).split(" ")[0]||"?";
 const rid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
@@ -1253,7 +1286,8 @@ function cardItem(L,it,estId){
   const chips=(estId?`<span class="chipz${z?"":" v"}">🧭 ${z?esc(zonaRotulo(estId,z)):"SEM ZONA AQUI"}</span>`:"");
   const vNum=v=>v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
   const tot=v=>Math.round(v*q*100)/100;
-  const mult=(v,dif)=>`<span class="mult">${fmtQtd(q)} × ${vNum(v)} = <b2>${vNum(tot(v))}</b2>${dif>0?` <i class="up">▲ ${vNum(dif)}</i>`:dif<0?` <i class="dn">▼ ${vNum(-dif)}</i>`:""}</span>`;
+  const uv=unVenda(p), sufixo=uv?`<small class="pu">/${uv}</small>`:"";
+  const mult=(v,dif)=>`<span class="mult">${fmtMedida(p,q)} × ${vNum(v)} = <b2>${vNum(tot(v))}</b2>${dif>0?` <i class="up">▲ ${vNum(dif)}</i>`:dif<0?` <i class="dn">▼ ${vNum(-dif)}</i>`:""}</span>`;
   // ---- resumo: AQUI × MAIS BARATO ----
   let resumo="";
   if(r){
@@ -1268,12 +1302,12 @@ function cardItem(L,it,estId){
     if(!estId) boxAqui=`<div class="bx"><small>📍 AQUI</small><span class="sub">ESCOLHA A LOJA NO TOPO</span></div>`;
     else if(!aqui) boxAqui=`<div class="bx"><small>📍 AQUI · ${esc(estNome(estId))}</small><b class="cinza">SEM PREÇO</b><span class="sub">REGISTRE AO COMPRAR</span></div>`;
     else boxAqui = d<=0
-        ? `<div class="bx ok"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}</b><span class="selo">✓ O MAIS BARATO</span>${mult(aqui.valor,0)}</div>`
-        : `<div class="bx caro"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}</b><span class="selo">+${brl(d)} MAIS CARO</span>${mult(aqui.valor,dTot)}</div>`;
+        ? `<div class="bx ok"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}${sufixo}</b><span class="selo">✓ O MAIS BARATO</span>${mult(aqui.valor,0)}</div>`
+        : `<div class="bx caro"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}${sufixo}</b><span class="selo">+${brl(d)}${uv?"/"+uv:""} MAIS CARO</span>${mult(aqui.valor,dTot)}</div>`;
     // MAIS BARATO: tocável quando a loja mais barata não é esta → confirma e move
     const podeMover = !r && menor.estabelecimentoId!==estId && !(aqui&&d<=0);
-    const boxMenor=`<div class="bx mb${podeMover?" tap":""}"${podeMover?` data-movermb="${p.id}"`:""}><small>★ MAIS BARATO · ${esc(estNome(menor.estabelecimentoId))}</small><b>${brl(menor.valor)}</b>`+
-      (aqui&&d>0?`<span class="selo">−${brl(d)} DE ECONOMIA</span>`:"")+
+    const boxMenor=`<div class="bx mb${podeMover?" tap":""}"${podeMover?` data-movermb="${p.id}"`:""}><small>★ MAIS BARATO · ${esc(estNome(menor.estabelecimentoId))}</small><b>${brl(menor.valor)}${sufixo}</b>`+
+      (aqui&&d>0?`<span class="selo">−${brl(d)}${uv?"/"+uv:""} DE ECONOMIA</span>`:"")+
       mult(menor.valor,aqui&&d>0?-dTot:0)+(podeMover?`<span class="go">›</span>`:"")+`</div>`;
     resumo=`<div class="resumo2">${boxAqui}${boxMenor}</div>`;
   }
@@ -1308,7 +1342,7 @@ function cardItem(L,it,estId){
     ${resumo}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
     <div class="acts">${botao}
       <button class="ib cif" data-hist="${p.id}" aria-label="PREÇOS NESTA LOJA">$</button>
-      <div class="stepq"><button data-qmenos="${p.id}" aria-label="MENOS">−</button><span>${fmtQtd(q)}</span><button data-qmais="${p.id}" aria-label="MAIS">+</button></div>
+      <div class="stepq${uv?" med":""}"><button data-qmenos="${p.id}" aria-label="MENOS">−</button><span data-qedit="${p.id}">${fmtMedida(p,q)}</span><button data-qmais="${p.id}" aria-label="MAIS">+</button></div>
       <button class="ib del" data-excluir="${p.id}" aria-label="EXCLUIR DA LISTA"><svg viewBox="0 0 24 24"><g fill="none" stroke="#b4472c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></g></svg></button>
       <button class="ib" data-mais="${p.id}" aria-label="MAIS OPÇÕES">⋯</button>
     </div>
@@ -1343,6 +1377,7 @@ $("itens").addEventListener("click",e=>{
     s.has(id)?s.delete(id):s.add(id); agendar(); return; }
   if((id=pick("mais"))){ maisOpcoesItem(L,id); return; }
   if((id=pick("qtd"))){ editarQtd(L,id); return; }
+  if((id=pick("qedit"))){ const it=(L.itens||[]).find(x=>x.produtoId===id); abrirQtd(id,it?(+it.qtd||1):1,q=>setQtd(L,id,q)); return; }
   if((id=pick("qmais"))){ passoQtd(L,id,+1); return; }
   if((id=pick("qmenos"))){ passoQtd(L,id,-1); return; }
   if((id=pick("excluir"))){ removerItem(L,id); return; }
@@ -1415,8 +1450,8 @@ function setQtd(L,id,q){
 function passoQtd(L,id,passo){
   L=S.listas[L.id]||L;
   const it=(L.itens||[]).find(x=>x.produtoId===id); if(!it) return;
-  const atual=+it.qtd||1, nq=Math.round((atual+passo)*1000)/1000;
-  if(nq<1){ if(atual>1) setQtd(L,id,1); else toast("PARA TIRAR DA LISTA, USE A LIXEIRA"); return; }
+  const atual=+it.qtd||1, nq=passoMedida(S.produtos[id],atual,passo);
+  if(nq==null){ if(!medidaDe(S.produtos[id])&&atual>1) setQtd(L,id,1); else toast("PARA TIRAR DA LISTA, USE A LIXEIRA"); return; }
   setQtd(L,id,nq);
 }
 // 🗑: loja → só desta loja; matriz/livre do grupo → todas as listas do grupo
@@ -1434,6 +1469,7 @@ function removerItem(L,id){
 function comprarItem(L,pid){
   const estId=exigirLoja(L); if(!estId) return;
   const ult=precosPorLoja(pid).find(x=>x.estabelecimentoId===estId);
+  if(medidaDe(S.produtos[pid])){ abrirPreco(L,pid,false); if(ult){ $("prValor").value=vNum2(ult.valor); linhaPreco(); } setTimeout(()=>{ $("prQtd").focus(); $("prQtd").select(); },80); return; }
   if(!ult) abrirPreco(L,pid,false); else abrirAinda(L,pid,ult);
 }
 function desfazerCompra(L,pid){
@@ -1552,7 +1588,8 @@ function lojaMaisBarataFora(){
   return {menor,aqui};
 }
 function abrirFora(L,pid){
-  fo={L,pid,estId:lojaSel(L),q:1}; renderFora(); show("mFora");
+  const m=medidaDe(S.produtos[pid]);
+  fo={L,pid,estId:lojaSel(L),q:m?deFino(m,500):1}; renderFora(); show("mFora");
 }
 function renderFora(){
   if(!fo) return;
@@ -1565,7 +1602,7 @@ function renderFora(){
   card.querySelectorAll("[data-movermb]").forEach(x=>{ x.removeAttribute("data-movermb"); x.classList.remove("tap"); const g=x.querySelector(".go"); if(g) g.remove(); });
   const acts=card.querySelector(".acts");
   if(acts) acts.innerHTML=`<button class="ib cif" data-fhist style="flex:1;width:auto;font-size:15px">$ <span style="font-size:12px;font-weight:700">PREÇO AQUI</span></button>
-    <div class="stepq"><button data-fmenos aria-label="MENOS">−</button><span>${fmtQtd(q)}</span><button data-fmais aria-label="MAIS">+</button></div>`;
+    <div class="stepq${medidaDe(S.produtos[pid])?" med":""}"><button data-fmenos aria-label="MENOS">−</button><span data-fedit>${fmtMedida(S.produtos[pid],q)}</span><button data-fmais aria-label="MAIS">+</button></div>`;
   $("foAdd").innerHTML=`➕ SÓ ADICIONAR À LISTA ${esc(semCarimbo(L.nome))}`;
   const mb=lojaMaisBarataFora();
   $("foMandar").classList.toggle("hidden",!mb);
@@ -1578,8 +1615,10 @@ function renderFora(){
 }
 $("foCard").addEventListener("click",e=>{
   if(!fo) return;
-  if(e.target.closest("[data-fmais]")){ fo.q=Math.round((fo.q+1)*1000)/1000; renderFora(); return; }
-  if(e.target.closest("[data-fmenos]")){ if(fo.q-1>=1){ fo.q=Math.round((fo.q-1)*1000)/1000; renderFora(); } return; }
+  const pf=S.produtos[fo.pid];
+  if(e.target.closest("[data-fmais]")){ const n=passoMedida(pf,fo.q,+1); if(n!=null){ fo.q=n; renderFora(); } return; }
+  if(e.target.closest("[data-fmenos]")){ const n=passoMedida(pf,fo.q,-1); if(n!=null){ fo.q=n; renderFora(); } return; }
+  if(e.target.closest("[data-fedit]")){ abrirQtd(fo.pid,fo.q,q=>{ if(fo){ fo.q=q; renderFora(); } }); return; }
   if(e.target.closest("[data-fhist]")){ abrirHist(fo.L,fo.pid,()=>renderFora()); return; }
   if(e.target.closest("[data-foto]")){ fotografarProduto(fo.pid); return; }
 });
@@ -1674,6 +1713,9 @@ function abrirPreco(L,pid,comCamera){
   $("prMover").textContent = ehLoja(L) ? "↪ NÃO VOU COMPRAR AQUI: MOVER PARA OUTRA LOJA" : "↪ NÃO VOU COMPRAR AQUI: MANDAR PARA A LISTA DE OUTRA LOJA";
   $("prMover").classList.toggle("hidden", !!realizado(L,pid)); // já comprado: não há o que mover
   $("prValor").value=""; $("prQtd").value=fmtQtd(it?it.qtd:1);
+  const uvp=unVenda(p);
+  $("prValorLb").textContent = uvp?`PREÇO DO ${uvp} (R$)`:"VALOR UNITÁRIO (R$)";
+  $("prQtdLb").textContent = uvp?`PESO (${uvp})`.replace("PESO (L)","VOLUME (L)"):"QUANTIDADE";
   $("prPrev").classList.add("hidden"); $("prStatus").classList.add("hidden"); $("prChipsWrap").classList.add("hidden");
   linhaPreco(); show("mPreco");
   if(comCamera) abrirCamera(f=>lerEtiqueta(f)); else { $("prValor").focus(); }
@@ -1844,6 +1886,39 @@ function mandarParaLoja(L,pid,v,destinoEst){
   }
   hide("mPreco"); toast(destinoEst?`ENVIADO PARA ${nomeDestino}`:"TIRADO DESTA LOJA: FICA SÓ NA LIVRE");
 }
+
+/* ---------- quantidade: escrever o número e escolher a medida ---------- */
+let qt=null;
+function abrirQtd(pid,qAtual,cb){
+  const p=S.produtos[pid]||{}, m=medidaDe(p);
+  qt={pid,cb,m,un:null};
+  $("qtNome").textContent=p.nome||""; $("qtSub").textContent=descProduto(p)+(m?` · VENDIDO POR ${p.vendidoPor}`:"");
+  if(m){
+    const f=emFino(m,qAtual); qt.un = f<m.fator ? m.fino : m.grosso;
+    $("qtValor").value = fmtQtd(qt.un===m.fino ? Math.round(f) : Math.round(f/m.fator*1000)/1000);
+    $("qtUn").innerHTML=[m.fino,m.grosso].map(u=>`<button data-qtu="${u}" class="${u===qt.un?"on":""}">${u}</button>`).join("");
+    $("qtUn").classList.remove("hidden");
+  }else{ $("qtValor").value=fmtQtd(qAtual); $("qtUn").innerHTML=""; $("qtUn").classList.add("hidden"); }
+  qtPrev(); show("mQtd"); setTimeout(()=>{ $("qtValor").focus(); $("qtValor").select(); },60);
+}
+function qtLer(){
+  const v=num($("qtValor").value); if(!(v>0)) return null;
+  if(!qt.m) return v;
+  const f = qt.un===qt.m.fino ? v : v*qt.m.fator;
+  return Math.round(deFino(qt.m,f)*1e6)/1e6;
+}
+function qtPrev(){
+  const q=qt&&qtLer(), p=qt&&S.produtos[qt.pid];
+  const r=p&&precosPorLoja(p.id)[0];
+  $("qtPrev").textContent = q&&r ? `${fmtMedida(p,q)} × ${brl(r.valor)}${unVenda(p)?"/"+unVenda(p):""} ≈ ${brl(r.valor*q)} (MENOR PREÇO)` : "";
+}
+$("qtValor").addEventListener("input",qtPrev);
+$("qtUn").addEventListener("click",e=>{ const b=e.target.closest("[data-qtu]"); if(!b||!qt) return; qt.un=b.dataset.qtu;
+  $("qtUn").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); qtPrev(); });
+$("qtCancel").onclick=()=>{ hide("mQtd"); qt=null; };
+$("qtOk").onclick=()=>{ if(!qt) return; const q=qtLer(); if(!q){ alert("INFORME A QUANTIDADE."); return; }
+  const cb=qt.cb; hide("mQtd"); qt=null; cb(q); };
+$("qtValor").addEventListener("keydown",e=>{ if(e.key==="Enter") $("qtOk").click(); });
 /* ---------- toque no MAIS BARATO: confirma e move para a lista da loja mais barata ---------- */
 let mv=null;
 function abrirMoverMenor(L,pid){
@@ -1902,6 +1977,7 @@ function abrirHist(L,pid,aoSalvar){
   const outra=precosPorLoja(pid).filter(r=>r.estabelecimentoId!==estId)[0]||null;
   hs={L,pid,estId,ult:regs.length?regs[regs.length-1]:null,aoSalvar};
   $("hsNome").textContent=p.nome||"";
+  $("hsValorLb").textContent = unVenda(p)?`PREÇO DO ${unVenda(p)} NOVO (R$)`:"PREÇO NOVO (R$)";
   $("hsSub").textContent = regs.length ? `PREÇOS NO ${estNome(estId)} · ÚLTIMO${regs.length>1?"S "+regs.length+" REGISTROS":" REGISTRO"}` : `SEM PREÇO REGISTRADO NO ${estNome(estId)}`;
   if(regs.length){
     let var_="";
@@ -2729,6 +2805,7 @@ function abrirPq(pid,precoId){
   const zDoProd=(p.zonas||{})[estId]||"";
   pq.abre={pid,estId,precoId:edit?edit.id:null,zona:edit?zDoProd:(zDoProd||pq.zona),zOrig:zDoProd};
   $("pqThumb").innerHTML=imgProduto(p); $("pqNome").textContent=p.nome;
+  $("pqValorLb").textContent = unVenda(p)?`PREÇO DO ${unVenda(p)} (R$)`:"PREÇO (R$)";
   $("pqSub").textContent=[descProduto(p),estNome(estId)].filter(Boolean).join(" · ");
   const ult=S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId&&(!edit||r.id!==edit.id)).sort((a,b)=>b.ts-a.ts)[0]||null;
   pq.abre.ult=ult;
