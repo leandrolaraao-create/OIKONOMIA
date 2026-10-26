@@ -309,6 +309,14 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .hgraf .t{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.06em;display:flex;justify-content:space-between;padding:0 2px}
 .hgraf svg{display:block;width:100%;height:auto}
 #hsValor:focus{outline:none}
+.foraflag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;background:#fff4d6;color:#8a5a00;border-radius:99px;padding:4px 10px;margin-bottom:8px}
+#foCard .item2{margin-bottom:0}
+.forafoot{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.forafoot button{width:100%;padding:12px;font-weight:800;font-size:14px;border-radius:12px}
+.forafoot button small{display:block;font-size:10.5px;font-weight:600;opacity:.85;margin-top:2px}
+.forafoot .sec2{color:var(--accent);border-color:var(--accent);background:#fff}
+.item2.flash{animation:flash 2s ease-out}
+@keyframes flash{0%,60%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
 .hdif{font-size:12px;font-weight:700;margin:6px 0 0;min-height:16px}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
 .achado img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex:none}
@@ -450,6 +458,18 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <button id="aiSim" class="primary" style="width:100%;padding:14px;margin-top:4px"></button>
   <button id="aiNao" style="width:100%;padding:12px;margin-top:8px">✏️ NÃO, MUDOU: INFORMAR O PREÇO</button>
   <button id="aiCancel" style="width:100%;padding:12px;margin-top:8px">CANCELAR</button>
+</div></div>
+
+<!-- Modo mercado: produto lido que não está na lista -->
+<div class="modal" id="mFora"><div class="sheet">
+  <span class="foraflag" id="foFlag"></span>
+  <div id="foCard"></div>
+  <div class="forafoot">
+    <button id="foComprei" class="primary">✔ ADICIONAR E COMPREI</button>
+    <button id="foAdd"></button>
+    <button id="foMandar" class="sec2"></button>
+    <button id="foNao">AGORA NÃO</button>
+  </div>
 </div></div>
 
 <!-- Mover para a loja mais barata (confirmação) -->
@@ -1433,17 +1453,106 @@ function tratarCodigoNaLista(c){
   if(!lojaSel(L2)){ alert("ESCOLHA PRIMEIRO O ESTABELECIMENTO NO TOPO DA LISTA."); return; }
   const p=Object.values(S.produtos).find(x=>x.barras===c);
   if(p){
-    if((L2.itens||[]).some(it=>it.produtoId===p.id)){ abrirPreco(L2,p.id,false); return; }
-    if(!confirm(`${p.nome} ${p.marca||""} NÃO ESTÁ NESTA LISTA. ADICIONAR E REGISTRAR O PREÇO?`)) return;
-    const itens=adicionarItens(L2,[{produtoId:p.id,qtd:1}]);
-    abrirPreco({...L2,itens},p.id,false); return;
+    if((L2.itens||[]).some(it=>it.produtoId===p.id)){ irParaItem(L2,p.id); return; }
+    abrirFora(L2,p.id); return;
   }
-  if(!confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR O PRODUTO E COLOCAR NA LISTA?`)) return;
+  // não cadastrado: cadastra e depois mostra o cartão "fora da lista"
   abrirProd(null,{barras:c},id=>{
-    const L3=S.listas[ui.lista]; const itens=adicionarItens(L3,[{produtoId:id,qtd:1}]);
-    setTimeout(()=>{ if(S.produtos[id]) abrirPreco({...L3,itens},id,false); },150);
+    const tentar=n=>{ if(S.produtos[id]) abrirFora(S.listas[ui.lista]||L2,id); else if(n<30) setTimeout(()=>tentar(n+1),100); };
+    tentar(0);
   });
+}
+// rola até o cartão do item e destaca (troca para TODOS se o filtro esconder o item)
+function irParaItem(L,pid){
+  const comprado=!!realizado(L,pid);
+  if((ui.filtro==="todo"&&comprado)||(ui.filtro==="done"&&!comprado)) setFiltro("all");
+  agendar();
+  const tentar=n=>{
+    const el=document.querySelector(`#itens .item2 [data-chk="${pid}"]`);
+    const card=el&&el.closest(".item2");
+    if(!card){ if(n<15) setTimeout(()=>tentar(n+1),80); return; }
+    card.scrollIntoView({behavior:"smooth",block:"center"});
+    card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+    setTimeout(()=>card.classList.remove("flash"),2100);
+    if(comprado) toast("JÁ COMPRADO");
+  };
+  setTimeout(()=>tentar(0),60);
+}
+/* ---------- produto lido fora da lista: mesmo cartão da lista + adicionar / comprar / mandar ---------- */
+let fo=null;
+function lojaMaisBarataFora(){
+  if(!fo) return null;
+  const pl=precosPorLoja(fo.pid), menor=pl[0]; if(!menor||menor.estabelecimentoId===fo.estId) return null;
+  const aqui=pl.find(x=>x.estabelecimentoId===fo.estId);
+  if(aqui&&aqui.valor<=menor.valor) return null;
+  return {menor,aqui};
+}
+function abrirFora(L,pid){
+  fo={L,pid,estId:lojaSel(L),q:1}; renderFora(); show("mFora");
+}
+function renderFora(){
+  if(!fo) return;
+  const {L,pid,estId,q}=fo;
+  $("foFlag").textContent=`⚠ FORA DA LISTA “${semCarimbo(L.nome)}”`;
+  $("foCard").innerHTML=cardItem(L,{produtoId:pid,qtd:q},estId);
+  const card=$("foCard").querySelector(".item2"); if(!card) return;
+  card.classList.remove("done");
+  card.querySelectorAll(".exp2,.lst2,.dica,.comprado").forEach(x=>x.remove());
+  card.querySelectorAll("[data-movermb]").forEach(x=>{ x.removeAttribute("data-movermb"); x.classList.remove("tap"); const g=x.querySelector(".go"); if(g) g.remove(); });
+  const acts=card.querySelector(".acts");
+  if(acts) acts.innerHTML=`<button class="ib cif" data-fhist style="flex:1;width:auto;font-size:15px">$ <span style="font-size:12px;font-weight:700">PREÇO AQUI</span></button>
+    <div class="stepq"><button data-fmenos aria-label="MENOS">−</button><span>${fmtQtd(q)}</span><button data-fmais aria-label="MAIS">+</button></div>`;
+  $("foAdd").innerHTML=`➕ SÓ ADICIONAR À LISTA ${esc(semCarimbo(L.nome))}`;
+  const mb=lojaMaisBarataFora();
+  $("foMandar").classList.toggle("hidden",!mb);
+  if(mb){
+    const g=grupoKey(L), dest=mb.menor.estabelecimentoId;
+    const f=listasDoGrupo(g).find(l=>ehLoja(l)&&l.estabelecimentoId===dest);
+    const eco=mb.aqui?Math.round((mb.aqui.valor-mb.menor.valor)*q*100)/100:0;
+    $("foMandar").innerHTML=`★ MANDAR PARA A LISTA DA ${esc(estNome(dest))}<small>${esc(f?f.nome:carimboDoGrupo(g)+"."+estNome(dest)+" (NOVA)")}${eco>0?" · ECONOMIZA "+brl(eco):""}</small>`;
+  }
+}
+$("foCard").addEventListener("click",e=>{
+  if(!fo) return;
+  if(e.target.closest("[data-fmais]")){ fo.q=Math.round((fo.q+1)*1000)/1000; renderFora(); return; }
+  if(e.target.closest("[data-fmenos]")){ if(fo.q-1>=1){ fo.q=Math.round((fo.q-1)*1000)/1000; renderFora(); } return; }
+  if(e.target.closest("[data-fhist]")){ abrirHist(fo.L,fo.pid,()=>renderFora()); return; }
+  if(e.target.closest("[data-foto]")){ fotografarProduto(fo.pid); return; }
+});
+function fecharFora(){ hide("mFora"); fo=null; }
+$("foNao").onclick=fecharFora;
+$("foAdd").onclick=()=>{
+  if(!fo) return; const {L,pid,q}=fo; fecharFora();
+  adicionarItens(L,[{produtoId:pid,qtd:q}]); toast("ADICIONADO À LISTA");
+  irParaItem(S.listas[L.id]||L,pid);
 };
+$("foComprei").onclick=()=>{
+  if(!fo) return; const {L,pid,q}=fo; fecharFora();
+  const itens=adicionarItens(L,[{produtoId:pid,qtd:q}]);
+  const L2={...(S.listas[L.id]||L),itens};
+  irParaItem(L2,pid);
+  setTimeout(()=>comprarItem(L2,pid),120);
+};
+$("foMandar").onclick=()=>{
+  if(!fo) return; const mb=lojaMaisBarataFora(); if(!mb) return;
+  const {L,pid,q}=fo; fecharFora();
+  const nome=adicionarEmLoja(L,pid,q,mb.menor.estabelecimentoId);
+  toast("ENVIADO PARA "+nome);
+};
+// coloca o item no grupo (matriz/livre) e na lista da loja de destino (cria se não existir), sem passar pela loja atual
+function adicionarEmLoja(L,pid,q,dest){
+  L=S.listas[L.id]||L;
+  const g=garantirGrupo(L), it={produtoId:pid,qtd:q};
+  const gerais=listasVisaoGeral(g);
+  if(!ehLoja(L)&&!gerais.some(l=>l.id===L.id)) gerais.push(L);
+  gerais.forEach(l=>{ if(!(l.itens||[]).some(x=>x.produtoId===pid)) DB.update("listas",l.id,{itens:[...(l.itens||[]),{...it}]}); });
+  const f=listasDoGrupo(g).find(l=>ehLoja(l)&&l.estabelecimentoId===dest);
+  if(f){ if(!(f.itens||[]).some(x=>x.produtoId===pid)) DB.update("listas",f.id,{itens:[...(f.itens||[]),{...it}]}); return f.nome; }
+  const m=matrizDoGrupo(g)||L, nome=`${carimboDoGrupo(g)}.${estNome(dest)}`;
+  DB.add("listas",{nome,tipo:"LOJA",estabelecimentoId:dest,itens:[{...it}],grupo:g,origem:m.id,
+    membros:L.membros||[eu().uid],criadoPor:eu().uid,criadoEm:Date.now()});
+  return nome;
+}
 
 /* ---------- Câmera compartilhada ---------- */
 let camCb=null;
@@ -1723,11 +1832,11 @@ function graficoHist(regs,refOutra){
        `<text x="${x.toFixed(1)}" y="${H-5}" font-size="9" font-weight="700" text-anchor="middle" fill="#69726c">${dCurta(r.ts)}</text>`; });
   return s+`</svg>`;
 }
-function abrirHist(L,pid){
+function abrirHist(L,pid,aoSalvar){
   const estId=lojaSel(L), p=S.produtos[pid]||{};
   const regs=S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId).sort((a,b)=>a.ts-b.ts).slice(-8);
   const outra=precosPorLoja(pid).filter(r=>r.estabelecimentoId!==estId)[0]||null;
-  hs={L,pid,estId,ult:regs.length?regs[regs.length-1]:null};
+  hs={L,pid,estId,ult:regs.length?regs[regs.length-1]:null,aoSalvar};
   $("hsNome").textContent=p.nome||"";
   $("hsSub").textContent = regs.length ? `PREÇOS NO ${estNome(estId)} · ÚLTIMO${regs.length>1?"S "+regs.length+" REGISTROS":" REGISTRO"}` : `SEM PREÇO REGISTRADO NO ${estNome(estId)}`;
   if(regs.length){
@@ -1760,7 +1869,7 @@ $("hsSave").onclick=()=>{
   DB.add("precos",{produtoId:pid,estabelecimentoId:estId,estNome:estNome(estId),valor:Math.round(v*100)/100,
     tipo:"VISTO",dataPreco:isoParaData(dIso,false),validoAte:null,qtd:null,
     usuarioUid:eu().uid,usuarioNome:eu().nome,ts:Date.now(),listaId:L.id,listaNome:L.nome});
-  hide("mHist"); hs=null; toast("PREÇO REGISTRADO");
+  const cb=hs.aoSalvar; hide("mHist"); hs=null; toast("PREÇO REGISTRADO"); if(cb) setTimeout(cb,80);
 };
 
 /* OCR */
