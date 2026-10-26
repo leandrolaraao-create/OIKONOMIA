@@ -190,6 +190,9 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .dif{font-weight:800;font-size:12px;white-space:nowrap}
 .dif.up{color:var(--warn)}
 .dif.down{color:var(--accent)}
+.cmpL .dif{font-size:11px;text-align:right}
+details.todos{margin-top:6px}
+details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor:pointer;padding:6px 0}
 .visto{color:var(--tag-ink);font-weight:800}
 .alerta{border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;margin:6px 0}
 .alerta.up{background:#fdeceb;color:var(--warn)}
@@ -433,7 +436,8 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
   <h2 id="pdTitle">PRODUTO</h2>
   <div style="display:flex;gap:12px;align-items:center">
     <div class="thumb big" id="pdFoto">TOQUE PARA FOTOGRAFAR</div>
-    <div style="flex:1"><div class="hint">ID</div><div id="pdCodigo" style="font-weight:800">GERADO AO SALVAR</div></div>
+    <div style="flex:1"><div class="hint">ID</div><div id="pdCodigo" style="font-weight:800">GERADO AO SALVAR</div>
+      <button id="pdOutroTam" class="small hidden" style="margin-top:8px">➕ OUTRO TAMANHO</button></div>
   </div>
   <label class="f">NOME<input id="pdNome" placeholder="EX.: LEITE CONDENSADO" autocomplete="off"></label>
   <label class="f">MARCA<input id="pdMarca" placeholder="EX.: MOÇA" autocomplete="off"></label>
@@ -450,8 +454,8 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
   <label class="f">OBSERVAÇÃO<textarea id="pdObs" rows="2"></textarea></label>
   <div class="sect">ZONA EM CADA ESTABELECIMENTO</div>
   <div id="pdZonas"></div>
-  <div id="pdMarcasWrap"><div class="sect">OUTRAS MARCAS DO MESMO PRODUTO</div><div id="pdMarcas"></div></div>
-  <div id="pdHistWrap"><div class="sect">PREÇOS REGISTRADOS</div>
+  <div id="pdMarcasWrap"><div class="sect">OUTRAS MARCAS E TAMANHOS</div><div id="pdMarcas"></div></div>
+  <div id="pdHistWrap"><div class="sect">PREÇO ATUAL EM CADA ESTABELECIMENTO</div>
     <button id="pdPreco" class="small" style="margin:4px 0 6px">💲 REGISTRAR PREÇO</button>
     <div id="pdHist"></div></div>
   <div class="btns">
@@ -1204,38 +1208,51 @@ function linhaPreco(){
   $("prBase").textContent = v ? precoBase(p,v) : "";
   $("prAlerta").innerHTML=alertasPreco(pr.pid,pr.estId,v);
 }
-// alertas: comparação com a última vez nesta loja e com a loja mais barata
-function alertasPreco(pid,estId,v){
-  let html="";
-  if(pid&&estId&&v>0){
-    const aqui=S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId).reduce((a,b)=>!a||b.ts>a.ts?b:a,null);
-    if(aqui){
-      const d=Math.round((v-aqui.valor)*100)/100;
-      if(d>0) html+=`<div class="alerta up">▲ ${brl(d)} MAIS CARO QUE DA ÚLTIMA VEZ AQUI (${brl(aqui.valor)} · ${dCurta(aqui.ts)})</div>`;
-      else if(d<0) html+=`<div class="alerta down">▼ ${brl(-d)} MAIS BARATO QUE DA ÚLTIMA VEZ AQUI (${brl(aqui.valor)} · ${dCurta(aqui.ts)})</div>`;
-      else html+=`<div class="alerta info">= MESMO PREÇO DA ÚLTIMA VEZ AQUI (${dCurta(aqui.ts)})</div>`;
-    }
-  }
-  return html+comparacaoLojas(pid,estId,v);
+// janelas de preço: quadro com todas as lojas (a loja escolhida mostra AGORA × última vez)
+function alertasPreco(pid,estId,v){ return comparacaoLojas(pid,estId,v); }
+// último preço registrado numa loja (mesmo vencido) e o anterior a ele
+function ultimoNaLoja(pid,estId,antesDe){
+  return S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId&&(antesDe==null||r.ts<antesDe))
+    .reduce((a,b)=>!a||b.ts>a.ts?b:a,null);
 }
-// quadro com o preço mais recente (válido) em cada estabelecimento, comparado ao valor digitado
+const difHtml = d => d>0 ? `<span class="dif up">▲ +${brl(d)}</span>` : d<0 ? `<span class="dif down">▼ −${brl(-d)}</span>` : `<span class="dif">= IGUAL</span>`;
+// seta do preço atual de uma loja em relação ao preço anterior dessa mesma loja
+function tendencia(r){
+  const ant=ultimoNaLoja(r.produtoId,r.estabelecimentoId,r.ts);
+  if(!ant) return `<span class="dif">1º REGISTRO</span>`;
+  const d=Math.round((r.valor-ant.valor)*100)/100;
+  if(!d) return `<span class="dif">= DESDE ${dCurta(ant.ts)}</span>`;
+  return d>0 ? `<span class="dif up">▲ +${brl(d)} DESDE ${dCurta(ant.ts)}</span>` : `<span class="dif down">▼ −${brl(-d)} DESDE ${dCurta(ant.ts)}</span>`;
+}
+// quadro com o preço mais recente (válido) de cada estabelecimento, do mais barato ao mais caro
+//  - sem valor digitado: cada loja mostra se subiu/caiu em relação ao preço anterior dela
+//  - com valor digitado: a loja 📍 mostra AGORA × última vez; as outras, a diferença para o valor digitado
 function comparacaoLojas(pid,estId,v){
   if(!pid) return "";
-  const pl=precosPorLoja(pid);
-  if(!pl.length) return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS</div><div class="hint">AINDA NÃO HÁ PREÇO DESTE PRODUTO EM NENHUM ESTABELECIMENTO.</div></div>`;
-  const p=S.produtos[pid];
-  const linhas=pl.map((r,i)=>{
-    let dif="";
-    if(v>0){
-      const d=Math.round((r.valor-v)*100)/100;
-      dif = d>0 ? `<span class="dif up">▲ +${brl(d)}</span>` : d<0 ? `<span class="dif down">▼ −${brl(-d)}</span>` : `<span class="dif">= IGUAL</span>`;
-    }
-    const marca=(r.estabelecimentoId===estId?"📍":"")+(i===0&&pl.length>1?"★ ":"");
-    return `<div class="cmpL${r.estabelecimentoId===estId?" aqui":""}">
-      <div><b>${marca}${esc(estNome(r.estabelecimentoId))}</b> ${brl(r.valor)}${precoBase(p,r.valor)?` <small>(${precoBase(p,r.valor)})</small>`:""}<br>
-        <small>${dLonga(r.ts)} · ${esc(r.usuarioNome)} · ${esc(rotuloTipo(r))}</small></div>${dif}</div>`;
+  const p=S.produtos[pid], pl=precosPorLoja(pid);
+  const linha=(r,i,dir)=>{
+    const aqui=r.estabelecimentoId===estId;
+    const marca=(aqui?"📍":"")+(i===0&&pl.length>1?"★ ":"");
+    return `<div class="cmpL${aqui?" aqui":""}">
+      <div><b>${marca}${esc(estNome(r.estabelecimentoId))}</b> ${brl(r.valor)}${precoBase(p,r.valor)?` <small>(${precoBase(p,r.valor)})</small>`:""}${aqui&&v>0?` → <b>AGORA ${brl(v)}</b>`:""}<br>
+        <small>${dLonga(r.ts)} · ${esc(r.usuarioNome)} · ${esc(rotuloTipo(r))}</small></div>${dir}</div>`;
+  };
+  let html=pl.map((r,i)=>{
+    let dir;
+    if(!(v>0)) dir=tendencia(r);
+    else if(r.estabelecimentoId===estId) dir=difHtml(Math.round((v-r.valor)*100)/100);  // agora × última vez aqui
+    else dir=difHtml(Math.round((r.valor-v)*100)/100);                                  // outra loja × valor digitado
+    return linha(r,i,dir);
   }).join("");
-  return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS${v>0?" · COMPARADO AO SEU VALOR":""}</div>${linhas}</div>`;
+  // loja escolhida sem preço válido no quadro
+  if(estId&&v>0&&S.ests[estId]&&!pl.some(r=>r.estabelecimentoId===estId)){
+    const ult=ultimoNaLoja(pid,estId);
+    html=`<div class="cmpL aqui"><div><b>📍${esc(estNome(estId))}</b> ${ult?`${brl(ult.valor)} <small>(${dCurta(ult.ts)} · VENCIDO)</small> → `:""}<b>AGORA ${brl(v)}</b><br>
+      <small>${ult?"COMPARADO AO ÚLTIMO PREÇO DESTA LOJA":"PRIMEIRO PREÇO NESTA LOJA"}</small></div>${ult?difHtml(Math.round((v-ult.valor)*100)/100):""}</div>`+html;
+  }
+  if(!html) return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS</div><div class="hint">AINDA NÃO HÁ PREÇO DESTE PRODUTO EM NENHUM ESTABELECIMENTO.</div></div>`;
+  const leg = v>0 ? " · 📍 AGORA × ÚLTIMA VEZ · OUTRAS × SEU VALOR" : " · SETA = EM RELAÇÃO AO PREÇO ANTERIOR";
+  return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS${leg}</div>${html}</div>`;
 }
 $("prCancel").onclick=()=>hide("mPreco");
 $("prFoto").onclick=()=>abrirCamera(f=>lerEtiqueta(f));
@@ -1713,16 +1730,17 @@ function abrirProd(id,pre={},cb=null){
   pd={id,foto:p?p.foto||null:null,cb};
   $("pdTitle").textContent=p?"EDITAR PRODUTO":"NOVO PRODUTO";
   $("pdCodigo").textContent=p?(p.codigo||"—"):"GERADO AO SALVAR";
-  $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):"";
-  $("pdVend").value=p?(p.vendidoPor||"UN"):"UN";
+  $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):(pre.marca||"");
+  $("pdVend").value=p?(p.vendidoPor||"UN"):(pre.vendidoPor||"UN");
   $("pdCQtd").value=p&&p.conteudoQtd?fmtQtd(p.conteudoQtd):""; $("pdCUn").value=p?(p.conteudoUn||""):"";
-  $("pdBarras").value=p?(p.barras||""):(pre.barras||""); $("pdObs").value=p?(p.obs||""):"";
+  $("pdBarras").value=p?(p.barras||""):(pre.barras||""); $("pdObs").value=p?(p.obs||""):(pre.obs||"");
+  const zonasDe = p ? (p.zonas||{}) : (pre.zonas||{});
   fotoPd();
   $("pdBase").innerHTML=""; consultaBase.ultimo="";
   if(!p&&pre.barras) consultarBase(pre.barras); // produto novo vindo de uma leitura de código
   const ests=Object.values(S.ests).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
   $("pdZonas").innerHTML=ests.length?ests.map(e=>`<label class="f">${esc(e.nome)}<select data-zona="${e.id}">
-      <option value="">— SEM ZONA —</option>${(e.zonas||[]).map(z=>`<option value="${esc(z.codigo)}" ${p&&p.zonas&&p.zonas[e.id]===z.codigo?"selected":""}>${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}</option>`).join("")}
+      <option value="">— SEM ZONA —</option>${(e.zonas||[]).map(z=>`<option value="${esc(z.codigo)}" ${zonasDe[e.id]===z.codigo?"selected":""}>${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}</option>`).join("")}
     </select></label>`).join(""):`<div class="hint">CADASTRE ESTABELECIMENTOS E ZONAS NA ABA ESTABELECIMENTOS.</div>`;
   $("pdHistWrap").classList.toggle("hidden",!p);
   const om=p?outrasMarcas(p):[];
@@ -1730,17 +1748,31 @@ function abrirProd(id,pre={},cb=null){
   if(om.length){
     const linhas=[p,...om].map(x=>{const b=melhorBase(x), c=precosPorLoja(x.id)[0];return {x,b,c}})
       .sort((a,b)=>(a.b?a.b.v:1e9)-(b.b?b.b.v:1e9));
-    $("pdMarcas").innerHTML=linhas.map(({x,b,c},i)=>`<div class="rec"><div>${x.id===p.id?"👉 ":""}<b>${esc(x.marca||"SEM MARCA")}</b> ${x.conteudoQtd?fmtQtd(x.conteudoQtd)+" "+esc(x.conteudoUn||""):""}<br>
+    $("pdMarcas").innerHTML=linhas.map(({x,b,c},i)=>`<div class="rec"><div>${i===0&&b?"★ ":""}${x.id===p.id?"👉 ":""}<b>${esc(x.marca||"SEM MARCA")}</b> ${x.conteudoQtd?fmtQtd(x.conteudoQtd)+" "+esc(x.conteudoUn||""):""}<br>
       <small>${c?esc(estNome(c.estabelecimentoId))+" · "+brl(c.valor):"SEM PREÇO"}</small></div>
       <div style="text-align:right" class="${i===0&&b?"pago":""}">${b?brl(b.v)+"/"+b.un:"—"}</div></div>`).join("");
   }
   if(p){
+    // preço atual de cada loja (com a seta em relação ao anterior) + todos os registros recolhidos
     const rs=S.precos.filter(r=>r.produtoId===p.id).sort((a,b)=>b.ts-a.ts);
-    $("pdHist").innerHTML=rs.map(r=>`<div class="rec"><div>${esc(estNome(r.estabelecimentoId))}<br><small>${dLonga(r.ts)} ${hora(r.ts)} · ${esc(r.usuarioNome)} · <span class="${classeTipo(r)}">${esc(rotuloTipo(r))}</span></small></div>
-      <div style="text-align:right">${brl(r.valor)}<br><small>${precoBase(p,r.valor)}</small></div></div>`).join("")||`<div class="hint">NENHUM PREÇO AINDA.</div>`;  }
+    const todos=rs.map(r=>`<div class="rec"><div>${esc(estNome(r.estabelecimentoId))}<br><small>${dLonga(r.ts)} ${hora(r.ts)} · ${esc(r.usuarioNome)} · <span class="${classeTipo(r)}">${esc(rotuloTipo(r))}</span></small></div>
+      <div style="text-align:right">${brl(r.valor)}<br><small>${precoBase(p,r.valor)}</small></div></div>`).join("");
+    $("pdHist").innerHTML = rs.length
+      ? comparacaoLojas(p.id,null,0).replace('<div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS','<div class="cmpH">ORDEM: DO MAIS BARATO AO MAIS CARO')
+        + `<details class="todos"><summary>VER TODOS OS REGISTROS (${rs.length})</summary>${todos}</details>`
+      : `<div class="hint">NENHUM PREÇO AINDA.</div>`;
+  }
+  $("pdOutroTam").classList.toggle("hidden",!p);
   $("pdDel").classList.toggle("hidden",!p);
   show("mProd");
 }
+// ➕ OUTRO TAMANHO: novo produto copiando nome, marca, observação, "vendido por" e zonas
+$("pdOutroTam").onclick=()=>{
+  const p=S.produtos[pd.id]; if(!p) return;
+  abrirProd(null,{nome:p.nome,marca:p.marca||"",obs:p.obs||"",vendidoPor:p.vendidoPor||"UN",zonas:{...(p.zonas||{})}},pd.cb);
+  toast("PREENCHA O CONTEÚDO, O CÓDIGO DE BARRAS E A FOTO DO NOVO TAMANHO");
+  setTimeout(()=>$("pdCQtd").focus(),100);
+};
 function fotoPd(){ $("pdFoto").innerHTML=pd.foto?`<img src="${pd.foto}" alt="">`:"TOQUE PARA FOTOGRAFAR"; }
 $("pdFoto").onclick=()=>abrirCamera(async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } });
 $("pdLerBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(c){ $("pdBarras").value=c; consultarBase(c); } };
