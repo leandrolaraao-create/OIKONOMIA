@@ -335,6 +335,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .pqzs button.on{background:var(--tag);border-color:var(--tag-ink);color:var(--tag-ink)}
 .pqzs button.add{border-style:dashed;color:var(--accent);border-color:var(--accent)}
 #pqValor:focus{outline:none}
+.zsel{display:flex;gap:6px;align-items:center}.zsel select{flex:1;min-width:0}.zsel button{flex:none;width:44px;height:42px;padding:0;font-size:17px}
 #pqSalvar{flex:2;white-space:nowrap}
 .hdif{font-size:12px;font-weight:700;margin:6px 0 0;min-height:16px}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
@@ -2448,9 +2449,8 @@ function abrirProd(id,pre={},cb=null){
   $("pdBase").innerHTML=""; consultaBase.ultimo="";
   if(!p&&pre.barras) consultarBase(pre.barras); // produto novo vindo de uma leitura de código
   const ests=Object.values(S.ests).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
-  $("pdZonas").innerHTML=ests.length?ests.map(e=>`<label class="f">${esc(e.nome)}<select data-zona="${e.id}">
-      <option value="">— SEM ZONA —</option>${(e.zonas||[]).map(z=>`<option value="${esc(z.codigo)}" ${zonasDe[e.id]===z.codigo?"selected":""}>${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}</option>`).join("")}
-    </select></label>`).join(""):`<div class="hint">CADASTRE ESTABELECIMENTOS E ZONAS NA ABA ESTABELECIMENTOS.</div>`;
+  $("pdZonas").innerHTML=ests.length?ests.map(e=>`<label class="f">${esc(e.nome)}<div class="zsel"><select data-zona="${e.id}">${opcoesZona(e.id,zonasDe[e.id]||"")}</select>
+      <button type="button" class="small" data-zedit="${e.id}" aria-label="EDITAR ZONAS">✏️</button></div></label>`).join(""):`<div class="hint">CADASTRE ESTABELECIMENTOS E ZONAS NA ABA ESTABELECIMENTOS.</div>`;
   $("pdHistWrap").classList.toggle("hidden",!p);
   const om=p?outrasMarcas(p):[];
   $("pdMarcasWrap").classList.toggle("hidden",!om.length);
@@ -2482,6 +2482,28 @@ $("pdOutroTam").onclick=()=>{
   toast("PREENCHA O CONTEÚDO, O CÓDIGO DE BARRAS E A FOTO DO NOVO TAMANHO");
   setTimeout(()=>$("pdCQtd").focus(),100);
 };
+function opcoesZona(estId,sel){
+  return `<option value="">— SEM ZONA —</option>`+pqZonas(estId).map(z=>`<option value="${esc(z.codigo)}" ${sel===z.codigo?"selected":""}>${esc(rotZ(z))}</option>`).join("")
+    +`<option value="__nova">+ NOVA ZONA…</option>`;
+}
+// recarrega as zonas de uma loja no cadastro do produto mantendo o que estava escolhido
+function recarregarZonasPd(estId,escolher){
+  const sel=document.querySelector(`#pdZonas [data-zona="${estId}"]`); if(!sel) return;
+  let v=escolher!=null?escolher:sel.value; if(v==="__nova") v="";
+  if(v&&!pqZonas(estId).some(z=>z.codigo===v)) v="";
+  sel.innerHTML=opcoesZona(estId,v); sel.value=v; sel.dataset.ant=v;
+}
+$("pdZonas").addEventListener("focusin",e=>{ const s=e.target.closest("[data-zona]"); if(s) s.dataset.ant=s.value; });
+$("pdZonas").addEventListener("change",e=>{
+  const sel=e.target.closest("[data-zona]"); if(!sel) return;
+  if(sel.value!=="__nova"){ sel.dataset.ant=sel.value; return; }
+  const estId=sel.dataset.zona; sel.value=sel.dataset.ant||"";
+  novaZona(estId,c=>recarregarZonasPd(estId,c));
+});
+$("pdZonas").addEventListener("click",e=>{
+  const b=e.target.closest("[data-zedit]"); if(!b) return; e.preventDefault();
+  const estId=b.dataset.zedit; editarZonas(estId,()=>recarregarZonasPd(estId));
+});
 function fotoPd(){ $("pdFoto").innerHTML=pd.foto?`<img src="${pd.foto}" alt="">`:"TOQUE PARA FOTOGRAFAR"; }
 $("pdFoto").onclick=()=>menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value),
   async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } });
@@ -2562,7 +2584,7 @@ $("pdSave").onclick=async()=>{
   const nome=up($("pdNome").value); if(!nome){alert("INFORME O NOME.");$("pdNome").focus();return}
   const barras=$("pdBarras").value.replace(/\D/g,"");
   if(barras){ const dup=Object.values(S.produtos).find(x=>x.barras===barras&&x.id!==pd.id); if(dup&&!confirm(`O CÓDIGO ${barras} JÁ ESTÁ NO PRODUTO ${dup.codigo} (${dup.nome}). SALVAR MESMO ASSIM?`)) return; }
-  const zonas={}; document.querySelectorAll("[data-zona]").forEach(s=>{if(s.value)zonas[s.dataset.zona]=s.value});
+  const zonas={}; document.querySelectorAll("#pdZonas [data-zona]").forEach(s=>{if(s.value&&s.value!=="__nova")zonas[s.dataset.zona]=s.value});
   const cq=num($("pdCQtd").value);
   const dados={nome,marca:up($("pdMarca").value),vendidoPor:$("pdVend").value,conteudoQtd:cq>0?cq:null,conteudoUn:$("pdCUn").value,
     barras,obs:up($("pdObs").value),zonas,foto:pd.foto||null,atualizadoPor:eu().uid,atualizadoEm:Date.now()};
@@ -2619,7 +2641,10 @@ function renderPesq(){
         <div class="v">${vNum2(r.valor)}${tag}</div></div>`; }).join("")+`</div>`
     : `<div class="empty">${pq.estId?"LIGUE A CÂMERA E APONTE PARA OS PRODUTOS.":"ESCOLHA O MERCADO, LIGUE A CÂMERA E APONTE PARA OS PRODUTOS."}<br>CADA PREÇO SALVO APARECE AQUI.</div>`;
 }
-function zonaRotuloPq(estId,cod){ const z=pqZonas(estId).find(x=>x.codigo===cod); return z&&z.descricao?`${cod} · ${z.descricao}`:cod; }
+const rotZ = z => `${z.codigo} · ${z.descricao||"SEM NOME ✏️"}`;
+function zonaRotuloPq(estId,cod){ const z=pqZonas(estId).find(x=>x.codigo===cod); return z?rotZ(z):cod; }
+// ✏️ ZONAS: abre a ficha do estabelecimento por cima, sem perder o que está aberto
+function editarZonas(estId,depois){ abrirEst(estId,()=>esperarEst(estId,()=>setTimeout(()=>{ if(depois) depois(); agendar(); },150)),true); }
 function pqExigeLoja(){ if(pq.estId&&S.ests[pq.estId]) return true; alert("ESCOLHA PRIMEIRO O MERCADO."); $("pqLoja").focus(); return false; }
 $("pqLoja").addEventListener("change",e=>{
   if(e.target.value==="__novo"){ e.target.value=pq.estId; abrirEst(null,id=>esperarEst(id,()=>{ pq.estId=id; pq.zona=""; pqGuardar(); agendar(); })); return; }
@@ -2662,8 +2687,6 @@ function pqCadastrar(pre){
     const tentar=n=>{ if(S.produtos[id]) abrirPq(id); else if(n<30) setTimeout(()=>tentar(n+1),100); };
     tentar(0);
   });
-  if(pq.zona){ const sel=document.querySelector(`#pdZonas [data-zona="${pq.estId}"]`);
-    if(sel&&![...sel.options].some(o=>o.value===pq.zona)){ const o=document.createElement("option"); o.value=pq.zona; o.textContent=zonaRotuloPq(pq.estId,pq.zona); sel.appendChild(o); sel.value=pq.zona; } }
 }
 $("pqNovo").onclick=()=>pqCadastrar({});
 // busca sem código (hortifruti, pão, granel…)
@@ -2693,9 +2716,10 @@ function novaZona(estId,cb){
 }
 $("pqZonaBar").onclick=()=>{
   if(!pqExigeLoja()) return;
-  const ops=pqZonas(pq.estId).map(z=>({txt:`${z.codigo===pq.zona?"✓ ":""}${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}`,fn:()=>{ pq.zona=z.codigo; pqGuardar(); agendar(); }}));
+  const ops=pqZonas(pq.estId).map(z=>({txt:`${z.codigo===pq.zona?"✓ ":""}${esc(rotZ(z))}`,fn:()=>{ pq.zona=z.codigo; pqGuardar(); agendar(); }}));
   ops.push({txt:`${pq.zona?"":"✓ "}SEM ZONA`,fn:()=>{ pq.zona=""; pqGuardar(); agendar(); }});
   ops.push({txt:"➕  NOVA ZONA",fn:()=>novaZona(pq.estId,c=>{ pq.zona=c; pqGuardar(); agendar(); })});
+  ops.push({txt:"✏️  EDITAR ZONAS DO "+esc(estNome(pq.estId)),fn:()=>editarZonas(pq.estId,()=>{ if(pq.zona&&!pqZonas(pq.estId).some(z=>z.codigo===pq.zona)){ pq.zona=""; pqGuardar(); } })});
   abrirMenu("ZONA ATUAL NO "+estNome(pq.estId),"OS PRÓXIMOS PRODUTOS JÁ VÊM COM ESTA ZONA",ops);
 };
 // janela de preço + zona
@@ -2719,12 +2743,14 @@ function abrirPq(pid,precoId){
 }
 function renderPqZonas(){
   const a=pq.abre; if(!a) return;
-  $("pqZs").innerHTML=pqZonas(a.estId).map(z=>`<button data-pqz="${esc(z.codigo)}" class="${z.codigo===a.zona?"on":""}">${z.codigo===a.zona?"✓ ":""}${esc(z.codigo)}${z.descricao?" · "+esc(z.descricao):""}</button>`).join("")
-    +`<button data-pqz="" class="${a.zona?"":"on"}">${a.zona?"":"✓ "}SEM ZONA</button><button class="add" data-pqznova>+ NOVA ZONA</button>`;
+  if(a.zona&&!pqZonas(a.estId).some(z=>z.codigo===a.zona)) a.zona="";
+  $("pqZs").innerHTML=pqZonas(a.estId).map(z=>`<button data-pqz="${esc(z.codigo)}" class="${z.codigo===a.zona?"on":""}">${z.codigo===a.zona?"✓ ":""}${esc(rotZ(z))}</button>`).join("")
+    +`<button data-pqz="" class="${a.zona?"":"on"}">${a.zona?"":"✓ "}SEM ZONA</button><button class="add" data-pqznova>+ NOVA ZONA</button><button class="add" data-pqzedit>✏️ EDITAR ZONAS</button>`;
 }
 $("pqZs").addEventListener("click",e=>{
   const a=pq.abre; if(!a) return;
   if(e.target.closest("[data-pqznova]")){ novaZona(a.estId,c=>{ a.zona=c; renderPqZonas(); }); return; }
+  if(e.target.closest("[data-pqzedit]")){ editarZonas(a.estId,()=>renderPqZonas()); return; }
   const b=e.target.closest("[data-pqz]"); if(b){ a.zona=b.dataset.pqz; renderPqZonas(); }
 });
 function pqDif(){
@@ -2797,11 +2823,11 @@ function esperarEst(id,cb,n=0){
   if(S.ests[id]||n>40) { cb(); return; }
   setTimeout(()=>esperarEst(id,cb,n+1),100);
 }
-function abrirEst(id,cb=null){
+function abrirEst(id,cb=null,atalho=false){
   const e=id?S.ests[id]:null;
   es={id,zonas:e?(e.zonas||[]).map(z=>({...z})):[],cb};
-  $("esTitle").textContent=e?"EDITAR ESTABELECIMENTO":"NOVO ESTABELECIMENTO";
-  $("esNome").value=e?e.nome:""; $("esDel").classList.toggle("hidden",!e);
+  $("esTitle").textContent=atalho?"ZONAS DO "+(e?e.nome:""):e?"EDITAR ESTABELECIMENTO":"NOVO ESTABELECIMENTO";
+  $("esNome").value=e?e.nome:""; $("esDel").classList.toggle("hidden",!e||atalho);
   renderZonas(); show("mEst"); if(!e) $("esNome").focus();
 }
 function renderZonas(){
@@ -2826,6 +2852,7 @@ $("esSave").onclick=()=>{
   const dados={nome,zonas:es.zonas.map(z=>({codigo:z.codigo,descricao:up(z.descricao)})),atualizadoPor:eu().uid,atualizadoEm:Date.now()};
   let id=es.id;
   if(id) DB.update("estabelecimentos",id,dados); else id=DB.add("estabelecimentos",{...dados,criadoPor:eu().uid,criadoEm:Date.now()});
+  pq.extra=pq.extra.filter(x=>x.estId!==id); // a ficha salva passa a ser a referência das zonas
   hide("mEst"); toast("ESTABELECIMENTO SALVO"); if(es.cb) es.cb(id);
 };
 $("esDel").onclick=()=>{ const e=S.ests[es.id];
