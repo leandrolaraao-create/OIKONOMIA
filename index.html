@@ -396,6 +396,11 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .pill{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px}
 .pill.n{background:#fdeceb;color:var(--warn)}.pill.c{background:#fff4d6;color:#8a5a00}.pill.a{background:var(--done);color:var(--accent)}.pill.v{background:var(--chip);color:var(--muted)}
 #mnSub{white-space:pre-line}
+/* foto grande no menu da foto */
+.fgbig{display:flex;align-items:center;justify-content:center;width:100%;height:min(270px,34vh);margin-top:10px;padding:6px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.fgbig img{max-width:100%;max-height:100%;object-fit:contain}
+.fgnome{font-size:19px;font-weight:900;margin-top:10px;line-height:1.2}
+.fgdesc{font-size:13px;color:var(--muted);font-weight:700;margin:2px 0 4px}
 .iagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
 .iat{position:relative;padding:0;border:2px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;aspect-ratio:1;display:flex;flex-direction:column}
 .iat img{flex:1;min-height:0;width:100%;object-fit:contain;background:#fff}
@@ -526,7 +531,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-H</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-I</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -967,6 +972,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 <div class="modal" id="mMenu"><div class="sheet">
   <h2 id="mnTitle"></h2>
   <div class="hint" id="mnSub"></div>
+  <div id="mnTopo"></div>
   <div id="mnOps" class="menu"></div>
   <button id="mnClose" style="width:100%;margin-top:8px;padding:12px">FECHAR</button>
 </div></div>
@@ -1061,7 +1067,7 @@ const primeiroNome = n => up(n).split(" ")[0]||"?";
 const rid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 let zModal=20;
-function show(id){const m=$(id); m.style.zIndex=++zModal; m.classList.add("show")}
+function show(id){const m=$(id); if(!document.querySelector(".modal.show")) zModal=20; m.style.zIndex=Math.min(++zModal,39); m.classList.add("show")} // abaixo do aviso (40) e do leitor em tela cheia (60)
 function hide(id){$(id).classList.remove("show"); if(id==="mProd"&&typeof pararPdCam==="function") pararPdCam();}
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
 
@@ -1571,8 +1577,8 @@ $("listas").addEventListener("click",e=>{
 
 /* ---------- Menu ⋮ ---------- */
 let menuAcoes={};
-function abrirMenu(titulo,sub,ops){
-  $("mnTitle").textContent=titulo; $("mnSub").textContent=sub||"";
+function abrirMenu(titulo,sub,ops,topo=""){
+  $("mnTitle").textContent=titulo; $("mnSub").textContent=sub||""; $("mnTopo").innerHTML=topo;
   menuAcoes={};
   $("mnOps").innerHTML=ops.map((o,i)=>{ menuAcoes[i]=o.fn; return `<button data-op="${i}" class="${o.perigo?"danger":""}">${o.txt}</button>`; }).join("");
   show("mMenu");
@@ -2204,8 +2210,12 @@ function termosFoto(nome,marca,cq,cu){
   return [nome,marca,c].map(x=>String(x||"").trim()).filter(Boolean).join(" ").toLowerCase();
 }
 // menu da foto do produto: câmera, Google (fundo branco) ou galeria
-function menuFoto(termos,aoEscolher,preencher=false){
-  abrirMenu("FOTO DO PRODUTO", termos?"BUSCA NO GOOGLE: "+up(termos)+" EMBALAGEM":"", [
+// info = {foto, nome, desc}: com foto, ela aparece grande no topo do menu
+function menuFoto(termos,aoEscolher,preencher=false,info=null){
+  const temFoto=!!(info&&info.foto);
+  const topo = temFoto ? `<div class="fgbig"><img src="${esc(info.foto)}" alt=""></div>
+    <div class="fgnome">${esc(up(info.nome||""))}</div>${info.desc?`<div class="fgdesc">${esc(info.desc)}</div>`:""}` : "";
+  abrirMenu("FOTO DO PRODUTO", temFoto?"":(termos?"BUSCA NO GOOGLE: "+up(termos)+" EMBALAGEM":""), [
     {txt:"🔍  BUSCAR FOTO COM IA (TIRE UMA FOTO DO PRODUTO)", fn:()=>buscarFotoIA(aoEscolher,preencher,termos)},
     {txt:"📷  TIRAR FOTO", fn:()=>abrirCamera(aoEscolher)},
     {txt:"🌐  PROCURAR NO GOOGLE (FUNDO BRANCO)", fn:()=>{
@@ -2214,12 +2224,13 @@ function menuFoto(termos,aoEscolher,preencher=false){
       toast("SEGURE O DEDO NA IMAGEM → BAIXAR IMAGEM. DEPOIS VOLTE E USE 📁 GALERIA");
     }},
     {txt:"📁  ESCOLHER DA GALERIA", fn:()=>abrirGaleria(aoEscolher)},
-  ]);
+  ], topo);
 }
 function fotografarProduto(pid){
   const p=S.produtos[pid]; if(!p) return;
   menuFoto(termosFoto(p.nome,p.marca,p.conteudoQtd,p.conteudoUn), async f=>{
-    const foto=await reduzir(f,360,0.72); DB.update("produtos",pid,{foto,atualizadoPor:eu().uid,atualizadoEm:Date.now()}); toast("FOTO SALVA"); });
+    const foto=await reduzir(f,360,0.72); DB.update("produtos",pid,{foto,atualizadoPor:eu().uid,atualizadoEm:Date.now()}); toast("FOTO SALVA"); },
+    false, {foto:p.foto,nome:p.nome,desc:descProduto(p)});
 }
 
 /* =====================================================================
@@ -3651,7 +3662,10 @@ $("pdZonas").addEventListener("click",e=>{
 });
 function fotoPd(){ $("pdFoto").innerHTML=pd.foto?`<img src="${pd.foto}" alt="">`:"TOQUE PARA FOTOGRAFAR"; }
 const fotoNoCadastro = async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } };
-$("pdFoto").onclick=()=>menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value),fotoNoCadastro,true);
+$("pdFoto").onclick=()=>{
+  const cq=num($("pdCQtd").value), atual={marca:up($("pdMarca").value),embalagem:$("pdEmb").value,unidades:Math.round(num($("pdUnids").value))||1,conteudoQtd:cq>0?cq:null,conteudoUn:$("pdCUn").value,vendidoPor:$("pdVend").value};
+  menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,cq,$("pdCUn").value),fotoNoCadastro,true,{foto:pd.foto,nome:$("pdNome").value,desc:descProduto(atual)});
+};
 $("pdIA").onclick=()=>buscarFotoIA(fotoNoCadastro,true,termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value));
 
 /* =====================================================================
