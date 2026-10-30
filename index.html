@@ -381,6 +381,18 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .opt .tags{grid-column:2/4;display:flex;gap:5px;flex-wrap:wrap;align-items:center}.opt .tags .tg{flex:none;display:inline-block;height:auto}
 .tg{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap;line-height:1.5}
 .tg.g{background:var(--done);color:var(--accent)}.tg.f{background:#fde8ef;color:#c2185b}.tg.y{background:#fff4d6;color:#8a5a00}.tg.n{background:var(--chip);color:var(--muted)}
+.iagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.iat{position:relative;padding:0;border:2px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;aspect-ratio:1;display:flex;flex-direction:column}
+.iat img{flex:1;min-height:0;width:100%;object-fit:contain;background:#fff}
+.iat small{display:block;font-size:8.5px;font-weight:700;color:var(--muted);padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:none;background:var(--chip)}
+.iat.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.iat.sel::after{content:"✔";position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center}
+.iat.eu small{background:#fff4d6;color:#8a5a00;font-weight:800;text-transform:uppercase}
+.iacampos{border:1px solid var(--line);border-radius:12px;margin-top:6px}
+.iac{display:flex;gap:10px;align-items:center;padding:8px 10px;font-size:12.5px}.iac+.iac{border-top:1px solid var(--line)}
+.iac input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.iac span{flex:1;min-width:0}.iac small{display:block;font-size:9.5px;font-weight:800;color:var(--muted)}
+.iac em{font-style:normal;font-size:9.5px;font-weight:800;color:var(--gold)}
 .ctbar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:8px 0 0;margin-top:10px;font-size:11.5px;font-weight:800}
 .resumo2 .mb.tap>.lcd{margin-right:26px}
 .resumo2 .mb .go{position:absolute;right:6px;top:24px;width:22px;height:22px;border-radius:50%;background:var(--chip);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
@@ -499,7 +511,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-E</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-G</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -762,7 +774,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div style="display:flex;gap:12px;align-items:center">
     <div class="thumb big" id="pdFoto">TOQUE PARA FOTOGRAFAR</div>
     <div style="flex:1"><div class="hint">ID</div><div id="pdCodigo" style="font-weight:800">GERADO AO SALVAR</div>
-      <button id="pdOutroTam" class="small hidden" style="margin-top:8px">➕ OUTRO TAMANHO</button></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button id="pdIA" class="small">🔍 BUSCAR FOTO</button><button id="pdOutroTam" class="small hidden">➕ OUTRO TAMANHO</button></div></div>
   </div>
   <label class="f">NOME<input id="pdNome" placeholder="EX.: LEITE CONDENSADO" autocomplete="off"></label>
   <label class="f">MARCA<input id="pdMarca" placeholder="EX.: MOÇA" autocomplete="off"></label>
@@ -795,6 +807,16 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
     <button id="pdCancel">CANCELAR</button>
     <button id="pdSave" class="primary">SALVAR</button>
   </div>
+</div></div>
+
+<!-- Busca de foto com IA -->
+<div class="modal" id="mIA"><div class="sheet" style="max-height:94vh">
+  <h2 style="margin:0 0 4px">🔍 BUSCAR FOTO</h2>
+  <div class="hint" id="iaMsg" style="font-weight:800"></div>
+  <div class="search" style="margin-top:8px"><input id="iaBusca" placeholder="O QUE BUSCAR" autocomplete="off"><button id="iaBuscar" class="cam" aria-label="BUSCAR">🔍</button></div>
+  <div class="iagrid" id="iaGrid"></div>
+  <div id="iaCamposW"><div class="sect">PREENCHER O CADASTRO</div><div class="hint">SÓ VÊM MARCADOS OS CAMPOS QUE ESTÃO VAZIOS.</div><div class="iacampos" id="iaCampos"></div></div>
+  <div class="btns"><button id="iaCancel">CANCELAR</button><button id="iaOk" class="primary">USAR</button></div>
 </div></div>
 
 <!-- Estabelecimento -->
@@ -972,6 +994,8 @@ const FIREBASE_CONFIG = {
   appId: "1:1072427017689:web:17556941774a5ba45c65c8"
 };
 const FB_VERSAO = "10.12.2";
+/* BUSCA DE FOTO COM IA: endereço do Cloudflare Worker (worker.js). Vazio = botão avisa que não está configurado. */
+let IA_URL = "https://oikonomia-ia.leandrolara-ao.workers.dev";
 const DEMO = !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith("COLE");
 
 /* ---------- Utilidades ---------- */
@@ -2134,8 +2158,9 @@ function termosFoto(nome,marca,cq,cu){
   return [nome,marca,c].map(x=>String(x||"").trim()).filter(Boolean).join(" ").toLowerCase();
 }
 // menu da foto do produto: câmera, Google (fundo branco) ou galeria
-function menuFoto(termos,aoEscolher){
+function menuFoto(termos,aoEscolher,preencher=false){
   abrirMenu("FOTO DO PRODUTO", termos?"BUSCA NO GOOGLE: "+up(termos)+" EMBALAGEM":"", [
+    {txt:"🔍  BUSCAR FOTO COM IA (TIRE UMA FOTO DO PRODUTO)", fn:()=>buscarFotoIA(aoEscolher,preencher,termos)},
     {txt:"📷  TIRAR FOTO", fn:()=>abrirCamera(aoEscolher)},
     {txt:"🌐  PROCURAR NO GOOGLE (FUNDO BRANCO)", fn:()=>{
       if(!termos){ alert("PREENCHA O NOME DO PRODUTO PRIMEIRO."); return; }
@@ -3557,8 +3582,123 @@ $("pdZonas").addEventListener("click",e=>{
   const estId=b.dataset.zedit; editarZonas(estId,()=>recarregarZonasPd(estId));
 });
 function fotoPd(){ $("pdFoto").innerHTML=pd.foto?`<img src="${pd.foto}" alt="">`:"TOQUE PARA FOTOGRAFAR"; }
-$("pdFoto").onclick=()=>menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value),
-  async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } });
+const fotoNoCadastro = async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } };
+$("pdFoto").onclick=()=>menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value),fotoNoCadastro,true);
+$("pdIA").onclick=()=>buscarFotoIA(fotoNoCadastro,true,termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value));
+
+/* =====================================================================
+   BUSCAR FOTO COM IA: tira a foto → a IA lê a embalagem → busca imagens → você escolhe
+   (as chaves ficam no Cloudflare Worker; o app só manda o login)
+   ===================================================================== */
+let ia=null;
+async function chamarIA(caminho,opts={}){
+  const t = DB.auth&&DB.auth.currentUser ? await DB.auth.currentUser.getIdToken() : "DEMO";
+  const r=await fetch(IA_URL.replace(/\/+$/,"")+caminho,{...opts,headers:{...(opts.headers||{}),Authorization:"Bearer "+t}});
+  if(!r.ok){ let m=""; try{ m=(await r.json()).erro; }catch(e){} throw new Error(m||("ERRO "+r.status)); }
+  return r;
+}
+function buscarFotoIA(aoEscolher,preencher,termos){
+  if(!IA_URL){ alert("BUSCA DE FOTO AINDA NÃO CONFIGURADA.\n\nO ADMINISTRADOR PRECISA CRIAR O INTERMEDIÁRIO (CLOUDFLARE WORKER) E COLOCAR O ENDEREÇO DELE NO APP (IA_URL)."); return; }
+  abrirCamera(async f=>{
+    ia={aoEscolher,preencher,foto:null,lido:null,recorte:null,imgs:[],sel:null};
+    $("iaMsg").textContent="LENDO A EMBALAGEM…"; $("iaGrid").innerHTML=""; $("iaCampos").innerHTML=""; $("iaCamposW").classList.add("hidden");
+    $("iaBusca").value=termos||""; $("iaOk").disabled=true;
+    show("mIA");
+    try{ ia.foto=await reduzir(f,1024,0.8); }catch(e){ $("iaMsg").textContent="NÃO FOI POSSÍVEL ABRIR A FOTO."; return; }
+    ia.recorte=await recortarIA(ia.foto,null); renderIA();
+    try{
+      const cats=[...new Set(Object.values(S.produtos).map(p=>up(p.categoria)).filter(Boolean))];
+      const r=await chamarIA("/identificar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imagem:ia.foto,categorias:cats})});
+      ia.lido=await r.json();
+    }catch(e){ $("iaMsg").textContent="NÃO CONSEGUI LER A FOTO: "+up(e.message)+". DIGITE O QUE BUSCAR E TOQUE EM 🔍."; return; }
+    const L=ia.lido;
+    if(L.caixa) ia.recorte=await recortarIA(ia.foto,L.caixa);
+    if(!L.achou){ $("iaMsg").textContent="NÃO RECONHECI O PRODUTO. DIGITE O QUE BUSCAR E TOQUE EM 🔍."; renderIA(); return; }
+    $("iaBusca").value=L.busca||[L.marca,L.nome,L.conteudo?fmtQtd(L.conteudo)+" "+L.unidade:""].filter(Boolean).join(" ");
+    renderCamposIA(); renderIA(); buscarImagensIA();
+  });
+}
+// recorte justo no produto (caixa vinda da IA) num quadrado branco
+function recortarIA(src,cx){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const W=img.width,H=img.height;
+      let [x0,y0,x1,y1]=cx||[0,0,1,1];
+      const pad=0.04; x0=Math.max(0,x0-pad); y0=Math.max(0,y0-pad); x1=Math.min(1,x1+pad); y1=Math.min(1,y1+pad);
+      const sx=x0*W, sy=y0*H, sw=(x1-x0)*W, sh=(y1-y0)*H, T=600, k=T*0.92/Math.max(sw,sh);
+      const c=document.createElement("canvas"); c.width=c.height=T; const g=c.getContext("2d");
+      g.fillStyle="#fff"; g.fillRect(0,0,T,T);
+      g.drawImage(img,sx,sy,sw,sh,(T-sw*k)/2,(T-sh*k)/2,sw*k,sh*k);
+      res(c.toDataURL("image/jpeg",0.85));
+    };
+    img.onerror=()=>res(src); img.src=src;
+  });
+}
+async function buscarImagensIA(){
+  if(!ia) return;
+  const q=$("iaBusca").value.trim();
+  if(!q){ $("iaMsg").textContent="DIGITE O QUE BUSCAR."; return; }
+  $("iaMsg").textContent="BUSCANDO IMAGENS…"; ia.imgs=[]; if(ia.sel!=="eu") ia.sel=null; renderIA();
+  try{
+    const r=await chamarIA("/imagens?q="+encodeURIComponent(q));
+    ia.imgs=((await r.json()).imagens||[]).slice(0,11);
+    const L=ia.lido;
+    $("iaMsg").textContent=(L&&L.achou?`LI: ${[L.marca,L.nome,L.embalagem,L.conteudo?(L.unidades>1?L.unidades+" × ":"")+fmtQtd(L.conteudo)+" "+L.unidade:""].filter(Boolean).join(" · ")}. `:"")
+      +(ia.imgs.length?"TOQUE NA MELHOR IMAGEM.":"NENHUMA IMAGEM ACHADA. TENTE OUTRA BUSCA OU USE SUA FOTO RECORTADA.");
+  }catch(e){ $("iaMsg").textContent="A BUSCA FALHOU: "+up(e.message); }
+  renderIA();
+}
+function renderIA(){
+  if(!ia) return;
+  $("iaGrid").innerHTML=ia.imgs.map((x,i)=>`<button class="iat${ia.sel===String(i)?" sel":""}" data-ia="${i}"><img src="${esc(x.miniatura)}" alt="" loading="lazy" referrerpolicy="no-referrer"><small>${esc(x.fonte||x.titulo||"")}</small></button>`).join("")
+    +(ia.recorte?`<button class="iat eu${ia.sel==="eu"?" sel":""}" data-ia="eu"><img src="${ia.recorte}" alt=""><small>📷 MINHA FOTO</small></button>`:"");
+  $("iaOk").disabled=!ia.sel;
+}
+// campos lidos pela IA: marcados só os que estão vazios no cadastro
+function camposIA(){
+  const L=ia&&ia.lido; if(!L||!L.achou) return [];
+  const cont=L.conteudo&&L.unidade&&CONT_UN.includes(L.unidade);
+  return [
+    L.nome&&{k:"nome",rot:"NOME",v:L.nome,vazio:!$("pdNome").value.trim(),apl:()=>$("pdNome").value=L.nome},
+    L.marca&&{k:"marca",rot:"MARCA",v:L.marca,vazio:!$("pdMarca").value.trim(),apl:()=>$("pdMarca").value=L.marca},
+    L.categoria&&{k:"cat",rot:"CATEGORIA",v:L.categoria,vazio:!$("pdCat").value.trim(),apl:()=>$("pdCat").value=L.categoria},
+    L.embalagem&&EMBALAGENS.includes(L.embalagem)&&{k:"emb",rot:"EMBALAGEM",v:L.embalagem,vazio:!$("pdEmb").value,apl:()=>$("pdEmb").value=L.embalagem},
+    L.unidades>1&&{k:"un",rot:"UNIDADES",v:String(L.unidades),vazio:!$("pdUnids").value.trim(),apl:()=>$("pdUnids").value=String(L.unidades)},
+    cont&&{k:"cont",rot:"CONTEÚDO (CADA)",v:fmtQtd(L.conteudo)+" "+L.unidade,vazio:!$("pdCQtd").value.trim(),apl:()=>{ $("pdCQtd").value=fmtQtd(L.conteudo); $("pdCUn").value=L.unidade; }},
+  ].filter(Boolean);
+}
+function renderCamposIA(){
+  const cs=ia&&ia.preencher?camposIA():[];
+  $("iaCamposW").classList.toggle("hidden",!cs.length);
+  $("iaCampos").innerHTML=cs.map(c=>`<label class="iac"><input type="checkbox" data-iac="${c.k}" ${c.vazio?"checked":""}><span><small>${c.rot}</small>${esc(c.v)}</span>${c.vazio?"":"<em>JÁ PREENCHIDO</em>"}</label>`).join("");
+}
+$("iaBuscar").onclick=buscarImagensIA;
+$("iaBusca").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); buscarImagensIA(); } });
+$("iaGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-ia]"); if(!b||!ia) return; ia.sel=b.dataset.ia; renderIA(); });
+$("iaCancel").onclick=()=>{ hide("mIA"); ia=null; };
+$("iaOk").onclick=async()=>{
+  if(!ia||!ia.sel){ alert("TOQUE NUMA IMAGEM."); return; }
+  const b=$("iaOk"); b.disabled=true; b.textContent="BAIXANDO…";
+  let blob=null;
+  try{
+    if(ia.sel==="eu") blob=await (await fetch(ia.recorte)).blob();
+    else{
+      const x=ia.imgs[+ia.sel];
+      // só a imagem original do site (a miniatura da busca não é guardada — termos da Brave)
+      try{ blob=await (await chamarIA("/baixar?url="+encodeURIComponent(x.url))).blob(); }catch(e){ blob=null; }
+    }
+  }catch(e){ blob=null; }
+  b.textContent="USAR";
+  if(!blob){ b.disabled=false; alert("NÃO FOI POSSÍVEL BAIXAR ESSA IMAGEM. ESCOLHA OUTRA."); return; }
+  const marcados=new Set([...document.querySelectorAll("#iaCampos [data-iac]:checked")].map(c=>c.dataset.iac));
+  const preenchidos=[];
+  if(ia.preencher) camposIA().forEach(c=>{ if(marcados.has(c.k)){ c.apl(); preenchidos.push(c.rot); } });
+  if(preenchidos.length) pdTotal();
+  const cb=ia.aoEscolher; hide("mIA"); ia=null; b.disabled=false;
+  await cb(blob);
+  toast(preenchidos.length?"FOTO E CAMPOS PREENCHIDOS. CONFIRA E TOQUE EM SALVAR.":"FOTO ESCOLHIDA");
+};
 // produto novo: câmera fixa no topo do cadastro, ligada até tocar no ✕ (cadastra vários em sequência)
 // editando: lê uma vez e fecha (só há um código para trocar)
 $("pdLerBarras").onclick=async()=>{
@@ -3895,7 +4035,7 @@ $("pqVisita").addEventListener("click",e=>{
 
 /* ---------- botão VOLTAR (celular, teclado ou navegador): navega dentro do app em vez de sair ---------- */
 const FECHA={mSenha:"snCancel",mAdmin:"admFechar",mRec:"rcCancel",mRecLista:"rlCancel",mQtd:"qtCancel",mMover:"mvCancel",mHist:"hsCancel",
-  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel"};
+  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel",mIA:"iaCancel"};
 let saidaArmada=0;
 function voltarUmPasso(){
   // 1) leitor em tela cheia
