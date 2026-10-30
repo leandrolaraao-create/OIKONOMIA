@@ -345,6 +345,43 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .resumo2 .mult .up{color:var(--warn)} .resumo2 .mult .dn{color:var(--accent)}
 .resumo2 .mb b{color:var(--accent)} .resumo2 .mb .selo{color:var(--accent)}
 .resumo2 .mb.tap{position:relative;cursor:pointer}
+/* categoria / embalagem */
+.resumo2 .emb,.crow .emb{display:inline-block;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:99px;background:var(--chip);color:var(--ink);margin:2px 0 4px;white-space:normal;line-height:1.35}
+.resumo2 .emb.outra{background:#fff4d6;color:#8a5a00}
+.resumo2 .per{display:block;font-size:10px;font-weight:800;color:var(--muted);margin-top:3px}
+.catnota{margin:6px 12px 0;font-size:10.5px;font-weight:700;color:var(--muted)}
+.catfaixa{margin:8px 12px 0;border:1px solid #bfe0cc;background:#f3f8f5;border-radius:10px;padding:7px 10px;font-size:11px;font-weight:800;color:var(--accent)}
+.catfaixa.y{border-color:#f0d58a;background:#fffaf0;color:#8a5a00}
+.ctsec{margin:0 12px}
+.crow{display:grid;grid-template-columns:22px 1fr auto;gap:3px 8px;align-items:center;padding:8px 6px;border-top:1px solid var(--line)}
+.crow .pos{font-weight:800;color:var(--muted);font-size:12px}
+.crow b{font-size:12.5px;display:block}.crow small{display:block;font-size:10px;color:var(--muted);font-weight:600}
+.crow .emb{margin:2px 4px 0 0;vertical-align:1px}
+.crow .cacts{grid-column:2/4;display:flex;gap:6px;align-items:center}
+.crow .cacts .d{flex:1;font-size:10.5px;font-weight:800}
+.crow .cacts .ib{width:38px;height:32px;font-size:17px}
+.crow .cacts .small{height:32px}
+.crow.na{background:#f6f8fb;box-shadow:inset 3px 0 0 var(--tag-ink)}
+.crow.best b{color:var(--accent)}
+.crow .d.up{color:var(--warn)}.crow .d.dn{color:var(--accent)}
+.catrow{display:flex;gap:10px;align-items:center;background:#eef6f1;border:1px solid #bfe0cc;border-radius:12px;padding:10px 12px;margin:6px 0}
+.catrow .m{flex:1;min-width:0}.catrow b{display:block;font-size:13px;color:var(--accent)}.catrow small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.catrow button{flex:none;white-space:nowrap}
+.catchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 8px;font-size:10.5px;font-weight:800;color:var(--muted)}
+.catchips button{border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800;background:#eef6f1;color:var(--accent);border-color:#bfe0cc}
+.ctq{display:flex;gap:8px;align-items:flex-end}
+.ctun{display:flex;gap:6px;margin-bottom:8px}
+.ctchips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 2px}
+.ctchips button,.ctun button{border-radius:99px;padding:6px 11px;font-size:11px;font-weight:800}
+.ctchips button.on,.ctun button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.opt{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;display:grid;grid-template-columns:22px 1fr auto;gap:4px 10px;align-items:center;cursor:pointer;background:var(--card)}
+.opt.sel{border:2px solid var(--accent);background:#f3f8f5}
+.opt .rad{width:20px;height:20px;border-radius:50%;border:2px solid #9aa39c}.opt.sel .rad{border:6px solid var(--accent)}
+.opt b{font-size:13px;display:block}.opt small{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+.opt .tags{grid-column:2/4;display:flex;gap:5px;flex-wrap:wrap;align-items:center}.opt .tags .tg{flex:none;display:inline-block;height:auto}
+.tg{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap;line-height:1.5}
+.tg.g{background:var(--done);color:var(--accent)}.tg.f{background:#fde8ef;color:#c2185b}.tg.y{background:#fff4d6;color:#8a5a00}.tg.n{background:var(--chip);color:var(--muted)}
+.ctbar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:8px 0 0;margin-top:10px;font-size:11.5px;font-weight:800}
 .resumo2 .mb.tap>.lcd{margin-right:26px}
 .resumo2 .mb .go{position:absolute;right:6px;top:24px;width:22px;height:22px;border-radius:50%;background:var(--chip);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
 .mvcmp{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:12px;font-weight:700}
@@ -462,7 +499,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-D</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-E</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -729,11 +766,18 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   </div>
   <label class="f">NOME<input id="pdNome" placeholder="EX.: LEITE CONDENSADO" autocomplete="off"></label>
   <label class="f">MARCA<input id="pdMarca" placeholder="EX.: MOÇA" autocomplete="off"></label>
+  <label class="f">CATEGORIA <small style="font-weight:600;color:var(--muted)">(PARA COMPARAR MARCAS E EMBALAGENS)</small><input id="pdCat" list="dlCat" placeholder="EX.: ACHOCOLATADO PRONTO" autocomplete="off"></label>
+  <datalist id="dlCat"></datalist>
   <div class="row">
     <label class="f">VENDIDO POR<select id="pdVend"></select></label>
-    <label class="f" style="flex:.7">CONTEÚDO<input id="pdCQtd" inputmode="decimal" placeholder="395"></label>
+    <label class="f" style="flex:.7">CONTEÚDO (CADA)<input id="pdCQtd" inputmode="decimal" placeholder="395"></label>
     <label class="f" style="flex:.6">UNID.<select id="pdCUn"></select></label>
   </div>
+  <div class="row">
+    <label class="f">EMBALAGEM<select id="pdEmb"></select></label>
+    <label class="f" style="flex:.6">UNIDADES<input id="pdUnids" inputmode="numeric" placeholder="1" autocomplete="off"></label>
+  </div>
+  <div class="hint" id="pdTotal" style="margin:-2px 0 6px;font-weight:800"></div>
   <div class="row">
     <label class="f">CÓDIGO DE BARRAS<input id="pdBarras" inputmode="numeric" autocomplete="off"></label>
     <button id="pdLerBarras" style="flex:none;align-self:flex-end;margin-bottom:8px">▥ LER</button>
@@ -782,6 +826,17 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div id="pkLista"></div>
   <div class="prev" id="pkPrev"></div>
   <div class="btns" id="pkBtns"></div>
+</div></div>
+
+<!-- Categoria: escolher pelo preço -->
+<div class="modal" id="mCat"><div class="sheet" style="max-height:94vh">
+  <h2 id="ctTit" style="margin:0 0 6px"></h2>
+  <div class="ctq"><label class="f" style="flex:1;margin-bottom:8px">QUANTO VOCÊ QUER?<input id="ctQ" inputmode="decimal" autocomplete="off"></label><div class="ctun" id="ctUn"></div></div>
+  <div class="ctchips" id="ctMarcas"></div>
+  <div class="ctchips" id="ctLojas"></div>
+  <div id="ctOpts"></div>
+  <div class="ctbar"><div id="ctEsc" style="margin-bottom:6px"></div>
+    <div class="btns" style="margin-top:0"><button id="ctCancel">CANCELAR</button><button id="ctOk" class="primary">➕ COLOCAR NA LISTA</button></div></div>
 </div></div>
 
 <!-- Distribuir -->
@@ -965,7 +1020,8 @@ function passoMedida(p,q,dir){
 const primeiroNome = n => up(n).split(" ")[0]||"?";
 const rid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-function show(id){$(id).classList.add("show")}
+let zModal=20;
+function show(id){const m=$(id); m.style.zIndex=++zModal; m.classList.add("show")}
 function hide(id){$(id).classList.remove("show"); if(id==="mProd"&&typeof pararPdCam==="function") pararPdCam();}
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
 
@@ -1201,32 +1257,76 @@ function precosPorLoja(pid){
 function precoNaLoja(pid,estId){ const p=precosPorLoja(pid).find(r=>r.estabelecimentoId===estId); return p?p.valor:null; }
 function descProduto(p){
   if(!p) return "";
-  const c = p.conteudoQtd ? `${fmtQtd(p.conteudoQtd)} ${p.conteudoUn||""}`.trim() : "";
+  const ct=contTotal(p);
+  let c = p.conteudoQtd ? `${fmtQtd(p.conteudoQtd)} ${p.conteudoUn||""}`.trim() : "";
+  if(ct&&ct.n>1) c=`${up(p.embalagem)||"PACOTE"} ${ct.n} × ${c} = ${fmtFino(ct.q,ct.un)}`;
+  else if(c&&p.embalagem) c=`${up(p.embalagem)} ${c}`;
   return [p.marca,c,p.vendidoPor&&p.vendidoPor!=="UN"?"("+p.vendidoPor+")":""].filter(Boolean).join(" · ");
+}
+/* =====================================================================
+   CATEGORIA E EMBALAGEM: tudo convertido para a menor unidade (ML, G, UN, M)
+   preço de 1 ML = preço ÷ conteúdo total · LEVA = quantas embalagens cobrem o que você quer
+   ===================================================================== */
+const EMBALAGENS=["","UNIDADE","FARDO","CAIXA","PACOTE","SACO","POTE","GARRAFA","LATA","VIDRO","BANDEJA","SACHÊ","REFIL","KIT"];
+const FINO={G:["G",1],KG:["G",1000],ML:["ML",1],L:["ML",1000],UN:["UN",1],M:["M",1]};
+// conteúdo total do produto na menor unidade: {q, un, n (unidades na embalagem)}
+function contTotal(p){
+  if(!p||!(+p.conteudoQtd>0)||!FINO[p.conteudoUn]) return null;
+  const n=+p.unidades>1?Math.round(+p.unidades):1, f=FINO[p.conteudoUn];
+  return {q:Math.round(n*(+p.conteudoQtd)*f[1]*1000)/1000,un:f[0],n};
+}
+const fmtFino=(q,un)=>`${(+q||0).toLocaleString("pt-BR",{maximumFractionDigits:2})} ${un}`;
+const fmtPorUn=(v,un)=>`1 ${un} = R$ ${(+v||0).toLocaleString("pt-BR",(un==="G"||un==="ML")?{minimumFractionDigits:5,maximumFractionDigits:5}:{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+// produto que entra na comparação da categoria (com categoria e conteúdo; vendidos a peso ficam de fora)
+const ehCat = p => !!(p&&up(p.categoria)&&contTotal(p)&&!medidaDe(p));
+// "FARDO 6 × 200 ML" · "UNIDADE 200 ML"
+function rotEmb(p){
+  const ct=contTotal(p); if(!ct) return up(p&&p.embalagem)||"";
+  const e=up(p.embalagem)||(ct.n>1?"PACOTE":"UNIDADE");
+  return `${e} ${ct.n>1?ct.n+" × ":""}${fmtQtd(p.conteudoQtd)} ${p.conteudoUn}`;
+}
+const rotEmbCurta = p => { const ct=contTotal(p); return (up(p.embalagem)||(ct&&ct.n>1?"PACOTE":"UNIDADE"))+(ct&&ct.n>1?" "+ct.n:""); };
+function membrosCat(cat,un){ cat=up(cat); if(!cat) return [];
+  return Object.values(S.produtos).filter(o=>up(o.categoria)===cat&&ehCat(o)&&(!un||contTotal(o).un===un)); }
+// categorias existentes: nome, unidade mais comum e produtos
+function categorias(){
+  const m={};
+  Object.values(S.produtos).forEach(p=>{ if(!ehCat(p)) return; const c=up(p.categoria); (m[c]=m[c]||[]).push(p); });
+  return Object.entries(m).map(([nome,ps])=>{
+    const cont={}; ps.forEach(p=>{const u=contTotal(p).un; cont[u]=(cont[u]||0)+1;});
+    const un=Object.keys(cont).sort((a,b)=>cont[b]-cont[a])[0];
+    return {nome,un,ps:ps.filter(p=>contTotal(p).un===un)};
+  }).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+}
+// quanto se paga de fato por um produto para cobrir N (na menor unidade)
+function opcao(o,valor,N){
+  const ct=contTotal(o), leva=Math.max(1,Math.ceil(N/ct.q-1e-9));
+  return {o,ct,valor,leva,total:Math.round(leva*valor*100)/100,sobra:Math.round((leva*ct.q-N)*1000)/1000,porUn:valor/ct.q};
+}
+// todas as opções (produto × loja, preço mais recente de cada loja), do mais barato ao mais caro — favorito não muda a ordem
+function opcoesCat(lista,N,estId,pref){
+  const r=[];
+  lista.forEach(o=>precosPorLoja(o.id).forEach(x=>{ if(estId&&x.estabelecimentoId!==estId) return; r.push({...opcao(o,x.valor,N),estId:x.estabelecimentoId,ts:x.ts}); }));
+  return r.sort((a,b)=>a.total-b.total||a.sobra-b.sobra||((b.o.id===pref)-(a.o.id===pref))||a.porUn-b.porUn);
+}
+// o que o item da lista precisa cobrir: o "QUERO" escolhido, ou a quantidade de embalagens × conteúdo
+function necessidade(it,p){
+  const ct=contTotal(p);
+  if(it&&it.quer&&it.quer.un===ct.un&&+it.quer.v>0) return +it.quer.v;
+  return (+(it&&it.qtd)||1)*ct.q;
 }
 // preço por KG / L / UN a partir do conteúdo
 function precoBase(p,valor){
-  if(!p||!p.conteudoQtd||!valor) return "";
-  const q=+p.conteudoQtd, u=p.conteudoUn;
-  if(u==="G") return brl(valor/q*1000)+"/KG";
-  if(u==="KG") return brl(valor/q)+"/KG";
-  if(u==="ML") return brl(valor/q*1000)+"/L";
-  if(u==="L") return brl(valor/q)+"/L";
-  if(u==="UN"&&q>1) return brl(valor/q)+"/UN";
-  if(u==="M") return brl(valor/q)+"/M";
-  return "";
+  const b=valorBase(p,valor); if(!b) return "";
+  if(b.un==="UN"&&contTotal(p).q<=1) return "";
+  return brl(b.v)+"/"+b.un;
 }
 // preço por KG/L/UN em número, para comparar marcas
 function valorBase(p,valor){
-  if(!p||!p.conteudoQtd||!valor) return null;
-  const q=+p.conteudoQtd, u=p.conteudoUn;
-  if(u==="G") return {v:valor/q*1000,un:"KG"};
-  if(u==="KG") return {v:valor/q,un:"KG"};
-  if(u==="ML") return {v:valor/q*1000,un:"L"};
-  if(u==="L") return {v:valor/q,un:"L"};
-  if(u==="UN") return {v:valor/q,un:"UN"};
-  if(u==="M") return {v:valor/q,un:"M"};
-  return null;
+  const ct=contTotal(p); if(!ct||!valor) return null;
+  if(ct.un==="G") return {v:valor/ct.q*1000,un:"KG"};
+  if(ct.un==="ML") return {v:valor/ct.q*1000,un:"L"};
+  return {v:valor/ct.q,un:ct.un};
 }
 const outrasMarcas = p => Object.values(S.produtos).filter(x=>x.id!==p.id&&up(x.nome)===up(p.nome));
 // melhor preço por KG/L de um produto (usando o preço mais recente de cada loja)
@@ -1544,6 +1644,7 @@ function cardItem(L,it,estId){
   if(!p) return `<div class="item2"><div class="top"><div class="thumb">❔</div><div class="info"><div class="name">PRODUTO REMOVIDO DO CATÁLOGO</div></div></div>
     <div class="acts"><button class="btnComprar sec" data-qtd="${it.produtoId}">REMOVER DA LISTA</button></div></div>`;
   const r=realizado(L,p.id), pl=precosPorLoja(p.id), menor=pl[0]||null;
+  const cat = !r&&ehCat(p) ? cardCat(L,it,p,estId) : null;
   const z=zonaDe(p,estId);
   const q=it.qtd||1;
   const chips=(estId?`<span class="chipz${z?"":" v"}">🧭 ${z?esc(zonaRotulo(estId,z)):"SEM ZONA AQUI"}</span>`:"");
@@ -1555,6 +1656,8 @@ function cardItem(L,it,estId){
   let resumo="";
   if(r){
     resumo=`<div class="comprado">✔ COMPRADO POR ${esc(r.usuarioNome)} · ${esc(r.estNome||estNome(r.estabelecimentoId))}${r.valor?`<br><b>${fmtQtd(r.qtd)} × ${brl(r.valor)} = ${brl(r.total)}</b>`:""} · ${dCurta(r.ts)} ${hora(r.ts)}${r.listaId!==L.id&&S.listas[r.listaId]?`<br><small>NA LISTA ${esc(S.listas[r.listaId].nome)}</small>`:""}</div>`;
+  }else if(cat&&cat.resumo){
+    resumo=cat.resumo;
   }else if(!menor){
     resumo=`<div class="resumo2"><div class="vazio">SEM PREÇO REGISTRADO EM NENHUMA LOJA</div></div>`;
   }else{
@@ -1589,7 +1692,7 @@ function cardItem(L,it,estId){
         <span class="vl">${lcd(x.valor,"sm "+(best||d<=0?"g":"r"),"",true)}<small>${best?"★ MENOR":d>0?difTxt(d):"= MESMO PREÇO"}</small></span></div>`;
     }).join("")+`</div>`;
   }
-  const dica=r?"":dicaMarca(p,estId);
+  const dica=r||cat?"":dicaMarca(p,estId);
   const botao = r
     ? `<button class="btnComprar sec" data-desfazer="${p.id}" data-chk="${p.id}">↩ DESFAZER COMPRA</button>`
     : `<button class="btnComprar" data-comprar="${p.id}" data-chk="${p.id}">✔ COMPREI</button>`;
@@ -1598,11 +1701,11 @@ function cardItem(L,it,estId){
       <div class="thumb" data-foto="${p.id}">${imgProduto(p)}</div>
       <div class="info">
         <div class="name">${esc(p.nome)}</div>
-        <div class="sub">${esc(descProduto(p))}</div>
+        <div class="sub">${esc(descProduto(p))}${cat&&it.quer?` · QUERO ${fmtFino(cat.N,cat.un)}`:""}</div>
         <div class="tags">${chips}</div>
       </div>
     </div>
-    ${resumo}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
+    ${resumo}${cat?cat.extra:""}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
     <div class="acts">${botao}
       <button class="ib cif" data-hist="${p.id}" aria-label="PREÇOS NESTA LOJA">$</button>
       <div class="stepq${uv?" med":""}"><button data-qmenos="${p.id}" aria-label="MENOS">−</button><span data-qedit="${p.id}">${fmtMedida(p,q)}</span><button data-qmais="${p.id}" aria-label="MAIS">+</button></div>
@@ -1610,6 +1713,89 @@ function cardItem(L,it,estId){
       <button class="ib" data-mais="${p.id}" aria-label="MAIS OPÇÕES">⋯</button>
     </div>
   </div>`;
+}
+/* ---------- cartão de produto com CATEGORIA: compara por ML/G/UN para o que você quer ---------- */
+const catFechados=new Set();
+function cardCat(L,it,p,estId){
+  const ct=contTotal(p), un=ct.un, N=necessidade(it,p);
+  const membros=membrosCat(p.categoria,un);
+  const daMarca=membros.filter(o=>up(o.marca)===up(p.marca));
+  const optsMarca=opcoesCat(daMarca,N,null,p.id);
+  const menor=optsMarca[0]||null;
+  const aquiR=estId?precosPorLoja(p.id).find(x=>x.estabelecimentoId===estId):null;
+  const aqui=aquiR?opcao(p,aquiR.valor,N):null;
+  const emb=(o,outra)=>`<span class="emb${outra?" outra":""}">${outra?"OUTRA EMBALAGEM: ":""}${esc(rotEmb(o))}</span>`;
+  const linha=x=>`<span class="per">LEVA ${x.leva}${x.leva>1?" × "+brl(x.valor):""} · ${fmtPorUn(x.porUn,un)}</span>`;
+  let resumo="", extra="";
+  if(menor){
+    const d=aqui?Math.round((aqui.total-menor.total)*100)/100:0;
+    let boxAqui;
+    if(!estId) boxAqui=`<div class="bx"><small>📍 AQUI</small><span class="sub">ESCOLHA A LOJA NO TOPO</span></div>`;
+    else if(!aqui) boxAqui=`<div class="bx"><small>📍 AQUI · ${esc(estNome(estId))}</small>${emb(p)}<b class="cinza">SEM PREÇO</b><span class="sub">REGISTRE AO COMPRAR</span></div>`;
+    else boxAqui = d<=0
+      ? `<div class="bx ok"><small>📍 AQUI · ${esc(estNome(estId))}</small>${emb(p)}${lcd(aqui.total,"lg g")}${linha(aqui)}<span class="selo">✓ O MAIS BARATO</span></div>`
+      : `<div class="bx caro"><small>📍 AQUI · ${esc(estNome(estId))}</small>${emb(p)}${lcd(aqui.total,"lg r")}${linha(aqui)}<span class="selo">${difTxt(d)}</span></div>`;
+    const outra=menor.o.id!==p.id;
+    const podeMover = !outra && menor.estId!==estId && !(aqui&&d<=0);
+    const boxMenor=`<div class="bx mb${podeMover?" tap":""}"${podeMover?` data-movermb="${p.id}"`:""}><small>★ MAIS BARATO · ${esc(estNome(menor.estId))}</small>${emb(menor.o,outra)}${lcd(menor.total,"lg g")}${linha(menor)}`+
+      (aqui&&d>0?`<span class="selo">${difTxt(-d)}</span>`:"")+(podeMover?`<span class="go">›</span>`:"")+`</div>`;
+    resumo=`<div class="resumo2">${boxAqui}${boxMenor}</div>`;
+    // a embalagem da lista nessa loja mais barata
+    if(outra){
+      const pr=precoNaLoja(p.id,menor.estId);
+      if(pr){ const x=opcao(p,pr,N), dd=Math.round((x.total-menor.total)*100)/100;
+        extra+=`<div class="catnota">NO ${esc(estNome(menor.estId))}, ${esc(rotEmb(p))} CUSTA ${brl(x.total)}${x.leva>1?` (LEVA ${x.leva})`:""} · ${difTxt(dd,` QUE LEVAR ${menor.leva} × ${esc(rotEmbCurta(menor.o))}`)}</div>`; }
+    }
+    // a categoria inteira, qualquer loja
+    if(membros.some(o=>up(o.marca)!==up(p.marca))){
+      const best=opcoesCat(membros,N,null,menor.o.id)[0];
+      if(best&&best.total<menor.total-0.004)
+        extra+=`<div class="catfaixa y">★ NA CATEGORIA, QUALQUER LOJA: ${esc(best.o.nome)}${best.o.marca?" · "+esc(best.o.marca):""} (${esc(rotEmb(best.o))}) NO ${esc(estNome(best.estId))}: LEVA ${best.leva} = ${brl(best.total)} · ${difTxt(best.total-menor.total," QUE "+esc(p.marca||"ESTA MARCA"))}</div>`;
+      else extra+=`<div class="catfaixa">★ NA CATEGORIA, QUALQUER LOJA: ESTE JÁ É O MAIS BARATO PARA ${fmtFino(N,un)}</div>`;
+    }
+  }
+  // NA CATEGORIA, AQUI: todas as marcas e embalagens desta loja, do mais barato ao mais caro
+  if(estId&&membros.length>1){
+    const ops=opcoesCat(membros,N,estId,p.id), sem=membros.filter(o=>!ops.some(x=>x.o.id===o.id));
+    const aberto=!catFechados.has(p.id);
+    extra+=`<button class="exp2" data-cattog="${p.id}">${aberto?"▾":"▸"} NA CATEGORIA, AQUI NO ${esc(estNome(estId))} · PARA ${fmtFino(N,un)}<span style="float:right">${membros.length}</span></button>`;
+    if(aberto){
+      extra+=`<div class="ctsec">`+ops.map((x,i)=>{
+        const eu_=x.o.id===p.id, dd=aqui?Math.round((x.total-aqui.total)*100)/100:null;
+        const cmp = eu_ ? "" : dd==null ? "" : ` · ${difTxt(dd)}`;
+        const cls = eu_ ? "" : dd==null ? "" : dd>0?"up":dd<0?"dn":"";
+        return `<div class="crow${i===0?" best":""}${eu_?" na":""}"><span class="pos">${i+1}º</span>
+          <div><b>${i===0?"★ ":""}${ehFav(x.o)?"❤️ ":""}${esc(x.o.nome)}${x.o.marca?" · "+esc(x.o.marca):""}${eu_?" · NA LISTA":""}</b>
+            <small><span class="emb">${esc(rotEmbCurta(x.o))}</span>${fmtFino(x.ct.q,un)} · ${brl(x.valor)} · ${fmtPorUn(x.porUn,un)}</small></div>
+          ${lcd(x.total,"sm "+(i===0?"g":eu_?"":"r"))}
+          <div class="cacts"><span class="d ${cls}">LEVA ${x.leva}${x.leva>1||x.sobra>0?" = "+fmtFino(x.leva*x.ct.q,un):""}${cmp}${x.sobra>0?" · SOBRA "+fmtFino(x.sobra,un):eu_?" · EXATO":""}</span>
+            <button class="ib cif" data-cathist="${x.o.id}" aria-label="ATUALIZAR PREÇO">$</button>${eu_?"":`<button class="small" data-trocar="${p.id}|${x.o.id}">TROCAR</button>`}</div></div>`;
+      }).join("")+sem.map(o=>`<div class="crow${o.id===p.id?" na":""}"><span class="pos">—</span>
+          <div><b>${ehFav(o)?"❤️ ":""}${esc(o.nome)}${o.marca?" · "+esc(o.marca):""}${o.id===p.id?" · NA LISTA":""}</b><small><span class="emb">${esc(rotEmbCurta(o))}</span>${fmtFino(contTotal(o).q,un)} · SEM PREÇO AQUI</small></div><span></span>
+          <div class="cacts"><span class="d"></span><button class="small" data-cathist="${o.id}">$ REGISTRAR</button></div></div>`).join("")+`</div>`;
+    }
+  }
+  return {resumo,extra,N,un};
+}
+// TROCAR: o item passa a ser outro produto da categoria, levando o suficiente para o que você quer
+function trocarItem(L,de,para){
+  L=S.listas[L.id]||L;
+  const p=S.produtos[de], o=S.produtos[para]; if(!p||!o) return;
+  const it=(L.itens||[]).find(x=>x.produtoId===de); if(!it) return;
+  const N=necessidade(it,p), ct=contTotal(o), leva=Math.max(1,Math.ceil(N/ct.q-1e-9));
+  if(!confirm(`TROCAR ${p.nome} (${rotEmb(p)})\nPOR ${o.nome}${o.marca?" · "+o.marca:""} (${rotEmb(o)})?\n\nLEVA ${leva} PARA ${fmtFino(N,ct.un)}.`)) return;
+  const quer={v:N,un:ct.un};
+  const listas = L.grupo ? listasDoGrupo(L.grupo).filter(l=>(l.itens||[]).some(x=>x.produtoId===de)) : [L];
+  listas.forEach(l=>{
+    const tem=(l.itens||[]).some(x=>x.produtoId===para), itens=[];
+    (l.itens||[]).forEach(x=>{
+      if(x.produtoId===de){ if(!tem) itens.push({...x,produtoId:para,qtd:leva,quer}); }
+      else if(x.produtoId===para) itens.push({...x,qtd:leva,quer});
+      else itens.push(x);
+    });
+    DB.update("listas",l.id,{itens});
+  });
+  toast("TROCADO POR "+o.nome+(o.marca?" · "+o.marca:""));
 }
 // "FILHA DE: …" leva até a matriz
 $("lMeta").addEventListener("click",e=>{ const a=e.target.closest("[data-goto]"); if(!a) return; e.preventDefault(); abrirLista(a.dataset.goto); });
@@ -1646,6 +1832,9 @@ $("itens").addEventListener("click",e=>{
   if((id=pick("excluir"))){ removerItem(L,id); return; }
   if((id=pick("hist"))){ if(!exigirLoja(L)) return; abrirHist(L,id); return; }
   if((id=pick("movermb"))){ abrirMoverMenor(L,id); return; }
+  if((id=pick("cattog"))){ catFechados.has(id)?catFechados.delete(id):catFechados.add(id); agendar(); return; }
+  if((id=pick("cathist"))){ if(!exigirLoja(L)) return; abrirHist(L,id); return; }
+  if((id=pick("trocar"))){ const [de,para]=id.split("|"); trocarItem(L,de,para); return; }
 });
 /* ---------- itens nas listas de um grupo ----------
    - adicionou numa filha de LOJA: entra nela e também na MATRIZ e na LIVRE (e sai de outra loja, uma loja por vez)
@@ -1677,7 +1866,7 @@ function adicionarItens(L,novos){
   // item que já está no grupo mantém a quantidade de lá
   if(L.grupo){
     const ref=[...listasVisaoGeral(L.grupo),...listasDoGrupo(L.grupo)];
-    novos=novos.map(n=>{ for(const l of ref){ const x=(l.itens||[]).find(i=>i.produtoId===n.produtoId); if(x) return {...n,qtd:x.qtd}; } return n; });
+    novos=novos.map(n=>{ for(const l of ref){ const x=(l.itens||[]).find(i=>i.produtoId===n.produtoId); if(x){ const {quer,...r}=n; return x.quer?{...r,qtd:x.qtd,quer:x.quer}:{...r,qtd:x.qtd}; } } return n; });
   }
   const alvo=[L];
   if(L.grupo) listasVisaoGeral(L.grupo).forEach(l=>{ if(!alvo.some(a=>a.id===l.id)) alvo.push(l); });
@@ -1707,7 +1896,7 @@ function editarQtd(L,id){
 function setQtd(L,id,q){
   L=S.listas[L.id]||L;
   const doGrupo = L.grupo ? listasDoGrupo(L.grupo).filter(l=>(l.itens||[]).some(x=>x.produtoId===id)) : [L];
-  doGrupo.forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).map(x=>x.produtoId===id?{...x,qtd:q}:x)}));
+  doGrupo.forEach(l=>DB.update("listas",l.id,{itens:(l.itens||[]).map(x=>{ if(x.produtoId!==id) return x; const {quer,...r}=x; return {...r,qtd:q}; })}));
 }
 // − / + do cartão: passo de 1; não desce abaixo de 1 (para tirar, use a lixeira)
 function passoQtd(L,id,passo){
@@ -2864,7 +3053,7 @@ async function lerCodigoFoto(){
    ===================================================================== */
 let pk={modo:null,nome:"",sel:{}};
 function abrirPicker(modo,nome){
-  pk={modo,nome:nome||"",sel:{},mes:false};
+  pk={modo,nome:nome||"",sel:{},quer:{},mes:false};
   const L=modo==="add"&&S.listas[ui.lista];
   $("pkTitle").textContent = modo==="nova" ? `NOVA LISTA: ${nome}` : "ADICIONAR PRODUTOS";
   $("pkBusca").value="";
@@ -2876,7 +3065,7 @@ function abrirPicker(modo,nome){
 }
 function filtrarProdutos(q){
   q=up(q);
-  return Object.values(S.produtos).filter(p=>!q||[p.nome,p.marca,p.codigo,p.barras,p.obs].some(v=>up(v).includes(q)))
+  return Object.values(S.produtos).filter(p=>!q||[p.nome,p.marca,p.codigo,p.barras,p.obs,p.categoria].some(v=>up(v).includes(q)))
     .sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR")||ordemPreco(a)-ordemPreco(b)||up(a.marca).localeCompare(up(b.marca),"pt-BR"));
 }
 function renderPicker(){
@@ -2885,14 +3074,26 @@ function renderPicker(){
   if(pk.mes) ps=[...ps].sort((a,b)=>((freq[b.id]||{}).vezes||0)-((freq[a.id]||{}).vezes||0));
   contarPicker();
   if(!Object.keys(S.produtos).length) $("pkCount").textContent="NENHUM PRODUTO CADASTRADO. TOQUE EM “+ CADASTRAR PRODUTO”.";
-  $("pkLista").innerHTML=ps.map(p=>{
+  // categorias: escolher pelo preço (ML/G/UN), qualquer marca ou embalagem
+  const busca=up($("pkBusca").value), cats=categorias().filter(c=>c.ps.length>1);
+  let topo="";
+  if(busca.length>=2){
+    topo=cats.filter(c=>c.nome.includes(busca)||c.ps.some(p=>ps.includes(p))).slice(0,3).map(c=>{
+      const ops=opcoesCat(c.ps,1,null), lojas=new Set(ops.map(x=>x.estId)).size;
+      const faixa=ops.length?` · DE ${fmtPorUn(Math.min(...ops.map(x=>x.porUn)),c.un).replace("1 "+c.un+" = ","")} A ${fmtPorUn(Math.max(...ops.map(x=>x.porUn)),c.un).replace("1 "+c.un+" = ","")} POR ${c.un}`:"";
+      return `<div class="catrow"><div class="m"><b>🏷️ ${esc(c.nome)}</b><small>CATEGORIA · ${c.ps.length} PRODUTOS${ops.length?` · ${ops.length} OPÇÕES EM ${lojas} LOJA${lojas>1?"S":""}`:""}${faixa}</small></div><button class="small primary" data-pkcat="${esc(c.nome)}">ESCOLHER PELO PREÇO ›</button></div>`;
+    }).join("");
+  } else if(cats.length){
+    topo=`<div class="catchips">ESCOLHER PELO PREÇO: ${cats.map(c=>`<button class="small" data-pkcat="${esc(c.nome)}">🏷️ ${esc(c.nome)}</button>`).join("")}</div>`;
+  }
+  $("pkLista").innerHTML=topo+ps.map(p=>{
     const ja=pk.jaNaLista.has(p.id), s=pk.sel[p.id];
     const pl=precosPorLoja(p.id)[0];
     const f=freq[p.id];
     return `<div class="pick">
       <input type="checkbox" data-pk="${p.id}" ${s||ja?"checked":""} ${ja?"disabled":""}>
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}</div>
+      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>
         ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}${precoBase(p,pl.valor)?" · "+precoBase(p,pl.valor):""}</div>`:""}</div>
       <input class="q" data-pkq="${p.id}" inputmode="decimal" value="${s?fmtQtd(s):""}" placeholder="QTD" ${ja?"disabled":""}>
     </div>`;
@@ -2921,18 +3122,19 @@ $("pkLista").addEventListener("change",e=>{
   const id=e.target.dataset.pk;
   if(id){
     const q=$("pkLista").querySelector(`[data-pkq="${id}"]`);
-    if(e.target.checked){ pk.sel[id]=pk.sel[id]||1; q.value=fmtQtd(pk.sel[id]); } else { delete pk.sel[id]; q.value=""; }
+    if(e.target.checked){ pk.sel[id]=pk.sel[id]||1; q.value=fmtQtd(pk.sel[id]); } else { delete pk.sel[id]; delete pk.quer[id]; q.value=""; }
     contarPicker(); return;
   }
   const qid=e.target.dataset.pkq;
-  if(qid){ const v=num(e.target.value), c=$("pkLista").querySelector(`[data-pk="${qid}"]`);
+  if(qid){ const v=num(e.target.value), c=$("pkLista").querySelector(`[data-pk="${qid}"]`); delete pk.quer[qid];
     if(v>0){ pk.sel[qid]=v; c.checked=true; } else { delete pk.sel[qid]; c.checked=false; e.target.value=""; }
     contarPicker(); }
 });
+$("pkLista").addEventListener("click",e=>{ const b=e.target.closest("[data-pkcat]"); if(b) abrirCat(b.dataset.pkcat); });
 $("pkNovo").onclick=()=>abrirProd(null,{},id=>{pk.sel[id]=1;renderPicker()});
 $("pkBtns").addEventListener("click",e=>{
   const id=e.target.id; if(!id) return;
-  const itens=Object.entries(pk.sel).map(([produtoId,qtd])=>({produtoId,qtd}));
+  const itens=Object.entries(pk.sel).map(([produtoId,qtd])=>pk.quer[produtoId]?{produtoId,qtd,quer:pk.quer[produtoId]}:{produtoId,qtd});
   if(id==="pkCancel"){ hide("mPick"); return; }
   if(id==="pkAdd"){ const L=S.listas[ui.lista]; if(itens.length) adicionarItens(L,itens); hide("mPick"); return; }
   if(id==="pkSo"||id==="pkDist"){
@@ -2942,6 +3144,74 @@ $("pkBtns").addEventListener("click",e=>{
     else abrirLista(nova.id);
   }
 });
+
+/* =====================================================================
+   ESCOLHER PELO PREÇO (categoria): quanto você quer → opções do mais barato ao mais caro
+   ===================================================================== */
+let cz=null;
+const UNS_CAT={ML:["ML","L"],G:["G","KG"],UN:["UN"],M:["M"]};
+function abrirCat(nome){
+  const c=categorias().find(x=>x.nome===up(nome)); if(!c) return;
+  // quantidade inicial: o que já está marcado desta categoria, senão o favorito, senão o menor produto
+  let N=0;
+  for(const p of c.ps){ if(pk.sel[p.id]){ N=pk.quer[p.id]?pk.quer[p.id].v:pk.sel[p.id]*contTotal(p).q; break; } }
+  if(!N){ const f=c.ps.find(ehFav); N=f?contTotal(f).q:Math.min(...c.ps.map(p=>contTotal(p).q)); }
+  cz={cat:c.nome,un:c.un,ps:c.ps,N,grosso:N>=1000&&UNS_CAT[c.un].length>1,marca:"",loja:"",sel:null};
+  $("ctTit").textContent="🏷️ "+c.nome;
+  $("ctQ").value=fmtQtd(Math.round((cz.grosso?N/1000:N)*1000)/1000);
+  renderCat(); show("mCat");
+}
+function renderCat(){
+  if(!cz) return;
+  const un=cz.un, N=cz.N;
+  $("ctUn").innerHTML=UNS_CAT[un].map((u,i)=>`<button data-ctun="${i}" class="${(i===1)===cz.grosso?"on":""}">${u}</button>`).join("");
+  const marcas=[...new Set(cz.ps.map(p=>up(p.marca)||"SEM MARCA"))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  const favM=new Set(cz.ps.filter(ehFav).map(p=>up(p.marca)||"SEM MARCA"));
+  $("ctMarcas").innerHTML=`<button data-ctm="" class="${cz.marca?"":"on"}">TODAS AS MARCAS</button>`+marcas.map(m=>`<button data-ctm="${esc(m)}" class="${cz.marca===m?"on":""}">${favM.has(m)?"❤️ ":""}${esc(m)}</button>`).join("");
+  const todas=opcoesCat(cz.ps,N||1,null);
+  const lojas=[...new Set(todas.map(x=>x.estId))];
+  $("ctLojas").innerHTML=`<button data-ctl="" class="${cz.loja?"":"on"}">TODAS AS LOJAS</button>`+lojas.map(l=>`<button data-ctl="${l}" class="${cz.loja===l?"on":""}">${esc(estNome(l))}</button>`).join("");
+  if(!(N>0)){ $("ctOpts").innerHTML=`<div class="empty">DIGITE QUANTO VOCÊ QUER.</div>`; $("ctEsc").innerHTML=""; return; }
+  const ops=todas.filter(x=>(!cz.marca||(up(x.o.marca)||"SEM MARCA")===cz.marca)&&(!cz.loja||x.estId===cz.loja));
+  cz.ops=ops;
+  const semPreco=cz.ps.filter(p=>!todas.some(x=>x.o.id===p.id)&&(!cz.marca||(up(p.marca)||"SEM MARCA")===cz.marca));
+  const min=ops.length?ops[0].total:0;
+  $("ctOpts").innerHTML=ops.map((x,i)=>{
+    const k=x.o.id+"|"+x.estId, d=Math.round((x.total-min)*100)/100, ja=pk.jaNaLista&&pk.jaNaLista.has(x.o.id);
+    const tags=[i===0?`<span class="tg g">★ MAIS BARATO PARA ${fmtFino(N,un)}</span>`:d>0?`<span class="tg y">${difTxt(d)}</span>`:`<span class="tg g">= MESMO PREÇO</span>`,
+      ehFav(x.o)?`<span class="tg f">❤️ SUA MARCA</span>`:"",
+      x.sobra>0?`<span class="tg y">SOBRA ${fmtFino(x.sobra,un)}</span>`:`<span class="tg n">EXATO</span>`,
+      ja?`<span class="tg n">JÁ NA LISTA</span>`:""].join("");
+    return `<div class="opt${cz.sel===k?" sel":""}" data-ct="${k}"><span class="rad"></span>
+      <div><b>${ehFav(x.o)?"❤️ ":""}${esc(x.o.nome)}${x.o.marca?" · "+esc(x.o.marca):""}</b><small>${esc(estNome(x.estId))} · ${esc(rotEmb(x.o))} · LEVA ${x.leva} = ${fmtFino(x.leva*x.ct.q,un)} · ${fmtPorUn(x.porUn,un)}</small></div>
+      ${lcd(x.total,"md"+(i===0?" g":""))}<div class="tags">${tags}</div></div>`;
+  }).join("")+(semPreco.length?`<div class="hint" style="margin-top:10px">SEM PREÇO AINDA: ${semPreco.map(p=>esc(p.nome+(p.marca?" · "+p.marca:"")+" ("+rotEmb(p)+")")).join(" · ")}</div>`:"")
+    +(ops.length?"":`<div class="empty">NENHUM PREÇO REGISTRADO COM ESSES FILTROS.</div>`);
+  const s=ops.find(x=>x.o.id+"|"+x.estId===cz.sel);
+  $("ctEsc").innerHTML = s ? `ESCOLHIDO: ${ehFav(s.o)?"❤️ ":""}${esc(s.o.nome)}${s.o.marca?" · "+esc(s.o.marca):""} (${esc(estNome(s.estId))}) · LEVA ${s.leva} = ${brl(s.total)}<br>${difCor(s.total-min," QUE O MAIS BARATO"," DO MAIS BARATO")}`
+    : `<span style="color:var(--muted)">TOQUE NUMA OPÇÃO</span>`;
+}
+$("ctQ").addEventListener("input",()=>{ if(!cz) return; const v=num($("ctQ").value); cz.N=v>0?Math.round(v*(cz.grosso?1000:1)*1000)/1000:0; renderCat(); });
+$("mCat").addEventListener("click",e=>{
+  if(!cz) return;
+  let b;
+  if((b=e.target.closest("[data-ctun]"))){ const g=b.dataset.ctun==="1"; if(g!==cz.grosso){ cz.grosso=g; $("ctQ").value=cz.N?fmtQtd(Math.round((g?cz.N/1000:cz.N)*1000)/1000):""; } renderCat(); return; }
+  if((b=e.target.closest("[data-ctm]"))){ cz.marca=b.dataset.ctm; renderCat(); return; }
+  if((b=e.target.closest("[data-ctl]"))){ cz.loja=b.dataset.ctl; renderCat(); return; }
+  if((b=e.target.closest("[data-ct]"))){ cz.sel=b.dataset.ct; renderCat(); return; }
+});
+$("ctCancel").onclick=()=>{ hide("mCat"); cz=null; };
+$("ctOk").onclick=()=>{
+  if(!cz) return;
+  const s=(cz.ops||[]).find(x=>x.o.id+"|"+x.estId===cz.sel);
+  if(!s){ alert("TOQUE NA OPÇÃO QUE VOCÊ QUER LEVAR."); return; }
+  if(pk.jaNaLista&&pk.jaNaLista.has(s.o.id)){ alert("ESSE PRODUTO JÁ ESTÁ NA LISTA. AJUSTE A QUANTIDADE NO CARTÃO DELE."); return; }
+  // um produto por categoria: troca o que estava marcado
+  cz.ps.forEach(p=>{ if(!pk.jaNaLista.has(p.id)){ delete pk.sel[p.id]; delete pk.quer[p.id]; } });
+  pk.sel[s.o.id]=s.leva; pk.quer[s.o.id]={v:cz.N,un:cz.un};
+  hide("mCat"); cz=null; renderPicker();
+  toast(`${s.o.nome}${s.o.marca?" · "+s.o.marca:""}: LEVA ${s.leva}`);
+};
 
 /* =====================================================================
    DISTRIBUIR
@@ -3203,6 +3473,16 @@ $("rpSave").onclick=()=>{
 let pd={id:null,foto:null,cb:null};
 $("pdVend").innerHTML=VENDIDO.map(v=>`<option>${v}</option>`).join("");
 $("pdCUn").innerHTML=CONT_UN.map(v=>`<option value="${v}">${v||"—"}</option>`).join("");
+$("pdEmb").innerHTML=EMBALAGENS.map(v=>`<option value="${v}">${v||"—"}</option>`).join("");
+// "CONTEÚDO TOTAL: 6 × 200 ML = 1.200 ML"
+function pdTotal(){
+  const n=Math.round(num($("pdUnids").value))||1, c=num($("pdCQtd").value), u=$("pdCUn").value;
+  const ct=contTotal({conteudoQtd:c,conteudoUn:u,unidades:n});
+  $("pdTotal").innerHTML = ct ? `CONTEÚDO TOTAL: ${n>1?n+" × "+fmtQtd(c)+" "+u+" = ":""}${fmtFino(ct.q,ct.un)}`
+    : up($("pdCat").value) ? `<span style="color:var(--gold)">PARA COMPARAR NA CATEGORIA, INFORME O CONTEÚDO E A UNIDADE</span>` : "";
+}
+["pdUnids","pdCQtd","pdCat"].forEach(i=>$(i).addEventListener("input",pdTotal));
+["pdCUn","pdEmb"].forEach(i=>$(i).addEventListener("change",pdTotal));
 function abrirProd(id,pre={},cb=null){
   const p=id?S.produtos[id]:null;
   pd={id,foto:p?p.foto||null:null,cb};
@@ -3211,6 +3491,10 @@ function abrirProd(id,pre={},cb=null){
   $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):(pre.marca||"");
   $("pdVend").value=p?(p.vendidoPor||"UN"):(pre.vendidoPor||"UN");
   $("pdCQtd").value=p&&p.conteudoQtd?fmtQtd(p.conteudoQtd):""; $("pdCUn").value=p?(p.conteudoUn||""):"";
+  $("pdCat").value=p?(p.categoria||""):(pre.categoria||""); $("pdEmb").value=p?(p.embalagem||""):(pre.embalagem||"");
+  $("pdUnids").value=p&&+p.unidades>1?String(p.unidades):"";
+  $("dlCat").innerHTML=[...new Set(Object.values(S.produtos).map(x=>up(x.categoria)).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">`).join("");
+  pdTotal();
   $("pdBarras").value=p?(p.barras||""):(pre.barras||""); $("pdObs").value=p?(p.obs||""):(pre.obs||"");
   const zonasDe = p ? (p.zonas||{}) : (pre.zonas||{});
   fotoPd();
@@ -3246,7 +3530,7 @@ function abrirProd(id,pre={},cb=null){
 // ➕ OUTRO TAMANHO: novo produto copiando nome, marca, observação, "vendido por" e zonas
 $("pdOutroTam").onclick=()=>{
   const p=S.produtos[pd.id]; if(!p) return;
-  abrirProd(null,{nome:p.nome,marca:p.marca||"",obs:p.obs||"",vendidoPor:p.vendidoPor||"UN",zonas:{...(p.zonas||{})}},pd.cb);
+  abrirProd(null,{nome:p.nome,marca:p.marca||"",obs:p.obs||"",vendidoPor:p.vendidoPor||"UN",categoria:p.categoria||"",zonas:{...(p.zonas||{})}},pd.cb);
   toast("PREENCHA O CONTEÚDO, O CÓDIGO DE BARRAS E A FOTO DO NOVO TAMANHO");
   setTimeout(()=>$("pdCQtd").focus(),100);
 };
@@ -3387,7 +3671,9 @@ $("pdSave").onclick=async()=>{
   if(barras){ const dup=Object.values(S.produtos).find(x=>x.barras===barras&&x.id!==pd.id); if(dup&&!confirm(`O CÓDIGO ${barras} JÁ ESTÁ NO PRODUTO ${dup.codigo} (${dup.nome}). SALVAR MESMO ASSIM?`)) return; }
   const zonas={}; document.querySelectorAll("#pdZonas [data-zona]").forEach(s=>{if(s.value&&s.value!=="__nova")zonas[s.dataset.zona]=s.value});
   const cq=num($("pdCQtd").value);
+  const nu=Math.round(num($("pdUnids").value));
   const dados={nome,marca:up($("pdMarca").value),vendidoPor:$("pdVend").value,conteudoQtd:cq>0?cq:null,conteudoUn:$("pdCUn").value,
+    categoria:up($("pdCat").value),embalagem:$("pdEmb").value,unidades:nu>1?nu:1,
     barras,obs:up($("pdObs").value),zonas,foto:pd.foto||null,atualizadoPor:eu().uid,atualizadoEm:Date.now()};
   if(pd.id){ DB.update("produtos",pd.id,dados); hide("mProd"); toast("PRODUTO SALVO"); return; }
   $("pdSave").disabled=true;
@@ -3609,13 +3895,13 @@ $("pqVisita").addEventListener("click",e=>{
 
 /* ---------- botão VOLTAR (celular, teclado ou navegador): navega dentro do app em vez de sair ---------- */
 const FECHA={mSenha:"snCancel",mAdmin:"admFechar",mRec:"rcCancel",mRecLista:"rlCancel",mQtd:"qtCancel",mMover:"mvCancel",mHist:"hsCancel",
-  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel"};
+  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel"};
 let saidaArmada=0;
 function voltarUmPasso(){
   // 1) leitor em tela cheia
   const scan=document.querySelector(".scan"); if(scan){ const x=scan.querySelector('[data-a="x"]'); if(x){ x.click(); return true; } }
   // 2) janela aberta (a de cima)
-  const abertas=[...document.querySelectorAll(".modal.show")];
+  const abertas=[...document.querySelectorAll(".modal.show")].sort((a,b)=>(+a.style.zIndex||20)-(+b.style.zIndex||20));
   if(abertas.length){ const m=abertas[abertas.length-1];
     const b=(FECHA[m.id]&&$(FECHA[m.id])) || [...m.querySelectorAll("button")].find(x=>/^(CANCELAR|FECHAR|AGORA NÃO|PULAR)$/.test(x.textContent.trim()));
     if(b) b.click(); else hide(m.id);
