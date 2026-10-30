@@ -381,6 +381,21 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .opt .tags{grid-column:2/4;display:flex;gap:5px;flex-wrap:wrap;align-items:center}.opt .tags .tg{flex:none;display:inline-block;height:auto}
 .tg{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap;line-height:1.5}
 .tg.g{background:var(--done);color:var(--accent)}.tg.f{background:#fde8ef;color:#c2185b}.tg.y{background:#fff4d6;color:#8a5a00}.tg.n{background:var(--chip);color:var(--muted)}
+/* opinião de cada usuário */
+.ops{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.ops i{font-style:normal;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;white-space:nowrap;line-height:1.6}
+.ops .n{background:#fdeceb;color:var(--warn)}.ops .c{background:#fff4d6;color:#8a5a00}.ops .a{background:var(--done);color:var(--accent)}
+.item2.done .ops{opacity:.55}.item2.done .ops i{font-size:9px}
+.opbox{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:8px}
+.opr{display:grid;grid-template-columns:86px 1fr;gap:8px;align-items:center;padding:8px 10px;font-size:12.5px;font-weight:800}
+.opr+.opr{border-top:1px solid var(--line)}
+.opr small{display:block;font-size:9.5px;color:var(--muted);font-weight:700}
+.opr.eu{background:#f6f8fb;box-shadow:inset 3px 0 0 var(--tag-ink)}
+.op3{display:flex;gap:5px}.op3 button{flex:1;min-width:0;padding:7px 2px;font-size:10.5px;font-weight:800;color:var(--muted);border-radius:10px;line-height:1.2}
+.op3 button.on.n{background:#fdeceb;border-color:#e9a59a;color:var(--warn)}.op3 button.on.c{background:#fff4d6;border-color:#f0d58a;color:#8a5a00}.op3 button.on.a{background:var(--done);border-color:#9fd3b5;color:var(--accent)}
+.pill{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px}
+.pill.n{background:#fdeceb;color:var(--warn)}.pill.c{background:#fff4d6;color:#8a5a00}.pill.a{background:var(--done);color:var(--accent)}.pill.v{background:var(--chip);color:var(--muted)}
+#mnSub{white-space:pre-line}
 .iagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
 .iat{position:relative;padding:0;border:2px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;aspect-ratio:1;display:flex;flex-direction:column}
 .iat img{flex:1;min-height:0;width:100%;object-fit:contain;background:#fff}
@@ -511,7 +526,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-G</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-H</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -796,6 +811,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   </div>
   <div id="pdBase"></div>
   <label class="f">OBSERVAÇÃO<textarea id="pdObs" rows="2"></textarea></label>
+  <div id="pdOpW"><div class="sect" style="display:flex;justify-content:space-between;gap:8px"><span>OPINIÃO DA FAMÍLIA</span><span id="pdOpFav"></span></div><div class="opbox" id="pdOp"></div></div>
   <div class="sect">ZONA EM CADA ESTABELECIMENTO</div>
   <div id="pdZonas"></div>
   <div id="pdMarcasWrap"><div class="sect">OUTRAS MARCAS E TAMANHOS</div><div id="pdMarcas"></div></div>
@@ -1144,6 +1160,23 @@ const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compra
 let desligar=[];
 const byId = arr => Object.fromEntries(arr.map(d=>[d.id,d]));
 const nomeUsuario = uid => (S.usuarios[uid]||{}).nome || "?";
+/* ---------- OPINIÃO: cada usuário marca a própria; só a família vê ---------- */
+const OPS={nao:{e:"😡",t:"NÃO COMO",c:"n",frase:"NÃO COME ESTE"},come:{e:"😐",t:"COMO",c:"c",frase:"COME ESTE"},adoro:{e:"😄",t:"ADORO",c:"a",frase:"ADORA ESTE"}};
+// pessoas com login da minha família, em ordem alfabética
+function membrosFam(){
+  const f=minhaFam(), me=S.user&&S.user.uid;
+  const l=Object.entries(S.usuarios||{}).filter(([id,u])=>f&&u.familiaId===f&&u.status!=="bloqueado").map(([uid,u])=>({uid,nome:up(u.nome||"?")}));
+  if(me&&!l.some(m=>m.uid===me)) l.push({uid:me,nome:up(S.user.nome||"?")});
+  return l.sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+}
+// opiniões do produto dadas por pessoas da minha família (ordem alfabética)
+function opinioes(p){
+  const f=minhaFam(); if(!p||!p.op||!f) return [];
+  return Object.entries(p.op).filter(([uid,o])=>o&&OPS[o.v]&&o.fam===f&&(!S.usuarios[uid]||S.usuarios[uid].familiaId===f))
+    .map(([uid,o])=>({uid,v:o.v,nome:up((S.usuarios[uid]||{}).nome||o.nome||"?")}))
+    .sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+}
+const opsHtml = p => { const l=opinioes(p); return l.length?`<div class="ops">${l.map(o=>`<i class="${OPS[o.v].c}">${OPS[o.v].e} ${esc(primeiroNome(o.nome))}</i>`).join("")}</div>`:""; };
 const famNome = id => (S.familias[id]||{}).nome || (id?"FAMÍLIA":"SEM FAMÍLIA");
 const quemFam = r => r&&r.familiaId&&r.familiaId!==minhaFam() ? ` (${famNome(r.familiaId)})` : "";
 const eu = () => S.user;
@@ -1726,6 +1759,7 @@ function cardItem(L,it,estId){
       <div class="info">
         <div class="name">${esc(p.nome)}</div>
         <div class="sub">${esc(descProduto(p))}${cat&&it.quer?` · QUERO ${fmtFino(cat.N,cat.un)}`:""}</div>
+        ${opsHtml(p)}
         <div class="tags">${chips}</div>
       </div>
     </div>
@@ -1790,12 +1824,12 @@ function cardCat(L,it,p,estId){
         const cls = eu_ ? "" : dd==null ? "" : dd>0?"up":dd<0?"dn":"";
         return `<div class="crow${i===0?" best":""}${eu_?" na":""}"><span class="pos">${i+1}º</span>
           <div><b>${i===0?"★ ":""}${ehFav(x.o)?"❤️ ":""}${esc(x.o.nome)}${x.o.marca?" · "+esc(x.o.marca):""}${eu_?" · NA LISTA":""}</b>
-            <small><span class="emb">${esc(rotEmbCurta(x.o))}</span>${fmtFino(x.ct.q,un)} · ${brl(x.valor)} · ${fmtPorUn(x.porUn,un)}</small></div>
+            <small><span class="emb">${esc(rotEmbCurta(x.o))}</span>${fmtFino(x.ct.q,un)} · ${brl(x.valor)} · ${fmtPorUn(x.porUn,un)}</small>${opsHtml(x.o)}</div>
           ${lcd(x.total,"sm "+(i===0?"g":eu_?"":"r"))}
           <div class="cacts"><span class="d ${cls}">LEVA ${x.leva}${x.leva>1||x.sobra>0?" = "+fmtFino(x.leva*x.ct.q,un):""}${cmp}${x.sobra>0?" · SOBRA "+fmtFino(x.sobra,un):eu_?" · EXATO":""}</span>
             <button class="ib cif" data-cathist="${x.o.id}" aria-label="ATUALIZAR PREÇO">$</button>${eu_?"":`<button class="small" data-trocar="${p.id}|${x.o.id}">TROCAR</button>`}</div></div>`;
       }).join("")+sem.map(o=>`<div class="crow${o.id===p.id?" na":""}"><span class="pos">—</span>
-          <div><b>${ehFav(o)?"❤️ ":""}${esc(o.nome)}${o.marca?" · "+esc(o.marca):""}${o.id===p.id?" · NA LISTA":""}</b><small><span class="emb">${esc(rotEmbCurta(o))}</span>${fmtFino(contTotal(o).q,un)} · SEM PREÇO AQUI</small></div><span></span>
+          <div><b>${ehFav(o)?"❤️ ":""}${esc(o.nome)}${o.marca?" · "+esc(o.marca):""}${o.id===p.id?" · NA LISTA":""}</b><small><span class="emb">${esc(rotEmbCurta(o))}</span>${fmtFino(contTotal(o).q,un)} · SEM PREÇO AQUI</small>${opsHtml(o)}</div><span></span>
           <div class="cacts"><span class="d"></span><button class="small" data-cathist="${o.id}">$ REGISTRAR</button></div></div>`).join("")+`</div>`;
     }
   }
@@ -1807,7 +1841,19 @@ function trocarItem(L,de,para){
   const p=S.produtos[de], o=S.produtos[para]; if(!p||!o) return;
   const it=(L.itens||[]).find(x=>x.produtoId===de); if(!it) return;
   const N=necessidade(it,p), ct=contTotal(o), leva=Math.max(1,Math.ceil(N/ct.q-1e-9));
-  if(!confirm(`TROCAR ${p.nome} (${rotEmb(p)})\nPOR ${o.nome}${o.marca?" · "+o.marca:""} (${rotEmb(o)})?\n\nLEVA ${leva} PARA ${fmtFino(N,ct.un)}.`)) return;
+  const pergunta=`TROCAR ${p.nome} (${rotEmb(p)}) POR ${o.nome}${o.marca?" · "+o.marca:""} (${rotEmb(o)})?`;
+  const avisos=opinioes(o).filter(x=>x.v!=="come").sort((a,b)=>(a.v==="nao"?0:1)-(b.v==="nao"?0:1));
+  const fazer=()=>trocarItemAgora(L,de,para,N,ct,leva,o);
+  if(avisos.length){ // alguém da família não come (ou adora) o produto novo
+    abrirMenu(pergunta,`LEVA ${leva} PARA ${fmtFino(N,ct.un)}.\n\n`+avisos.map(x=>`${OPS[x.v].e} ${primeiroNome(x.nome)} ${OPS[x.v].frase}.`).join("\n"),
+      [{txt:avisos.some(x=>x.v==="nao")?"TROCAR MESMO ASSIM":"TROCAR",perigo:avisos.some(x=>x.v==="nao"),fn:fazer}]);
+    return;
+  }
+  if(!confirm(`${pergunta}\n\nLEVA ${leva} PARA ${fmtFino(N,ct.un)}.`)) return;
+  fazer();
+}
+function trocarItemAgora(L,de,para,N,ct,leva,o){
+  L=S.listas[L.id]||L;
   const quer={v:N,un:ct.un};
   const listas = L.grupo ? listasDoGrupo(L.grupo).filter(l=>(l.itens||[]).some(x=>x.produtoId===de)) : [L];
   listas.forEach(l=>{
@@ -3118,7 +3164,7 @@ function renderPicker(){
     return `<div class="pick">
       <input type="checkbox" data-pk="${p.id}" ${s||ja?"checked":""} ${ja?"disabled":""}>
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>
+      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>${opsHtml(p)}
         ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}${precoBase(p,pl.valor)?" · "+precoBase(p,pl.valor):""}</div>`:""}</div>
       <input class="q" data-pkq="${p.id}" inputmode="decimal" value="${s?fmtQtd(s):""}" placeholder="QTD" ${ja?"disabled":""}>
     </div>`;
@@ -3208,7 +3254,7 @@ function renderCat(){
       x.sobra>0?`<span class="tg y">SOBRA ${fmtFino(x.sobra,un)}</span>`:`<span class="tg n">EXATO</span>`,
       ja?`<span class="tg n">JÁ NA LISTA</span>`:""].join("");
     return `<div class="opt${cz.sel===k?" sel":""}" data-ct="${k}"><span class="rad"></span>
-      <div><b>${ehFav(x.o)?"❤️ ":""}${esc(x.o.nome)}${x.o.marca?" · "+esc(x.o.marca):""}</b><small>${esc(estNome(x.estId))} · ${esc(rotEmb(x.o))} · LEVA ${x.leva} = ${fmtFino(x.leva*x.ct.q,un)} · ${fmtPorUn(x.porUn,un)}</small></div>
+      <div><b>${ehFav(x.o)?"❤️ ":""}${esc(x.o.nome)}${x.o.marca?" · "+esc(x.o.marca):""}</b><small>${esc(estNome(x.estId))} · ${esc(rotEmb(x.o))} · LEVA ${x.leva} = ${fmtFino(x.leva*x.ct.q,un)} · ${fmtPorUn(x.porUn,un)}</small>${opsHtml(x.o)}</div>
       ${lcd(x.total,"md"+(i===0?" g":""))}<div class="tags">${tags}</div></div>`;
   }).join("")+(semPreco.length?`<div class="hint" style="margin-top:10px">SEM PREÇO AINDA: ${semPreco.map(p=>esc(p.nome+(p.marca?" · "+p.marca:"")+" ("+rotEmb(p)+")")).join(" · ")}</div>`:"")
     +(ops.length?"":`<div class="empty">NENHUM PREÇO REGISTRADO COM ESSES FILTROS.</div>`);
@@ -3392,6 +3438,7 @@ function renderProdutos(){
       <div><div class="name">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}</div>
         <div class="sub">${esc(descProduto(p))}</div>
         <div class="sub">${esc(p.codigo||"")}${p.barras?" · ▥ "+esc(p.barras):""}</div>
+        ${opsHtml(p)}
         ${c?`<div class="sub" style="color:var(--accent);font-weight:700">MAIS BARATO: ${esc(estNome(c.estabelecimentoId))} ${brl(c.valor)} (${dCurta(c.ts)} · ${esc(primeiroNome(c.usuarioNome))})${precoBase(p,c.valor)?" · "+precoBase(p,c.valor):""}</div>`:`<div class="sub">SEM PREÇO</div>`}
         ${pl.length>1?`<div class="sub">${pl.length} ESTABELECIMENTOS COM PREÇO</div>`:""}
         <div class="tags"><button class="tag" data-rp="${p.id}">💲 PREÇO</button></div>
@@ -3510,7 +3557,7 @@ function pdTotal(){
 ["pdCUn","pdEmb"].forEach(i=>$(i).addEventListener("change",pdTotal));
 function abrirProd(id,pre={},cb=null){
   const p=id?S.produtos[id]:null;
-  pd={id,foto:p?p.foto||null:null,cb};
+  pd={id,foto:p?p.foto||null:null,cb,opMeu:p?((opinioes(p).find(o=>o.uid===eu().uid)||{}).v||null):null};
   $("pdTitle").textContent=p?"EDITAR PRODUTO":"NOVO PRODUTO";
   $("pdCodigo").textContent=p?(p.codigo||"—"):"GERADO AO SALVAR";
   $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):(pre.marca||"");
@@ -3548,6 +3595,7 @@ function abrirProd(id,pre={},cb=null){
         + `<details class="todos"><summary>VER TODOS OS REGISTROS (${rs.length})</summary>${todos}</details>`
       : `<div class="hint">NENHUM PREÇO AINDA.</div>`;
   }
+  renderPdOp();
   $("pdOutroTam").classList.toggle("hidden",!p);
   $("pdDel").classList.toggle("hidden",!p||!ehAdmin());
   show("mProd");
@@ -3559,6 +3607,26 @@ $("pdOutroTam").onclick=()=>{
   toast("PREENCHA O CONTEÚDO, O CÓDIGO DE BARRAS E A FOTO DO NOVO TAMANHO");
   setTimeout(()=>$("pdCQtd").focus(),100);
 };
+// OPINIÃO DA FAMÍLIA no cadastro: a minha linha tem os botões; as dos outros, só leitura
+function renderPdOp(){
+  const f=minhaFam(); $("pdOpW").classList.toggle("hidden",!f); if(!f) return;
+  const p=pd.id?S.produtos[pd.id]:null, me=eu().uid;
+  const deles=Object.fromEntries(opinioes(p).map(o=>[o.uid,o.v]));
+  $("pdOpFav").textContent = p&&ehFav(p) ? "❤️ FAVORITO DA CASA" : "";
+  $("pdOp").innerHTML=membrosFam().map(m=>{
+    if(m.uid===me) return `<div class="opr eu"><div>${esc(primeiroNome(m.nome))}<small>VOCÊ</small></div><div class="op3">${Object.entries(OPS).map(([k,o])=>`<button type="button" data-opv="${k}" class="${o.c}${pd.opMeu===k?" on":""}">${o.e} ${o.t}</button>`).join("")}</div></div>`;
+    const v=deles[m.uid];
+    return `<div class="opr"><div>${esc(primeiroNome(m.nome))}<small>${esc(famNome(f))}</small></div><div>${v?`<span class="pill ${OPS[v].c}">${OPS[v].e} ${OPS[v].t}</span>`:`<span class="pill v">— SEM OPINIÃO</span>`}</div></div>`;
+  }).join("");
+}
+$("pdOp").addEventListener("click",e=>{
+  const b=e.target.closest("[data-opv]"); if(!b) return;
+  const nv = pd.opMeu===b.dataset.opv ? null : b.dataset.opv; // tocar de novo apaga
+  pd.opMeu=nv; renderPdOp();
+  if(pd.id){ const p=S.produtos[pd.id]; if(!p) return; const me=eu().uid, op={...(p.op||{})};
+    if(nv) op[me]={v:nv,fam:minhaFam(),nome:eu().nome}; else delete op[me];
+    DB.update("produtos",pd.id,{op}); toast(nv?"OPINIÃO SALVA: "+OPS[nv].t:"OPINIÃO APAGADA"); }
+});
 function opcoesZona(estId,sel){
   return `<option value="">— SEM ZONA —</option>`+pqZonas(estId).map(z=>`<option value="${esc(z.codigo)}" ${sel===z.codigo?"selected":""}>${esc(rotZ(z))}</option>`).join("")
     +`<option value="__nova">+ NOVA ZONA…</option>`;
@@ -3821,7 +3889,8 @@ $("pdSave").onclick=async()=>{
   try{ codigo="PROD"+String(await DB.proximo("produtos")).padStart(6,"0"); }
   catch(e){ codigo="PRODT"+Date.now().toString(36).toUpperCase(); toast("SEM INTERNET: ID PROVISÓRIO "+codigo); }
   $("pdSave").disabled=false;
-  const id=DB.add("produtos",{...dados,codigo,criadoPor:eu().uid,criadoPorNome:eu().nome,criadoEm:Date.now()});
+  const opNovo = pd.opMeu ? {op:{[eu().uid]:{v:pd.opMeu,fam:minhaFam(),nome:eu().nome}}} : {};
+  const id=DB.add("produtos",{...dados,...opNovo,codigo,criadoPor:eu().uid,criadoPorNome:eu().nome,criadoEm:Date.now()});
   toast("PRODUTO "+codigo+" CADASTRADO");
   if(pdc.ativo&&!pd.cb){ // modo cadastro em sequência: formulário limpo, câmera continua ligada
     const zonasAntes={...zonas}; abrirProd(null,{zonas:zonasAntes}); pdc.ultimo="";
