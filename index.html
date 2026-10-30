@@ -409,6 +409,19 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .rknota{font-size:11px;color:var(--muted);font-weight:600;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:8px}
 .rktog{display:flex;gap:6px;margin-top:12px}.rktog button{flex:1;border-radius:99px;padding:7px;font-size:11px;font-weight:800}
 .rktog button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.admtabs{display:flex;gap:6px;margin:12px 0 4px}.admtabs button{flex:1;border-radius:99px;padding:8px 2px;font-size:10.5px;font-weight:800}
+.admtabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.admsec{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin:14px 2px 6px;display:flex;justify-content:space-between;gap:8px}
+.admbox{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.admr{display:flex;gap:10px;align-items:center;padding:10px 12px;flex-wrap:wrap}.admr+.admr{border-top:1px solid var(--line)}
+.admav{width:36px;height:36px;border-radius:50%;background:var(--tag);color:var(--tag-ink);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.admm{flex:1;min-width:150px}.admm b{display:block;font-size:14px}.admm small{font-size:11px;color:var(--muted);font-weight:600;text-transform:none}
+.admpill{font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;margin-left:4px;vertical-align:1px}
+.admpill.novo{background:#fff4d6;color:#8a5a00}.admpill.adm{background:var(--done);color:var(--accent)}.admpill.blq{background:#fdeceb;color:var(--warn)}
+.admacts{display:flex;gap:6px;align-items:center;width:100%}.admacts select{flex:1;min-width:0}
+.admdanger{border:1px solid #f0c9c1;background:#fdf3f1;border-radius:14px;padding:12px;margin-top:10px}
+.admdanger b{color:var(--warn)}.admdanger small{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin:4px 0 10px}
+
 .hdif{font-size:12px;font-weight:700;margin:6px 0 0;min-height:16px}
 .achado{display:flex;gap:10px;align-items:center;background:var(--done);border:1px solid #bfe0cc;border-radius:12px;padding:8px;margin:4px 0 8px}
 .achado img{width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--line);flex:none}
@@ -435,12 +448,20 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   </div>
 </div>
 
+<div id="espera" class="hidden" style="padding:40px 20px;max-width:420px;margin:0 auto;text-align:center">
+  <div class="marca-login"><h1>OIKONOMIA</h1></div>
+  <div style="font-size:44px;margin:20px 0 6px">⏳</div>
+  <div id="esTit" style="font-weight:800;font-size:18px">AGUARDANDO LIBERAÇÃO</div>
+  <div id="esTxt" class="hint" style="margin-top:8px;font-size:13px"></div>
+  <div class="btns" style="margin-top:18px"><button id="esSair">SAIR</button><button id="esDeNovo" class="primary">VERIFICAR DE NOVO</button></div>
+</div>
+
 <!-- ================= APP ================= -->
 <div id="app" class="hidden">
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-B</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-C</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -819,6 +840,29 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="btns"><button id="rlCancel">CANCELAR</button><button id="rlOk" class="primary">➕ COLOCAR</button></div>
 </div></div>
 
+<!-- 🛡️ Painel do administrador -->
+<div class="modal" id="mAdmin"><div class="sheet" style="max-height:94vh">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2 style="margin:0">🛡️ PAINEL DO ADMINISTRADOR</h2><button id="admFechar" class="small">FECHAR</button>
+  </div>
+  <div class="admtabs">
+    <button data-adm="usuarios" class="on">👤 USUÁRIOS</button><button data-adm="familias">🏠 FAMÍLIAS</button><button data-adm="lojas">🏪 LOJAS</button><button data-adm="dados">⚠ DADOS</button>
+  </div>
+  <div id="admBody"></div>
+</div></div>
+
+<!-- Senha (painel, zerar, trocar minha senha) -->
+<div class="modal" id="mSenha"><div class="sheet">
+  <h2 id="snTit" style="margin:0"></h2>
+  <div class="hint" id="snSub" style="margin-top:4px"></div>
+  <label class="f" id="snFraseW">DIGITE: APAGAR TUDO<input id="snFrase" autocomplete="off"></label>
+  <label class="f" id="snAtualW"><span id="snAtualL">SUA SENHA</span><input id="snAtual" type="password" autocomplete="current-password" style="text-transform:none"></label>
+  <label class="f" id="snNovaW">SENHA NOVA (MÍNIMO 6)<input id="snNova" type="password" autocomplete="new-password" style="text-transform:none"></label>
+  <label class="f" id="snNova2W">REPITA A SENHA NOVA<input id="snNova2" type="password" autocomplete="new-password" style="text-transform:none"></label>
+  <div class="hint" id="snMsg" style="color:var(--warn);margin-top:6px"></div>
+  <div class="btns"><button id="snCancel">CANCELAR</button><button id="snOk" class="primary">CONFIRMAR</button></div>
+</div></div>
+
 <div class="modal" id="mMenu"><div class="sheet">
   <h2 id="mnTitle"></h2>
   <div class="hint" id="mnSub"></div>
@@ -938,7 +982,13 @@ const Local = {
   async reset(){ },
   col(c){ return this.dados[c]||(this.dados[c]={}); },
   emitir(sub){ let docs=Object.entries(this.col(sub.c)).map(([id,d])=>({id,...JSON.parse(JSON.stringify(d))}));
-    if(sub.f) docs=docs.filter(d=>(d[sub.f[0]]||[]).includes(sub.f[1])); sub.cb(docs); },
+    if(sub.f&&sub.f.eq) docs=docs.filter(d=>d[sub.f.eq[0]]===sub.f.eq[1]);
+    else if(sub.f) docs=docs.filter(d=>(d[sub.f[0]]||[]).includes(sub.f[1])); sub.cb(docs); },
+  async getAll(c){ return Object.entries(this.col(c)).map(([id,d])=>({id,...JSON.parse(JSON.stringify(d))})); },
+  async delMany(c,ids){ ids.forEach(id=>delete this.col(c)[id]); this.mudou(c); },
+  async updMany(c,lst){ lst.forEach(([id,d])=>{ if(this.col(c)[id]) this.col(c)[id]={...this.col(c)[id],...d}; }); this.mudou(c); },
+  async reauth(senha){ if(!senha) throw {code:"auth/wrong-password"}; },
+  async trocarSenha(a,n){ if(!a) throw {code:"auth/wrong-password"}; },
   mudou(c){ this.salvar(); this.subs.filter(s=>s.c===c).forEach(s=>queueMicrotask(()=>this.emitir(s))); },
   listen(c,cb,f){ const s={c,cb,f}; this.subs.push(s); queueMicrotask(()=>this.emitir(s)); return ()=>{this.subs=this.subs.filter(x=>x!==s)} },
   async get(c,id){ const d=this.col(c)[id]; return d?{id,...d}:null; },
@@ -969,9 +1019,15 @@ const Fire = {
     if(String(e&&e.code).includes("permission-denied")&&S.user&&!this.avisado){ this.avisado=true; semAutorizacao(); return; }
     toast("ERRO AO GRAVAR: "+(e.code||e.message||e)); },
   listen(c,cb,f){ const fs=this.fs; let q=fs.collection(this.db,c);
-    if(f) q=fs.query(q,fs.where(f[0],"array-contains",f[1]));
+    if(f&&f.eq) q=fs.query(q,fs.where(f.eq[0],"==",f.eq[1]));
+    else if(f) q=fs.query(q,fs.where(f[0],"array-contains",f[1]));
     return fs.onSnapshot(q,s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))),e=>this.erro(e)); },
   async get(c,id){ const s=await this.fs.getDoc(this.fs.doc(this.db,c,id)); return s.exists()?{id:s.id,...s.data()}:null; },
+  async getAll(c){ const s=await this.fs.getDocs(this.fs.collection(this.db,c)); return s.docs.map(d=>({id:d.id,...d.data()})); },
+  async delMany(c,ids){ const fs=this.fs; for(let i=0;i<ids.length;i+=400){ const b=fs.writeBatch(this.db); ids.slice(i,i+400).forEach(id=>b.delete(fs.doc(this.db,c,id))); await b.commit(); } },
+  async updMany(c,lst){ const fs=this.fs; for(let i=0;i<lst.length;i+=400){ const b=fs.writeBatch(this.db); lst.slice(i,i+400).forEach(([id,d])=>b.update(fs.doc(this.db,c,id),d)); await b.commit(); } },
+  async reauth(senha){ const au=this.au, u=this.auth.currentUser; await au.reauthenticateWithCredential(u,au.EmailAuthProvider.credential(u.email,senha)); },
+  async trocarSenha(atual,nova){ await this.reauth(atual); await this.au.updatePassword(this.auth.currentUser,nova); },
   set(c,id,d,merge){ this.fs.setDoc(this.fs.doc(this.db,c,id),d,{merge:!!merge}).catch(e=>this.erro(e)); },
   add(c,d){ const r=this.fs.doc(this.fs.collection(this.db,c)); this.fs.setDoc(r,d).catch(e=>this.erro(e)); return r.id; },
   update(c,id,d){ this.fs.updateDoc(this.fs.doc(this.db,c,id),d).catch(e=>this.erro(e)); },
@@ -981,15 +1037,27 @@ const Fire = {
     return await Promise.race([t,new Promise((_,r)=>setTimeout(()=>r(new Error("offline")),8000))]); }
 };
 const DB = DEMO ? Local : Fire;
+/* administrador: definido nas regras do Firebase (esta lista só controla o que aparece na tela) */
+const ADMINS = ["leandrolara.ao@gmail.com"].concat(DEMO?["l@x.com","leandro@x.com"]:[]);
+const ehAdmin = () => !!(S.user&&ADMINS.includes(String(S.user.email||"").toLowerCase()));
+const minhaFam = () => (S.user&&S.user.familiaId)||null;
+// listas, compras, receitas e preços gravam a família de quem criou
+const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos"]);
+(function(){ const add0=DB.add.bind(DB), set0=DB.set.bind(DB);
+  DB.add=(c,d)=>add0(c, COLS_FAM.has(c)&&d&&!("familiaId" in d)&&minhaFam()?{...d,familiaId:minhaFam()}:d);
+  DB.set=(c,id,d,merge)=>set0(c,id, COLS_FAM.has(c)&&d&&!merge&&!("familiaId" in d)&&minhaFam()?{...d,familiaId:minhaFam()}:d, merge);
+})();
 
 /* =====================================================================
    ESTADO
    ===================================================================== */
-const S = { user:null, usuarios:{}, produtos:{}, ests:{}, precos:[], listas:{}, realizados:{}, finalizacoes:[], receitas:{} };
+const S = { user:null, usuarios:{}, familias:{}, produtos:{}, ests:{}, precos:[], listas:{}, realizados:{}, finalizacoes:[], receitas:{} };
 const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compras", fechados:new Set(), abertos:new Set() };
 let desligar=[];
 const byId = arr => Object.fromEntries(arr.map(d=>[d.id,d]));
 const nomeUsuario = uid => (S.usuarios[uid]||{}).nome || "?";
+const famNome = id => (S.familias[id]||{}).nome || (id?"FAMÍLIA":"SEM FAMÍLIA");
+const quemFam = r => r&&r.familiaId&&r.familiaId!==minhaFam() ? ` (${famNome(r.familiaId)})` : "";
 const eu = () => S.user;
 
 /* ---------- Login ---------- */
@@ -1014,11 +1082,19 @@ $("lEsqueci").onclick=async()=>{
   catch(err){ $("lMsg").textContent=errLogin(err); }
 };
 $("who").onclick=()=>{
-  const n=prompt("SEU NOME (APARECE NAS COMPRAS E PREÇOS QUE VOCÊ REGISTRA):",S.user.nome);
-  if(n===null) return;
-  if(up(n)){ S.user.nome=up(n); DB.set("usuarios",S.user.uid,{nome:S.user.nome,email:S.user.email},true); $("who").textContent=S.user.nome+" ▾"; }
+  const ops=[];
+  if(ehAdmin()) ops.push({txt:"🛡️  PAINEL DO ADMINISTRADOR",fn:()=>abrirPainel()});
+  ops.push({txt:"🔑  TROCAR MINHA SENHA",fn:()=>trocarMinhaSenha()});
+  ops.push({txt:"✏️  MEU NOME",fn:()=>{
+    const n=prompt("SEU NOME (APARECE NAS COMPRAS E PREÇOS QUE VOCÊ REGISTRA):",S.user.nome);
+    if(n===null) return;
+    if(up(n)){ S.user.nome=up(n); DB.set("usuarios",S.user.uid,{nome:S.user.nome},true); $("who").textContent=S.user.nome+" ▾"; }
+  }});
+  abrirMenu(S.user.nome,`${famNome(minhaFam())}${ehAdmin()?" · ADMINISTRADOR":""}`,ops);
 };
-function sair(){ desligar.forEach(f=>{try{f()}catch(e){}}); desligar=[]; DB.logout(); }
+$("esSair").onclick=()=>sair();
+$("esDeNovo").onclick=()=>{ entrou({uid:S.user.uid,email:S.user.email}); };
+function sair(){ desligar.forEach(f=>{try{f()}catch(e){}}); desligar=[]; $("espera").classList.add("hidden"); DB.logout(); }
 $("sair").onclick=()=>{ if(confirm("SAIR DA CONTA NESTE APARELHO?")) sair(); };
 
 // e-mail fora da lista de autorizados das regras do banco
@@ -1034,27 +1110,63 @@ async function entrou(u){
     if(String(e&&e.code).includes("permission-denied")){ semAutorizacao(); return; }
     perfil="timeout";
   }
-  let nome = perfil&&perfil!=="timeout" ? perfil.nome : "";
-  if(!nome && perfil!=="timeout"){
+  const admin=ADMINS.includes(String(u.email||"").toLowerCase());
+  if(perfil==="timeout"){ perfil=null; try{ const c=JSON.parse(localStorage.getItem("lc3.perfil."+u.uid)||"null"); if(c) perfil=c; }catch(e){} if(!perfil) perfil={nome:"",status:"ativo",offline:true}; }
+  let nome = perfil ? perfil.nome : "";
+  if(!perfil){
     while(!nome){ nome=up(prompt("BEM-VINDO! DIGITE SEU NOME (VAI APARECER NAS COMPRAS E PREÇOS QUE VOCÊ REGISTRAR):","")||""); }
-    DB.set("usuarios",u.uid,{nome,email:u.email,criadoEm:Date.now()});
+    perfil={nome,email:u.email,status:admin?"ativo":"novo",criadoEm:Date.now()};
+    DB.set("usuarios",u.uid,perfil);
   }
   if(!nome) nome=up(u.email.split("@")[0]);
-  S.user={uid:u.uid,email:u.email,nome};
+  S.user={uid:u.uid,email:u.email,nome,familiaId:perfil.familiaId||null,status:perfil.status||"novo"};
+  // administrador sem família: primeira vez nesta versão → cria a FAMÍLIA 01 e migra os dados
+  if(admin&&!perfil.familiaId&&!perfil.offline){ await migrarParaFamilias(u,nome); }
+  if(!admin&&(S.user.status!=="ativo"||!S.user.familiaId)&&!perfil.offline){ telaEspera(); return; }
+  try{ localStorage.setItem("lc3.perfil."+u.uid,JSON.stringify({nome:S.user.nome,familiaId:S.user.familiaId,status:"ativo"})); }catch(e){}
+  $("espera").classList.add("hidden");
   $("who").textContent=nome+" ▾";
   $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  const fam=S.user.familiaId||"__sem__";
+  desligar.forEach(f=>{try{f()}catch(e){}});
   desligar=[
-    DB.listen("usuarios",d=>{S.usuarios=byId(d);agendar()}),
+    DB.listen("usuarios",d=>{S.usuarios=byId(d);agendar();if(painel)renderPainel()}),
+    DB.listen("familias",d=>{S.familias=byId(d);agendar();if(painel)renderPainel()}),
     DB.listen("produtos",d=>{S.produtos=byId(d);agendar()}),
-    DB.listen("estabelecimentos",d=>{S.ests=byId(d);agendar()}),
+    DB.listen("estabelecimentos",d=>{S.ests=byId(d);agendar();if(painel)renderPainel()}),
     // ts = data do preço (a escolhida no anúncio, ou a do registro); tsReg = quando foi digitado
-    DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar()}),
-    DB.listen("realizados",d=>{S.realizados=byId(d);agendar()}),
-    DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()}),
-    DB.listen("receitas",d=>{S.receitas=byId(d);agendar()}),
+    DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar();if(painel)renderPainel()}),
+    DB.listen("realizados",d=>{S.realizados=byId(d);agendar()},{eq:["familiaId",fam]}),
+    DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()},{eq:["familiaId",fam]}),
+    DB.listen("receitas",d=>{S.receitas=byId(d);agendar()},{eq:["familiaId",fam]}),
     DB.listen("listas",d=>{S.listas=byId(d);agendar();setTimeout(limparFilhasVazias,0)},["membros",u.uid]),
   ];
   mostrar();
+}
+// usuário ainda não liberado (ou bloqueado) pelo administrador
+function telaEspera(){
+  $("app").classList.add("hidden"); $("login").classList.add("hidden"); $("espera").classList.remove("hidden");
+  const blq=S.user.status==="bloqueado";
+  $("esTit").textContent = blq ? "ACESSO BLOQUEADO" : "AGUARDANDO LIBERAÇÃO";
+  $("esTxt").textContent = blq ? "SEU ACESSO ESTÁ BLOQUEADO. FALE COM O ADMINISTRADOR." : "SEU ACESSO FOI CRIADO. O ADMINISTRADOR PRECISA ESCOLHER SUA FAMÍLIA E LIBERAR.";
+}
+// migração única: cria a FAMÍLIA 01, coloca o administrador nela e leva listas, compras, receitas, preços e favoritos
+async function migrarParaFamilias(u,nome){
+  try{
+    const fams=await DB.getAll("familias");
+    const famId = fams.length ? fams.sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0))[0].id : DB.add("familias",{nome:"FAMÍLIA 01",criadoEm:Date.now(),criadoPor:u.uid});
+    DB.set("usuarios",u.uid,{nome,email:u.email,status:"ativo",familiaId:famId},true);
+    S.user.familiaId=famId; S.user.status="ativo";
+    for(const c of ["listas","realizados","finalizacoes","receitas"]){
+      const docs=(await DB.getAll(c)).filter(d=>!d.familiaId);
+      if(docs.length) await DB.updMany(c,docs.map(d=>[d.id,{familiaId:famId}]));
+    }
+    const ps=(await DB.getAll("precos")).filter(r=>!r.familiaId&&r.usuarioUid===u.uid);
+    if(ps.length) await DB.updMany("precos",ps.map(r=>[r.id,{familiaId:famId}]));
+    const favs=(await DB.getAll("produtos")).filter(p=>p["favorito"]);
+    if(favs.length) await DB.updMany("produtos",favs.map(p=>[p.id,{fav:{...(p.fav||{}),[famId]:true},favorito:false}]));
+    toast("FAMÍLIA 01 CRIADA E DADOS MIGRADOS");
+  }catch(e){ console.error(e); alert("NÃO FOI POSSÍVEL PREPARAR AS FAMÍLIAS ("+(e.code||e.message||e)+"). CONFIRA SE AS REGRAS NOVAS DO FIREBASE FORAM PUBLICADAS."); }
 }
 
 /* =====================================================================
@@ -1122,7 +1234,7 @@ function dicaMarca(p,estId){
   let melhor=null;
   outrasMarcas(p).forEach(o=>{const b=melhorBase(o); if(b&&b.un===meu.un&&b.v<meu.v*0.995&&(!melhor||b.v<melhor.b.v)) melhor={o,b}});
   if(!melhor) return "";
-  if(p.favorito){ const pc=Math.round((1-melhor.b.v/meu.v)*100);
+  if(ehFav(p)){ const pc=Math.round((1-melhor.b.v/meu.v)*100);
     return `❤️ ${esc(p.marca||"FAVORITO")} ${brl(meu.v)}/${meu.un} · ${esc(melhor.o.marca||"OUTRA MARCA")} ${brl(melhor.b.v)}/${melhor.b.un} NO ${esc(estNome(melhor.b.estId))}: ${difPct(-pc)}`; }
   return `💡 ${esc(melhor.o.marca||"OUTRA MARCA")}${melhor.o.conteudoQtd?" "+fmtQtd(melhor.o.conteudoQtd)+" "+esc(melhor.o.conteudoUn||""):""} SAI MAIS BARATO: ${brl(melhor.b.v)}/${melhor.b.un} EM ${esc(estNome(melhor.b.estId))} (ESTE: ${brl(meu.v)}/${meu.un})`;
 }
@@ -1464,7 +1576,7 @@ function cardItem(L,it,estId){
       const best=i===0, d=Math.round((x.valor-menor.valor)*100)/100;
       const cls = best ? "best" : (d>0?"caro":"best");
       return `<div class="li2 ${cls}">
-        <span class="lj">${x.estabelecimentoId===estId?"📍":""}${esc(estNome(x.estabelecimentoId))}<small>${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.validoAte?" · ATÉ "+dCurta(x.validoAte):""}</small></span>
+        <span class="lj">${x.estabelecimentoId===estId?"📍":""}${esc(estNome(x.estabelecimentoId))}<small>${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${esc(quemFam(x))}${x.validoAte?" · ATÉ "+dCurta(x.validoAte):""}</small></span>
         <span class="gr"><i style="width:${Math.max(4,Math.round(x.valor/max*100))}%"></i></span>
         <span class="vl">${lcd(x.valor,"sm "+(best||d<=0?"g":"r"),"",true)}<small>${best?"★ MENOR":d>0?difTxt(d):"= MESMO PREÇO"}</small></span></div>`;
     }).join("")+`</div>`;
@@ -1903,7 +2015,7 @@ function comparacaoLojas(pid,estId,v){
     const marca=(aqui?"📍":"")+(i===0&&pl.length>1?"★ ":"");
     return `<div class="cmpL${aqui?" aqui":""}">
       <div><b>${marca}${esc(estNome(r.estabelecimentoId))}</b> ${brl(r.valor)}${precoBase(p,r.valor)?` <small>(${precoBase(p,r.valor)})</small>`:""}${aqui&&v>0?` → <b>AGORA ${brl(v)}</b>`:""}<br>
-        <small>${dLonga(r.ts)} · ${esc(r.usuarioNome)} · ${esc(rotuloTipo(r))}</small></div>${dir}</div>`;
+        <small>${dLonga(r.ts)} · ${esc(r.usuarioNome)}${esc(quemFam(r))} · ${esc(rotuloTipo(r))}</small></div>${dir}</div>`;
   };
   let html=pl.map((r,i)=>{
     let dir;
@@ -2065,10 +2177,11 @@ $("qtValor").addEventListener("keydown",e=>{ if(e.key==="Enter") $("qtOk").click
 
 /* ---------- ❤️ favorito da casa (uma marca por produto; fica na posição de preço dela) ---------- */
 function ordemPreco(p){ const b=melhorBase(p); if(b) return b.v; const c=precosPorLoja(p.id)[0]; return c?c.valor:1e9; }
+const ehFav = p => !!(p&&p.fav&&minhaFam()&&p.fav[minhaFam()]);
 function marcarFavorito(id){
-  const p=S.produtos[id]; if(!p) return;
-  const liga=!p.favorito;
-  [p,...outrasMarcas(p)].forEach(x=>{ const quer = liga && x.id===id; if(!!x.favorito!==quer) DB.update("produtos",x.id,{favorito:quer}); });
+  const p=S.produtos[id]; if(!p) return; const f=minhaFam(); if(!f) return;
+  const liga=!ehFav(p);
+  [p,...outrasMarcas(p)].forEach(x=>{ const quer = liga && x.id===id; if(ehFav(x)!==quer) DB.update("produtos",x.id,{fav:{...(x.fav||{}),[f]:quer}}); });
   toast(liga?`❤️ ${p.marca||p.nome} É O FAVORITO DA CASA`:"FAVORITO REMOVIDO");
 }
 $("pdMarcas").addEventListener("click",e=>{
@@ -2111,6 +2224,7 @@ $("receitas").addEventListener("click",e=>{
     abrirMenu(r.nome,`CRIADA EM ${dLonga(r.criadoEm)}`,[
       {txt:"✏️  ABRIR / EDITAR",fn:()=>abrirRec(r.id)},
       {txt:"➕  COLOCAR NA LISTA",fn:()=>abrirRecLista(r.id)},
+      {txt:"📤  ENVIAR PARA… (CÓPIA PARA OUTRA FAMÍLIA)",fn:()=>enviarReceita(r)},
       {txt:"⧉  DUPLICAR",fn:()=>{ DB.add("receitas",{...r,id:undefined,nome:up(r.nome+" (CÓPIA)"),criadoEm:Date.now(),criadoPor:eu().uid,criadoPorNome:eu().nome}); toast("RECEITA DUPLICADA"); }},
       {txt:"🗑️  EXCLUIR",perigo:true,fn:()=>{ if(confirm(`EXCLUIR A RECEITA “${r.nome}”?`)) DB.del("receitas",r.id); }},
     ]); return; }
@@ -2133,7 +2247,7 @@ function renderRecItens(){
   $("rcItens").innerHTML=rc.itens.map((i,k)=>{ const p=S.produtos[i.produtoId];
     if(!p) return `<div class="ring"><div class="thumb">❔</div><div class="x"><b>PRODUTO REMOVIDO</b></div><button class="rm" data-rcrm="${k}">✕</button></div>`;
     const v=c.linha[p.id];
-    return `<div class="ring"><div class="thumb">${imgProduto(p)}</div><div class="x"><b>${esc(p.nome)}</b><small>${p.favorito?"❤️ ":""}${esc(descProduto(p))}</small></div>
+    return `<div class="ring"><div class="thumb">${imgProduto(p)}</div><div class="x"><b>${esc(p.nome)}</b><small>${ehFav(p)?"❤️ ":""}${esc(descProduto(p))}</small></div>
       <button class="q" data-rcq="${k}">${fmtMedida(p,+i.qtd||1)}</button><span class="v">${v!=null?vNum2(v):"—"}</span><button class="rm" data-rcrm="${k}" aria-label="TIRAR">✕</button></div>`; }).join("")
     || `<div class="hint" style="margin:6px 0">BUSQUE OU LEIA O CÓDIGO PARA ADICIONAR OS INGREDIENTES.</div>`;
   $("rcCusto").innerHTML = c.com ? `<div class="rctot"><span>CUSTO ESTIMADO${c.estId?" NO "+esc(estNome(c.estId))+" (MAIS BARATO)":" (MAIS BARATO DE CADA)"}<br>${c.com} DE ${c.n} COM PREÇO</span><b>${brl(c.total)}</b></div>` : "";
@@ -2147,7 +2261,7 @@ function rcAdicionar(pid){
 $("rcBusca").addEventListener("input",()=>{
   const q=$("rcBusca").value.trim(); if(!q){ $("rcSug").innerHTML=""; return; }
   const ps=filtrarProdutos(q).slice(0,8);
-  $("rcSug").innerHTML=ps.map(p=>`<div class="pick" data-rcs="${p.id}" style="grid-template-columns:48px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${p.favorito?'<span class="fav">❤️ </span>':""}${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+  $("rcSug").innerHTML=ps.map(p=>`<div class="pick" data-rcs="${p.id}" style="grid-template-columns:48px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${ehFav(p)?'<span class="fav">❤️ </span>':""}${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
     +`<button class="small" id="rcCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
 });
 $("rcSug").addEventListener("click",e=>{
@@ -2241,6 +2355,183 @@ $("rlOk").onclick=()=>{
   });
   hide("mRecLista"); rl=null; toast(`${add.length} ITENS COLOCADOS EM ${semCarimbo(L.nome)}`); ui.lr="listas"; abrirLista(L.id);
 };
+/* =====================================================================
+   🛡️ ADMINISTRADOR · FAMÍLIAS · SENHAS
+   ===================================================================== */
+// janela de senha reaproveitada: abrir o painel, zerar o app, trocar a própria senha
+let sn=null;
+function pedirSenha({tit,sub="",frase=false,nova=false,rotulo="SUA SENHA"}){
+  return new Promise(res=>{
+    sn={res,frase,nova};
+    $("snTit").textContent=tit; $("snSub").textContent=sub; $("snMsg").textContent="";
+    $("snAtualL").textContent=rotulo;
+    ["snFrase","snAtual","snNova","snNova2"].forEach(id=>$(id).value="");
+    $("snFraseW").classList.toggle("hidden",!frase);
+    $("snNovaW").classList.toggle("hidden",!nova); $("snNova2W").classList.toggle("hidden",!nova);
+    show("mSenha"); setTimeout(()=>$(frase?"snFrase":"snAtual").focus(),60);
+  });
+}
+$("snCancel").onclick=()=>{ hide("mSenha"); const r=sn&&sn.res; sn=null; if(r) r(null); };
+$("snOk").onclick=()=>{
+  if(!sn) return;
+  if(sn.frase&&up($("snFrase").value).trim()!=="APAGAR TUDO"){ $("snMsg").textContent="DIGITE EXATAMENTE: APAGAR TUDO"; return; }
+  const atual=$("snAtual").value; if(!atual){ $("snMsg").textContent="DIGITE A SENHA."; return; }
+  let nv=null;
+  if(sn.nova){ nv=$("snNova").value;
+    if(nv.length<6){ $("snMsg").textContent="A SENHA NOVA PRECISA TER PELO MENOS 6 CARACTERES."; return; }
+    if(nv!==$("snNova2").value){ $("snMsg").textContent="AS DUAS SENHAS NOVAS NÃO SÃO IGUAIS."; return; } }
+  hide("mSenha"); const r=sn.res; sn=null; r({atual,nova:nv});
+};
+$("snAtual").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!(sn&&sn.nova)) $("snOk").click(); });
+const errSenha = e => { const c=String((e&&e.code)||""); return c.includes("wrong-password")||c.includes("invalid-credential")?"SENHA INCORRETA.":c.includes("too-many")?"MUITAS TENTATIVAS. AGUARDE UM POUCO.":c.includes("network")?"SEM INTERNET.":"NÃO FOI POSSÍVEL ("+(c||e.message||e)+")."; };
+async function trocarMinhaSenha(){
+  const r=await pedirSenha({tit:"🔑 TROCAR MINHA SENHA",rotulo:"SENHA ATUAL",nova:true}); if(!r) return;
+  try{ await DB.trocarSenha(r.atual,r.nova); toast("SENHA TROCADA"); }catch(e){ alert(errSenha(e)); }
+}
+
+/* ---------- painel ---------- */
+let painel=null;
+async function abrirPainel(){
+  if(!ehAdmin()) return;
+  const r=await pedirSenha({tit:"🛡️ PAINEL DO ADMINISTRADOR",sub:"CONFIRME SUA SENHA PARA ENTRAR"}); if(!r) return;
+  try{ await DB.reauth(r.atual); }catch(e){ alert(errSenha(e)); return; }
+  painel={aba:"usuarios",cont:null};
+  renderPainel(); show("mAdmin"); contarPainel();
+}
+async function contarPainel(){
+  try{ const [ls,rs]=await Promise.all([DB.getAll("listas"),DB.getAll("receitas")]);
+    const c={}; ls.forEach(l=>{ const k=l.familiaId||"_"; (c[k]=c[k]||{l:0,r:0}).l++; }); rs.forEach(x=>{ const k=x.familiaId||"_"; (c[k]=c[k]||{l:0,r:0}).r++; });
+    if(painel){ painel.cont=c; renderPainel(); } }catch(e){ console.error(e); }
+}
+$("admFechar").onclick=()=>{ hide("mAdmin"); painel=null; };
+document.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{ if(!painel) return; painel.aba=b.dataset.adm; renderPainel(); });
+const famOpts = sel => Object.values(S.familias).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR")).map(f=>`<option value="${f.id}" ${f.id===sel?"selected":""}>${esc(f.nome)}</option>`).join("");
+function renderPainel(){
+  if(!painel) return;
+  document.querySelectorAll("[data-adm]").forEach(b=>b.classList.toggle("on",b.dataset.adm===painel.aba));
+  let h="";
+  const us=Object.entries(S.usuarios).map(([uid,u])=>({uid,...u}));
+  const admin = u => ADMINS.includes(String(u.email||"").toLowerCase());
+  if(painel.aba==="usuarios"){
+    const novos=us.filter(u=>!admin(u)&&(u.status!=="ativo"&&u.status!=="bloqueado"||!u.familiaId&&u.status!=="bloqueado"));
+    const lib=us.filter(u=>!novos.includes(u)).sort((a,b)=>(a.nome||"").localeCompare(b.nome||"","pt-BR"));
+    h+=`<div class="admsec"><span>NOVOS · AGUARDANDO LIBERAÇÃO</span><span>${novos.length}</span></div>`;
+    h+= novos.length ? `<div class="admbox">`+novos.map(u=>`<div class="admr"><div class="admav">${esc((u.nome||"?")[0])}</div><div class="admm"><b>${esc(u.nome||"SEM NOME")}<span class="admpill novo">NOVO</span></b><small>${esc(u.email||"")}${u.criadoEm?" · ENTROU "+dCurta(u.criadoEm)+" "+hora(u.criadoEm):""}</small></div>
+        <div class="admacts"><select data-admfam="${u.uid}">${Object.keys(S.familias).length?famOpts(""):`<option value="">CRIE UMA FAMÍLIA PRIMEIRO</option>`}</select><button class="primary small" data-admlib="${u.uid}">✔ LIBERAR</button><button class="small danger" data-admblq="${u.uid}" title="BLOQUEAR">✕</button></div></div>`).join("")+`</div>`
+      : `<div class="hint" style="margin:0 2px 8px">NINGUÉM ESPERANDO. CRIE O USUÁRIO NO CONSOLE DO FIREBASE; NO PRIMEIRO ACESSO ELE APARECE AQUI.</div>`;
+    h+=`<div class="admsec"><span>USUÁRIOS LIBERADOS</span><span>${lib.length}</span></div><div class="admbox">`+lib.map(u=>`<div class="admr"><div class="admav">${esc((u.nome||"?")[0])}</div><div class="admm"><b>${esc(u.nome||"SEM NOME")}${admin(u)?'<span class="admpill adm">ADMIN</span>':""}${u.status==="bloqueado"?'<span class="admpill blq">BLOQUEADO</span>':""}</b><small>${esc(famNome(u.familiaId))} · ${esc(u.email||"")}</small></div><button class="small" data-admed="${u.uid}">✏️</button></div>`).join("")+`</div>`;
+    h+=`<div class="hint" style="margin:6px 2px">CRIAR USUÁRIO E SENHA, REDEFINIR SENHA OU EXCLUIR A CONTA DE VEZ: NO CONSOLE DO FIREBASE (AUTHENTICATION).</div>`;
+  }
+  else if(painel.aba==="familias"){
+    const fs=Object.values(S.familias).sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0));
+    h+=`<div class="admsec"><span>FAMÍLIAS</span><span>${fs.length}</span></div><div class="admbox">`+fs.map(f=>{ const nu=us.filter(u=>u.familiaId===f.id).length, c=(painel.cont||{})[f.id]||{l:0,r:0};
+      return `<div class="admr"><div class="admav" style="border-radius:10px">🏠</div><div class="admm"><b>${esc(f.nome)}${f.id===minhaFam()?'<span class="admpill adm">A SUA</span>':""}</b><small>${nu} USUÁRIO${nu===1?"":"S"}${painel.cont?` · ${c.l} LISTA${c.l===1?"":"S"} · ${c.r} RECEITA${c.r===1?"":"S"}`:""}</small></div>
+        <button class="small" data-admfren="${f.id}">✏️ RENOMEAR</button>${nu?"":`<button class="small danger" data-admfdel="${f.id}">🗑</button>`}</div>`; }).join("")+`</div>`;
+    h+=`<button class="primary" id="admNovaFam" style="width:100%;padding:11px">+ NOVA FAMÍLIA</button>
+      <div class="hint" style="margin:8px 2px">SÓ DÁ PARA EXCLUIR FAMÍLIA SEM NINGUÉM DENTRO. LISTAS, COMPRAS, RECEITAS E FAVORITOS SÃO DE CADA FAMÍLIA; PREÇOS, PRODUTOS E LOJAS SÃO DE TODOS.</div>`;
+  }
+  else if(painel.aba==="lojas"){
+    const es=Object.values(S.ests).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+    h+=`<div class="admsec"><span>ESTABELECIMENTOS</span><span>${es.length}</span></div><div class="admbox">`+es.map(e=>{ const ps=S.precos.filter(r=>r.estabelecimentoId===e.id); const ult=ps.reduce((a,b)=>!a||b.ts>a.ts?b:a,null);
+      return `<div class="admr"><div class="admav" style="border-radius:10px">🏪</div><div class="admm"><b>${esc(e.nome)}</b><small>${ps.length} PREÇO${ps.length===1?"":"S"} · ${(e.zonas||[]).length} ZONAS${ult?" · ÚLTIMO "+dCurta(ult.ts):""}</small></div><button class="small danger" data-admldel="${e.id}">🗑 EXCLUIR</button></div>`; }).join("")+`</div>`;
+    const orf=S.precos.filter(r=>!S.ests[r.estabelecimentoId]);
+    h+=`<div class="admsec"><span>PREÇOS ÓRFÃOS (DE LOJAS JÁ EXCLUÍDAS)</span><span>${orf.length}</span></div>`+
+      (orf.length?`<button id="admOrf" style="width:100%;padding:11px">🧹 LIMPAR ${orf.length} PREÇO${orf.length===1?"":"S"} ÓRFÃO${orf.length===1?"":"S"}</button>`:`<div class="hint" style="margin:0 2px">NENHUM.</div>`);
+  }
+  else {
+    h+=`<div class="admbox" style="margin-top:12px"><div class="admr"><div class="admm"><b>📦 BAIXAR CÓPIA DE TUDO</b><small>ARQUIVO .JSON COM TODOS OS DADOS. FAÇA ANTES DE ZERAR.</small></div><button class="small" id="admBackup">BAIXAR</button></div></div>
+      <div class="admdanger"><b>⚠ ZERAR O APP</b><small id="admZeroTxt">APAGA PRODUTOS, LOJAS, PREÇOS, LISTAS, RECEITAS E COMPRAS DE TODAS AS FAMÍLIAS. USUÁRIOS E FAMÍLIAS CONTINUAM. NÃO DÁ PARA DESFAZER.</small>
+      <button class="danger" id="admZerar" style="width:100%;padding:11px">🗑 ZERAR TODOS OS DADOS…</button></div>`;
+  }
+  $("admBody").innerHTML=h;
+}
+$("admBody").addEventListener("click",async e=>{
+  const t=e.target.closest("button"); if(!t) return;
+  const d=t.dataset;
+  if(d.admlib){ const sel=document.querySelector(`[data-admfam="${d.admlib}"]`), f=sel&&sel.value;
+    if(!f||!S.familias[f]){ alert("CRIE E ESCOLHA UMA FAMÍLIA PRIMEIRO (ABA FAMÍLIAS)."); return; }
+    DB.set("usuarios",d.admlib,{status:"ativo",familiaId:f},true); toast("USUÁRIO LIBERADO NA "+famNome(f)); return; }
+  if(d.admblq){ if(confirm("BLOQUEAR ESTE USUÁRIO? ELE NÃO VAI ACESSAR NADA ATÉ VOCÊ DESBLOQUEAR.")) DB.set("usuarios",d.admblq,{status:"bloqueado"},true); return; }
+  if(d.admed){ editarUsuario(d.admed); return; }
+  if(t.id==="admNovaFam"){ const n=up(prompt("NOME DA NOVA FAMÍLIA:","FAMÍLIA "+String(Object.keys(S.familias).length+1).padStart(2,"0"))||""); if(n) DB.add("familias",{nome:n,criadoEm:Date.now(),criadoPor:eu().uid}); return; }
+  if(d.admfren){ const f=S.familias[d.admfren]; const n=up(prompt("NOVO NOME DA FAMÍLIA:",f.nome)||""); if(n) DB.update("familias",f.id,{nome:n}); return; }
+  if(d.admfdel){ const f=S.familias[d.admfdel]; if(Object.values(S.usuarios).some(u=>u.familiaId===f.id)){ alert("A FAMÍLIA AINDA TEM USUÁRIOS."); return; }
+    if(confirm(`EXCLUIR A ${f.nome}?`)) DB.del("familias",f.id); return; }
+  if(d.admldel){ await excluirLoja(d.admldel); return; }
+  if(t.id==="admOrf"){ await limparOrfaos(); return; }
+  if(t.id==="admBackup"){ await baixarCopia(); return; }
+  if(t.id==="admZerar"){ await zerarApp(); return; }
+});
+function editarUsuario(uid){
+  const u=S.usuarios[uid]; if(!u) return;
+  const souEu=uid===eu().uid;
+  const ops=[
+    {txt:"✏️  RENOMEAR",fn:()=>{ const n=up(prompt("NOME DO USUÁRIO:",u.nome||"")||""); if(n) DB.set("usuarios",uid,{nome:n},true); }},
+    {txt:"🏠  MUDAR DE FAMÍLIA",fn:()=>abrirMenu("FAMÍLIA DE "+(u.nome||""),"",Object.values(S.familias).map(f=>({txt:(f.id===u.familiaId?"✓ ":"")+esc(f.nome),fn:()=>{
+      if(f.id===u.familiaId) return;
+      if(!confirm(`MOVER ${u.nome} PARA A ${f.nome}?\n\nAS LISTAS QUE ELE JÁ PARTICIPA CONTINUAM COM ELE; AS COMPRAS E RECEITAS NOVAS VÃO PARA A ${f.nome}.`)) return;
+      DB.set("usuarios",uid,{familiaId:f.id,status:"ativo"},true); if(souEu) toast("SAIA E ENTRE DE NOVO PARA VER A NOVA FAMÍLIA"); }})))},
+  ];
+  if(!souEu){
+    ops.push(u.status==="bloqueado"
+      ? {txt:"🔓  DESBLOQUEAR",fn:()=>DB.set("usuarios",uid,{status:"ativo"},true)}
+      : {txt:"⛔  BLOQUEAR",perigo:true,fn:()=>{ if(confirm(`BLOQUEAR ${u.nome}?`)) DB.set("usuarios",uid,{status:"bloqueado"},true); }});
+    ops.push({txt:"🗑  REMOVER DO APP",perigo:true,fn:()=>{ if(confirm(`REMOVER ${u.nome} DO APP?\n\nSE ELE ENTRAR DE NOVO, VOLTA COMO NOVO. PARA APAGAR A CONTA DE VEZ, EXCLUA NO CONSOLE DO FIREBASE.`)) DB.del("usuarios",uid); }});
+  }
+  abrirMenu(u.nome||"USUÁRIO",`${famNome(u.familiaId)} · ${u.email||""}`,ops);
+}
+// exclui a loja, todos os preços dela e a zona dos produtos nela
+async function excluirLoja(id){
+  if(!ehAdmin()) return false;
+  const e=S.ests[id]; if(!e) return false;
+  const ps=S.precos.filter(r=>r.estabelecimentoId===id), prods=Object.values(S.produtos).filter(p=>p.zonas&&p.zonas[id]);
+  if(!confirm(`EXCLUIR ${e.nome}?\n\nISSO APAGA TAMBÉM ${ps.length} PREÇO${ps.length===1?"":"S"} REGISTRADO${ps.length===1?"":"S"} NELE (DE TODAS AS FAMÍLIAS) E A ZONA DE ${prods.length} PRODUTO${prods.length===1?"":"S"}.\nAS COMPRAS JÁ FEITAS NELE CONTINUAM.\n\nNÃO DÁ PARA DESFAZER.`)) return false;
+  try{
+    DB.del("estabelecimentos",id);
+    if(ps.length) await DB.delMany("precos",ps.map(r=>r.id));
+    if(prods.length) await DB.updMany("produtos",prods.map(p=>{ const z={...p.zonas}; delete z[id]; return [p.id,{zonas:z}]; }));
+    toast(`${e.nome} EXCLUÍDO COM ${ps.length} PREÇO${ps.length===1?"":"S"}`); return true;
+  }catch(err){ alert("ERRO AO EXCLUIR: "+(err.code||err.message||err)); return false; }
+}
+async function limparOrfaos(){
+  const orf=S.precos.filter(r=>!S.ests[r.estabelecimentoId]); if(!orf.length) return;
+  if(!confirm(`APAGAR ${orf.length} PREÇO${orf.length===1?"":"S"} DE LOJAS QUE NÃO EXISTEM MAIS?`)) return;
+  try{ await DB.delMany("precos",orf.map(r=>r.id)); toast("PREÇOS ÓRFÃOS APAGADOS"); }catch(err){ alert("ERRO: "+(err.code||err.message||err)); }
+}
+const COLS_TUDO=["usuarios","familias","produtos","estabelecimentos","precos","listas","realizados","finalizacoes","receitas","contadores"];
+async function baixarCopia(){
+  try{
+    const dados={app:"OIKONOMIA",geradoEm:new Date().toISOString(),geradoPor:eu().email};
+    for(const c of COLS_TUDO) dados[c]=await DB.getAll(c);
+    const blob=new Blob([JSON.stringify(dados,null,1)],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    const d=new Date(); a.download=`oikonomia-copia-${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}.json`;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);
+    toast("CÓPIA BAIXADA");
+  }catch(err){ alert("ERRO AO GERAR A CÓPIA: "+(err.code||err.message||err)); }
+}
+async function zerarApp(){
+  const cols=["produtos","estabelecimentos","precos","listas","realizados","finalizacoes","receitas","contadores"];
+  let tot={};
+  try{ for(const c of cols) tot[c]=(await DB.getAll(c)).map(d=>d.id); }catch(err){ alert("ERRO: "+(err.code||err.message||err)); return; }
+  const r=await pedirSenha({tit:"⚠ ZERAR O APP",sub:`VAI APAGAR ${tot.produtos.length} PRODUTOS, ${tot.estabelecimentos.length} LOJAS, ${tot.precos.length} PREÇOS, ${tot.listas.length} LISTAS, ${tot.receitas.length} RECEITAS E ${tot.realizados.length} COMPRAS. USUÁRIOS E FAMÍLIAS CONTINUAM.`,frase:true});
+  if(!r) return;
+  try{ await DB.reauth(r.atual); }catch(e){ alert(errSenha(e)); return; }
+  try{
+    for(const c of cols) if(tot[c].length) await DB.delMany(c,tot[c]);
+    ui.lista=null; toast("APP ZERADO"); hide("mAdmin"); painel=null; mostrar();
+  }catch(err){ alert("ERRO AO ZERAR (PARTE PODE TER SIDO APAGADA): "+(err.code||err.message||err)); }
+}
+// 📤 receita: manda uma cópia para alguém de outra família
+function enviarReceita(r){
+  const outros=Object.entries(S.usuarios).filter(([uid,u])=>u.status==="ativo"&&u.familiaId&&u.familiaId!==minhaFam()).sort((a,b)=>(a[1].nome||"").localeCompare(b[1].nome||"","pt-BR"));
+  if(!outros.length){ alert("NÃO HÁ USUÁRIOS DE OUTRAS FAMÍLIAS."); return; }
+  abrirMenu("ENVIAR “"+r.nome+"” PARA…","A PESSOA RECEBE UMA CÓPIA NA FAMÍLIA DELA",outros.map(([uid,u])=>({txt:`👤  ${esc(u.nome)} · ${esc(famNome(u.familiaId))}`,fn:()=>{
+    DB.add("receitas",{nome:r.nome,serve:r.serve||null,obs:r.obs||"",itens:(r.itens||[]).map(i=>({...i})),familiaId:u.familiaId,
+      criadoEm:Date.now(),criadoPor:eu().uid,criadoPorNome:eu().nome,enviadaPor:eu().uid,enviadaPorNome:eu().nome,enviadaDe:minhaFam()});
+    toast(`RECEITA ENVIADA PARA ${u.nome}`); }})));
+}
+
 /* ---------- 🏆 RANK: quanto sairia comprar tudo em cada mercado × distribuindo ---------- */
 let rk=null;
 function itensDoGrupoRank(L){
@@ -2593,7 +2884,7 @@ function renderPicker(){
     return `<div class="pick">
       <input type="checkbox" data-pk="${p.id}" ${s||ja?"checked":""} ${ja?"disabled":""}>
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name" style="font-size:13px">${p.favorito?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}</div>
+      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}</div>
         ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}${precoBase(p,pl.valor)?" · "+precoBase(p,pl.valor):""}</div>`:""}</div>
       <input class="q" data-pkq="${p.id}" inputmode="decimal" value="${s?fmtQtd(s):""}" placeholder="QTD" ${ja?"disabled":""}>
     </div>`;
@@ -2738,10 +3029,10 @@ let shareAlvo=null;
 $("btnShare").onclick=()=>abrirShare(ui.lista);
 function abrirShare(id){
   const L=S.listas[id]; if(!L) return; shareAlvo=id;
-  const us=Object.entries(S.usuarios).sort((a,b)=>(a[1].nome||"").localeCompare(b[1].nome||"","pt-BR"));
+  const us=Object.entries(S.usuarios).filter(([uid,u])=>uid===L.criadoPor||(u.familiaId===minhaFam()&&u.status==="ativo")).sort((a,b)=>(a[1].nome||"").localeCompare(b[1].nome||"","pt-BR"));
   $("shUsers").innerHTML=us.map(([uid,u])=>`<label class="urow"><input type="checkbox" data-u="${uid}" ${(L.membros||[]).includes(uid)?"checked":""} ${uid===L.criadoPor?"disabled":""}>
     <span><b>${esc(u.nome)}</b><br><small class="muted" style="text-transform:none">${esc(u.email||"")}</small>${uid===L.criadoPor?" · CRIADOR":""}</span></label>`).join("")
-    || `<div class="empty">NENHUM OUTRO USUÁRIO AINDA. ELES APARECEM AQUI DEPOIS DO PRIMEIRO LOGIN.</div>`;
+    || `<div class="empty">NENHUM OUTRO USUÁRIO NA SUA FAMÍLIA AINDA.</div>`;
   $("shGrupoWrap").classList.toggle("hidden",listasDoGrupo(grupoKey(L)).length<2);
   show("mShare");
 }
@@ -2795,7 +3086,7 @@ function renderProdutos(){
     const c=pl[0];
     return `<div class="card click prow" data-prod="${p.id}">
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name">${p.favorito?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}</div>
+      <div><div class="name">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}</div>
         <div class="sub">${esc(descProduto(p))}</div>
         <div class="sub">${esc(p.codigo||"")}${p.barras?" · ▥ "+esc(p.barras):""}</div>
         ${c?`<div class="sub" style="color:var(--accent);font-weight:700">MAIS BARATO: ${esc(estNome(c.estabelecimentoId))} ${brl(c.valor)} (${dCurta(c.ts)} · ${esc(primeiroNome(c.usuarioNome))})${precoBase(p,c.valor)?" · "+precoBase(p,c.valor):""}</div>`:`<div class="sub">SEM PREÇO</div>`}
@@ -2926,7 +3217,7 @@ function abrirProd(id,pre={},cb=null){
   if(om.length){
     const linhas=[p,...om].map(x=>{const b=melhorBase(x), c=precosPorLoja(x.id)[0];return {x,b,c}})
       .sort((a,b)=>(a.b?a.b.v:1e9)-(b.b?b.b.v:1e9));
-    $("pdMarcas").innerHTML=linhas.map(({x,b,c},i)=>`<div class="rec"><button type="button" class="favbtn${x.favorito?" on":""}" data-fav="${x.id}" aria-label="FAVORITO DA CASA">♥</button><div style="flex:1">${i===0&&b?"★ ":""}${x.id===p.id?"👉 ":""}<b>${esc(x.marca||"SEM MARCA")}</b>${x.favorito?' <span class="fav" style="font-size:10px;font-weight:800">FAVORITO DA CASA</span>':""} ${x.conteudoQtd?fmtQtd(x.conteudoQtd)+" "+esc(x.conteudoUn||""):""}<br>
+    $("pdMarcas").innerHTML=linhas.map(({x,b,c},i)=>`<div class="rec"><button type="button" class="favbtn${ehFav(x)?" on":""}" data-fav="${x.id}" aria-label="FAVORITO DA CASA">♥</button><div style="flex:1">${i===0&&b?"★ ":""}${x.id===p.id?"👉 ":""}<b>${esc(x.marca||"SEM MARCA")}</b>${ehFav(x)?' <span class="fav" style="font-size:10px;font-weight:800">FAVORITO DA CASA</span>':""} ${x.conteudoQtd?fmtQtd(x.conteudoQtd)+" "+esc(x.conteudoUn||""):""}<br>
       <small>${c?esc(estNome(c.estabelecimentoId))+" · "+brl(c.valor):"SEM PREÇO"}</small></div>
       <div style="text-align:right" class="${i===0&&b?"pago":""}">${b?brl(b.v)+"/"+b.un:"—"}</div></div>`).join("");
   }
@@ -2941,7 +3232,7 @@ function abrirProd(id,pre={},cb=null){
       : `<div class="hint">NENHUM PREÇO AINDA.</div>`;
   }
   $("pdOutroTam").classList.toggle("hidden",!p);
-  $("pdDel").classList.toggle("hidden",!p);
+  $("pdDel").classList.toggle("hidden",!p||!ehAdmin());
   show("mProd");
 }
 // ➕ OUTRO TAMANHO: novo produto copiando nome, marca, observação, "vendido por" e zonas
@@ -3297,7 +3588,7 @@ function abrirEst(id,cb=null,atalho=false){
   const e=id?S.ests[id]:null;
   es={id,zonas:e?(e.zonas||[]).map(z=>({...z})):[],cb};
   $("esTitle").textContent=atalho?"ZONAS DO "+(e?e.nome:""):e?"EDITAR ESTABELECIMENTO":"NOVO ESTABELECIMENTO";
-  $("esNome").value=e?e.nome:""; $("esDel").classList.toggle("hidden",!e||atalho);
+  $("esNome").value=e?e.nome:""; $("esDel").classList.toggle("hidden",!e||atalho||!ehAdmin());
   renderZonas(); show("mEst"); if(!e) $("esNome").focus();
 }
 function renderZonas(){
@@ -3325,9 +3616,7 @@ $("esSave").onclick=()=>{
   pq.extra=pq.extra.filter(x=>x.estId!==id); // a ficha salva passa a ser a referência das zonas
   hide("mEst"); toast("ESTABELECIMENTO SALVO"); if(es.cb) es.cb(id);
 };
-$("esDel").onclick=()=>{ const e=S.ests[es.id];
-  if(!confirm(`EXCLUIR ${e.nome}?\n\nOS PREÇOS JÁ REGISTRADOS CONTINUAM NO HISTÓRICO.`)) return;
-  DB.del("estabelecimentos",es.id); hide("mEst"); };
+$("esDel").onclick=async()=>{ if(await excluirLoja(es.id)) hide("mEst"); };
 
 /* =====================================================================
    HISTÓRICO
