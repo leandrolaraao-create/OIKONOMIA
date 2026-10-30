@@ -89,6 +89,24 @@ header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px 
 .totals{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
 .totals>div{flex:1}
 .tl{font-size:11px;color:var(--muted)}
+/* visor (fonte DSEG7 Classic, © keshikan, SIL Open Font License 1.1 — embutida para funcionar sem internet) */
+@font-face{font-family:"DSEG7";src:url(data:font/woff2;base64,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) format("woff2");font-weight:700;font-display:block}
+:root{--lcd:#e8ebe5;--lcdb:#cdd3ca}
+.lcd{display:inline-flex;align-items:baseline;justify-content:flex-end;gap:4px;background:var(--lcd);border:1px solid var(--lcdb);border-radius:8px;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.12);padding:5px 8px 4px;color:var(--ink);white-space:nowrap;line-height:1;vertical-align:middle}
+.lcd .rs{font:700 10px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--muted);align-self:center}
+.lcd .n{font-family:"DSEG7",system-ui,sans-serif;font-weight:700;letter-spacing:.02em}
+.lcd.g .n{color:var(--accent)} .lcd.r .n{color:var(--warn)} .lcd.y .n{color:var(--gold)}
+.lcd.lg .n{font-size:20px}.lcd.md .n{font-size:16px}.lcd.sm .n{font-size:12px}.lcd.xs .n{font-size:10.5px}
+.lcd.sm,.lcd.xs{padding:3px 6px 2px;border-radius:6px}
+.lcd.full{display:flex;width:100%}
+input.lcdin{font-family:"DSEG7",system-ui,sans-serif;font-weight:700;font-size:30px;text-align:right;background:var(--lcd);border:1px solid var(--lcdb);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.12);border-radius:10px;padding:10px 14px;letter-spacing:.02em}
+input.lcdin::placeholder{color:#c3c9c0}
+input.lcdin:focus{outline:none;border-color:#9aa39c}
+.tsub{font-size:9.5px;font-weight:700;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.totals{align-items:flex-end}
+.totals .tl{font-size:10px;font-weight:800;letter-spacing:.04em;margin-bottom:3px;line-height:1.2}
 .tv{font-size:20px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.1}
 .tv.sm{font-size:15px;color:var(--ink)}
 .tv.fut{color:var(--gold)}
@@ -319,11 +337,14 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .resumo2 b .pu{display:inline;font-size:11px;font-weight:700;margin-left:1px;letter-spacing:0;color:inherit}
 .resumo2 .mult{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:4px;padding-top:4px;border-top:1px dashed var(--line);font-variant-numeric:tabular-nums}
 .resumo2 .mult b2{font-weight:800;color:var(--ink)}
+.resumo2 .bx>.lcd{margin:2px 0 1px}
+.resumo2 .mult{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.li2 .vl .lcd{margin-bottom:2px}
 .resumo2 .mult i{font-style:normal;font-weight:800;white-space:nowrap}
 .resumo2 .mult .up{color:var(--warn)} .resumo2 .mult .dn{color:var(--accent)}
 .resumo2 .mb b{color:var(--accent)} .resumo2 .mb .selo{color:var(--accent)}
 .resumo2 .mb.tap{position:relative;cursor:pointer}
-.resumo2 .mb.tap b{padding-right:28px}
+.resumo2 .mb.tap>.lcd{margin-right:26px}
 .resumo2 .mb .go{position:absolute;right:6px;top:24px;width:22px;height:22px;border-radius:50%;background:var(--chip);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
 .mvcmp{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:12px;font-weight:700}
 .mvcmp .c{flex:1;border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
@@ -381,6 +402,9 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .rkeco{display:flex;gap:8px;margin-top:10px}
 .rkeco div{flex:1;background:#fff;border-radius:10px;padding:8px 10px;font-size:10.5px;font-weight:700;color:var(--muted)}
 .rkeco b{display:block;font-size:17px;color:var(--accent);font-variant-numeric:tabular-nums}
+.rkeco>div>span{display:block;margin-top:4px;font-size:12px}
+.rkr .v small{white-space:normal;max-width:190px;margin-left:auto}
+.rkdist .t .lcd{flex:none}
 .rkwarn{margin-top:10px;font-size:11.5px;font-weight:700;color:#8a5a00;background:#fff4d6;border-radius:10px;padding:8px 10px}
 .rknota{font-size:11px;color:var(--muted);font-weight:600;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:8px}
 .rktog{display:flex;gap:6px;margin-top:12px}.rktog button{flex:1;border-radius:99px;padding:7px;font-size:11px;font-weight:800}
@@ -428,9 +452,9 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
         <button id="btnPdfLista" style="flex:none" title="EXPORTAR PDF">📄</button>
       </div>
       <div class="totals">
-        <div><div class="tl">NESTA LOJA</div><div class="tv" id="tLoja">R$ 0,00</div></div>
-        <div><div class="tl">TOTAL DO GRUPO</div><div class="tv sm" id="tGrupo">R$ 0,00</div></div>
-        <div><div class="tl">FALTA ~</div><div class="tv sm fut" id="tFalta">R$ 0,00</div></div>
+        <div><div class="tl">JÁ GASTO AQUI</div><div id="tLoja"></div><div class="tsub" id="tLojaS"></div></div>
+        <div><div class="tl" id="tGrupoL">JÁ GASTO NA LISTA</div><div id="tGrupo"></div><div class="tsub" id="tGrupoS"></div></div>
+        <div><div class="tl">FALTA GASTAR ~</div><div id="tFalta"></div><div class="tsub" id="tFaltaS"></div></div>
       </div>
       <div id="mm" class="mm hidden">
         <video id="mmVideo" playsinline muted autoplay></video>
@@ -560,7 +584,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="pqtop"><div class="thumb" id="pqThumb"></div><div style="flex:1;min-width:0"><h2 id="pqNome" style="margin:0"></h2><div class="hint" id="pqSub"></div></div></div>
   <div class="pqlast" id="pqLast"></div>
   <div class="row big">
-    <label class="f"><span id="pqValorLb">PREÇO (R$)</span><input id="pqValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f"><span id="pqValorLb">PREÇO (R$)</span><input id="pqValor" class="lcdin" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
     <label class="f" style="flex:.85">VÁLIDO ATÉ (OPCIONAL)<input id="pqValido" type="date"></label>
   </div>
   <div class="hdif" id="pqDif"></div>
@@ -603,7 +627,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="hint" id="hsSub"></div>
   <div class="hgraf" id="hsGraf"></div>
   <div class="row big">
-    <label class="f"><span id="hsValorLb">PREÇO NOVO (R$)</span><input id="hsValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f"><span id="hsValorLb">PREÇO NOVO (R$)</span><input id="hsValor" class="lcdin" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
     <label class="f" style="flex:.8">DATA<input id="hsData" type="date"></label>
   </div>
   <div class="hdif" id="hsDif"></div>
@@ -624,7 +648,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div id="prStatus" class="status hidden"></div>
   <div id="prChipsWrap" class="hidden"><div class="hint">VALORES ENCONTRADOS (TOQUE PARA ESCOLHER):</div><div class="chips" id="prChips"></div></div>
   <div class="row big">
-    <label class="f"><span id="prValorLb">VALOR UNITÁRIO (R$)</span><input id="prValor" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
+    <label class="f"><span id="prValorLb">VALOR UNITÁRIO (R$)</span><input id="prValor" class="lcdin" inputmode="numeric" placeholder="0,00" autocomplete="off"></label>
     <label class="f" style="flex:.6"><span id="prQtdLb">QUANTIDADE</span><input id="prQtd" inputmode="decimal"></label>
   </div>
   <div class="line-total" id="prLinha"></div>
@@ -855,6 +879,17 @@ const dCurta = ts => new Date(ts).toLocaleDateString("pt-BR",{day:"2-digit",mont
 const dLonga = ts => new Date(ts).toLocaleDateString("pt-BR");
 const hora = ts => new Date(ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 const p2 = n => String(n).padStart(2,"0");
+// visor de valor em dinheiro: R$ + número em fonte de visor (+ unidade opcional, ex. /KG)
+const vNumL = v => (+v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const lcd = (v,cls="",un="",semRs=false) => `<span class="lcd ${cls}">${semRs?"":`<span class="rs">R$</span>`}<span class="n">${vNumL(v)}</span>${un?`<span class="rs">/${un}</span>`:""}</span>`;
+/* padrão de comparação: ▲ vermelho + valor sem sinal + MAIS CARO · ▼ verde + valor sem sinal + MAIS BARATO · = MESMO PREÇO */
+function difTxt(d,ref="",eq="",un=""){ d=Math.round((+d||0)*100)/100;
+  const u=un?"/"+un:"";
+  return d>0?`▲ ${brl(d)}${u} MAIS CARO${ref}`:d<0?`▼ ${brl(-d)}${u} MAIS BARATO${ref}`:`= MESMO PREÇO${eq}`; }
+const difCls = d => (Math.round((+d||0)*100)/100)>0?"up":(Math.round((+d||0)*100)/100)<0?"down":"";
+const difSpan = (d,ref="",eq="",un="") => `<span class="dif ${difCls(d)}">${difTxt(d,ref,eq,un)}</span>`;
+const difCor = (d,ref="",eq="",un="") => { const c=difCls(d); return `<span style="color:${c==="up"?"var(--warn)":c==="down"?"var(--accent)":"var(--muted)"};font-weight:800">${difTxt(d,ref,eq,un)}</span>`; };
+function difPct(pc,ref=""){ return pc>0?`▲ ${pc}% MAIS CARO${ref}`:pc<0?`▼ ${-pc}% MAIS BARATO${ref}`:`= MESMO PREÇO${ref}`; }
 /* ---------- produtos vendidos por peso/volume: quantidade guardada na unidade de venda (KG, G ou L) ---------- */
 const MEDIDA={KG:{fino:"G",grosso:"KG",fator:1000,base:"grosso"},G:{fino:"G",grosso:"KG",fator:1000,base:"fino"},L:{fino:"ML",grosso:"L",fator:1000,base:"grosso"}};
 const medidaDe = p => p&&MEDIDA[p.vendidoPor]?MEDIDA[p.vendidoPor]:null;
@@ -1088,7 +1123,7 @@ function dicaMarca(p,estId){
   outrasMarcas(p).forEach(o=>{const b=melhorBase(o); if(b&&b.un===meu.un&&b.v<meu.v*0.995&&(!melhor||b.v<melhor.b.v)) melhor={o,b}});
   if(!melhor) return "";
   if(p.favorito){ const pc=Math.round((1-melhor.b.v/meu.v)*100);
-    return `❤️ ${esc(p.marca||"FAVORITO")} ${brl(meu.v)}/${meu.un} · ${esc(melhor.o.marca||"OUTRA MARCA")} ${brl(melhor.b.v)}/${melhor.b.un} NO ${esc(estNome(melhor.b.estId))} (−${pc}%)`; }
+    return `❤️ ${esc(p.marca||"FAVORITO")} ${brl(meu.v)}/${meu.un} · ${esc(melhor.o.marca||"OUTRA MARCA")} ${brl(melhor.b.v)}/${melhor.b.un} NO ${esc(estNome(melhor.b.estId))}: ${difPct(-pc)}`; }
   return `💡 ${esc(melhor.o.marca||"OUTRA MARCA")}${melhor.o.conteudoQtd?" "+fmtQtd(melhor.o.conteudoQtd)+" "+esc(melhor.o.conteudoUn||""):""} SAI MAIS BARATO: ${brl(melhor.b.v)}/${melhor.b.un} EM ${esc(estNome(melhor.b.estId))} (ESTE: ${brl(meu.v)}/${meu.un})`;
 }
 // produtos que costumam ser comprados: comprados em 2+ compras (grupos) diferentes
@@ -1357,11 +1392,18 @@ function renderLista(L){
   $("lMeta").innerHTML=`CRIADA POR ${esc(nomeUsuario(L.criadoPor))} · ${dLonga(L.criadoEm)}`+(membros.length>1?` · 👥 ${membros.map(esc).join(", ")}`:"")+parentesco;
   const itens=L.itens||[];
   const reais=itens.map(it=>realizado(L,it.produtoId)).filter(Boolean);
-  $("tLoja").textContent=brl(reais.filter(r=>r.estabelecimentoId===estId).reduce((s,r)=>s+(r.total||0),0));
-  $("tGrupo").textContent=brl(Object.values(S.realizados).filter(r=>r.grupo===grupoKey(L)).reduce((s,r)=>s+(r.total||0),0));
-  let falta=0;
-  itens.forEach(it=>{ if(realizado(L,it.produtoId)) return; const v=(estId&&precoNaLoja(it.produtoId,estId))??(precosPorLoja(it.produtoId)[0]||{}).valor; if(v) falta+=v*(it.qtd||1); });
-  $("tFalta").textContent=brl(falta);
+  const reaisAqui=reais.filter(r=>r.estabelecimentoId===estId);
+  const reaisGrupo=Object.values(S.realizados).filter(r=>r.grupo===grupoKey(L));
+  $("tLoja").innerHTML=lcd(reaisAqui.reduce((s,r)=>s+(r.total||0),0),"md g full");
+  $("tLojaS").textContent=estId?`${reaisAqui.length} ITE${reaisAqui.length===1?"M":"NS"} · ${estNome(estId)}`:"ESCOLHA A LOJA";
+  $("tGrupoL").textContent=L.grupo?"JÁ GASTO NA LISTA MATRIZ":"JÁ GASTO NA LISTA";
+  $("tGrupo").innerHTML=lcd(reaisGrupo.reduce((s,r)=>s+(r.total||0),0),"md full");
+  const nLojasG=new Set(reaisGrupo.map(r=>r.estabelecimentoId)).size;
+  $("tGrupoS").textContent=`${reaisGrupo.length} ITE${reaisGrupo.length===1?"M":"NS"} · ${nLojasG} LOJA${nLojasG===1?"":"S"}`;
+  let falta=0, nFalta=0;
+  itens.forEach(it=>{ if(realizado(L,it.produtoId)) return; nFalta++; const v=(estId&&precoNaLoja(it.produtoId,estId))??(precosPorLoja(it.produtoId)[0]||{}).valor; if(v) falta+=v*(it.qtd||1); });
+  $("tFalta").innerHTML=lcd(falta,"md y full");
+  $("tFaltaS").textContent=`${nFalta} ITE${nFalta===1?"M":"NS"} · ESTIMADO`;
   $("countLine").textContent=`${reais.length} DE ${itens.length} COMPRADOS`+(estId?"":" · ESCOLHA O ESTABELECIMENTO ACIMA PARA REGISTRAR");
   // itens
   let vis=itens.filter(it=>{const d=!!realizado(L,it.produtoId);return ui.filtro==="all"||(ui.filtro==="todo"&&!d)||(ui.filtro==="done"&&d)});
@@ -1388,7 +1430,7 @@ function cardItem(L,it,estId){
   const vNum=v=>v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
   const tot=v=>Math.round(v*q*100)/100;
   const uv=unVenda(p), sufixo=uv?`<small class="pu">/${uv}</small>`:"";
-  const mult=(v,dif)=>`<span class="mult">${fmtMedida(p,q)} × ${vNum(v)} = <b2>${vNum(tot(v))}</b2>${dif>0?` <i class="up">▲ ${vNum(dif)}</i>`:dif<0?` <i class="dn">▼ ${vNum(-dif)}</i>`:""}</span>`;
+  const mult=(v,dif)=>`<span class="mult">${fmtMedida(p,q)} × ${vNum(v)} = ${lcd(tot(v),"xs","",true)}${dif?` <i class="${dif>0?"up":"dn"}">${difTxt(dif)}</i>`:""}</span>`;
   // ---- resumo: AQUI × MAIS BARATO ----
   let resumo="";
   if(r){
@@ -1403,12 +1445,12 @@ function cardItem(L,it,estId){
     if(!estId) boxAqui=`<div class="bx"><small>📍 AQUI</small><span class="sub">ESCOLHA A LOJA NO TOPO</span></div>`;
     else if(!aqui) boxAqui=`<div class="bx"><small>📍 AQUI · ${esc(estNome(estId))}</small><b class="cinza">SEM PREÇO</b><span class="sub">REGISTRE AO COMPRAR</span></div>`;
     else boxAqui = d<=0
-        ? `<div class="bx ok"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}${sufixo}</b><span class="selo">✓ O MAIS BARATO</span>${mult(aqui.valor,0)}</div>`
-        : `<div class="bx caro"><small>📍 AQUI · ${esc(estNome(estId))}</small><b>${brl(aqui.valor)}${sufixo}</b><span class="selo">+${brl(d)}${uv?"/"+uv:""} MAIS CARO</span>${mult(aqui.valor,dTot)}</div>`;
+        ? `<div class="bx ok"><small>📍 AQUI · ${esc(estNome(estId))}</small>${lcd(aqui.valor,"lg g",uv)}<span class="selo">✓ O MAIS BARATO</span>${mult(aqui.valor,0)}</div>`
+        : `<div class="bx caro"><small>📍 AQUI · ${esc(estNome(estId))}</small>${lcd(aqui.valor,"lg r",uv)}<span class="selo">${difTxt(d,"","",uv)}</span>${mult(aqui.valor,dTot)}</div>`;
     // MAIS BARATO: tocável quando a loja mais barata não é esta → confirma e move
     const podeMover = !r && menor.estabelecimentoId!==estId && !(aqui&&d<=0);
-    const boxMenor=`<div class="bx mb${podeMover?" tap":""}"${podeMover?` data-movermb="${p.id}"`:""}><small>★ MAIS BARATO · ${esc(estNome(menor.estabelecimentoId))}</small><b>${brl(menor.valor)}${sufixo}</b>`+
-      (aqui&&d>0?`<span class="selo">−${brl(d)}${uv?"/"+uv:""} DE ECONOMIA</span>`:"")+
+    const boxMenor=`<div class="bx mb${podeMover?" tap":""}"${podeMover?` data-movermb="${p.id}"`:""}><small>★ MAIS BARATO · ${esc(estNome(menor.estabelecimentoId))}</small>${lcd(menor.valor,"lg g",uv)}`+
+      (aqui&&d>0?`<span class="selo">${difTxt(-d,"","",uv)}</span>`:"")+
       mult(menor.valor,aqui&&d>0?-dTot:0)+(podeMover?`<span class="go">›</span>`:"")+`</div>`;
     resumo=`<div class="resumo2">${boxAqui}${boxMenor}</div>`;
   }
@@ -1424,7 +1466,7 @@ function cardItem(L,it,estId){
       return `<div class="li2 ${cls}">
         <span class="lj">${x.estabelecimentoId===estId?"📍":""}${esc(estNome(x.estabelecimentoId))}<small>${dCurta(x.ts)} · ${esc(primeiroNome(x.usuarioNome))}${x.validoAte?" · ATÉ "+dCurta(x.validoAte):""}</small></span>
         <span class="gr"><i style="width:${Math.max(4,Math.round(x.valor/max*100))}%"></i></span>
-        <span class="vl">${brl(x.valor)}<small>${best?"★ MENOR":d>0?"+"+brl(d):"= MENOR"}</small></span></div>`;
+        <span class="vl">${lcd(x.valor,"sm "+(best||d<=0?"g":"r"),"",true)}<small>${best?"★ MENOR":d>0?difTxt(d):"= MESMO PREÇO"}</small></span></div>`;
     }).join("")+`</div>`;
   }
   const dica=r?"":dicaMarca(p,estId);
@@ -1711,7 +1753,7 @@ function renderFora(){
     const g=grupoKey(L), dest=mb.menor.estabelecimentoId;
     const f=listasDoGrupo(g).find(l=>ehLoja(l)&&l.estabelecimentoId===dest);
     const eco=mb.aqui?Math.round((mb.aqui.valor-mb.menor.valor)*q*100)/100:0;
-    $("foMandar").innerHTML=`★ MANDAR PARA A LISTA DA ${esc(estNome(dest))}<small>${esc(f?f.nome:carimboDoGrupo(g)+"."+estNome(dest)+" (NOVA)")}${eco>0?" · ECONOMIZA "+brl(eco):""}</small>`;
+    $("foMandar").innerHTML=`★ MANDAR PARA A LISTA DA ${esc(estNome(dest))}<small>${esc(f?f.nome:carimboDoGrupo(g)+"."+estNome(dest)+" (NOVA)")}${eco>0?" · "+difTxt(-eco):""}</small>`;
   }
 }
 $("foCard").addEventListener("click",e=>{
@@ -1842,14 +1884,13 @@ function ultimoNaLoja(pid,estId,antesDe){
   return S.precos.filter(r=>r.produtoId===pid&&r.estabelecimentoId===estId&&(antesDe==null||r.ts<antesDe))
     .reduce((a,b)=>!a||b.ts>a.ts?b:a,null);
 }
-const difHtml = d => d>0 ? `<span class="dif up">▲ +${brl(d)}</span>` : d<0 ? `<span class="dif down">▼ −${brl(-d)}</span>` : `<span class="dif">= IGUAL</span>`;
+const difHtml = (d,ref="",eq="") => difSpan(d,ref,eq);
 // seta do preço atual de uma loja em relação ao preço anterior dessa mesma loja
 function tendencia(r){
   const ant=ultimoNaLoja(r.produtoId,r.estabelecimentoId,r.ts);
   if(!ant) return `<span class="dif">1º REGISTRO</span>`;
   const d=Math.round((r.valor-ant.valor)*100)/100;
-  if(!d) return `<span class="dif">= DESDE ${dCurta(ant.ts)}</span>`;
-  return d>0 ? `<span class="dif up">▲ +${brl(d)} DESDE ${dCurta(ant.ts)}</span>` : `<span class="dif down">▼ −${brl(-d)} DESDE ${dCurta(ant.ts)}</span>`;
+  return difSpan(d,` DESDE ${dCurta(ant.ts)}`,` DESDE ${dCurta(ant.ts)}`);
 }
 // quadro com o preço mais recente (válido) de cada estabelecimento, do mais barato ao mais caro
 //  - sem valor digitado: cada loja mostra se subiu/caiu em relação ao preço anterior dela
@@ -1867,7 +1908,7 @@ function comparacaoLojas(pid,estId,v){
   let html=pl.map((r,i)=>{
     let dir;
     if(!(v>0)) dir=tendencia(r);
-    else if(r.estabelecimentoId===estId) dir=difHtml(Math.round((v-r.valor)*100)/100);  // agora × última vez aqui
+    else if(r.estabelecimentoId===estId) dir=difHtml(Math.round((v-r.valor)*100)/100," QUE A ÚLTIMA VEZ"," DA ÚLTIMA VEZ");  // agora × última vez aqui
     else dir=difHtml(Math.round((r.valor-v)*100)/100);                                  // outra loja × valor digitado
     return linha(r,i,dir);
   }).join("");
@@ -1875,7 +1916,7 @@ function comparacaoLojas(pid,estId,v){
   if(estId&&v>0&&S.ests[estId]&&!pl.some(r=>r.estabelecimentoId===estId)){
     const ult=ultimoNaLoja(pid,estId);
     html=`<div class="cmpL aqui"><div><b>📍${esc(estNome(estId))}</b> ${ult?`${brl(ult.valor)} <small>(${dCurta(ult.ts)} · VENCIDO)</small> → `:""}<b>AGORA ${brl(v)}</b><br>
-      <small>${ult?"COMPARADO AO ÚLTIMO PREÇO DESTA LOJA":"PRIMEIRO PREÇO NESTA LOJA"}</small></div>${ult?difHtml(Math.round((v-ult.valor)*100)/100):""}</div>`+html;
+      <small>${ult?"COMPARADO AO ÚLTIMO PREÇO DESTA LOJA":"PRIMEIRO PREÇO NESTA LOJA"}</small></div>${ult?difHtml(Math.round((v-ult.valor)*100)/100," QUE A ÚLTIMA VEZ"," DA ÚLTIMA VEZ"):""}</div>`+html;
   }
   if(!html) return `<div class="cmpBox"><div class="cmpH">PREÇOS EM TODOS OS ESTABELECIMENTOS</div><div class="hint">AINDA NÃO HÁ PREÇO DESTE PRODUTO EM NENHUM ESTABELECIMENTO.</div></div>`;
   const leg = v>0 ? " · 📍 AGORA × ÚLTIMA VEZ · OUTRAS × SEU VALOR" : " · SETA = EM RELAÇÃO AO PREÇO ANTERIOR";
@@ -2227,8 +2268,11 @@ function calcRank(L,modo){
     if(r&&r.total){ dist+=r.total; usadas[r.estabelecimentoId]=(usadas[r.estabelecimentoId]||0)+1; return; }
     const [e,v]=Object.entries(precos[i.pid]).sort((a,b)=>a[1]-b[1])[0]; dist+=v*i.q; usadas[e]=(usadas[e]||0)+1; });
   dist=Math.round(dist*100)/100;
-  const completos=porLoja.filter(x=>x.cob===n&&n>0).sort((a,b)=>b.total-a.total);
-  const incompletos=porLoja.filter(x=>x.cob<n).sort((a,b)=>b.cob-a.cob||a.total-b.total);
+  // distribuída só nos itens que cada loja tem preço (comparação justa, item a item)
+  const custoDist=i=>{ const r=realizado(L,i.pid); if(r&&r.total) return r.total; return Math.min(...Object.values(precos[i.pid]))*i.q; };
+  porLoja.forEach(x=>{ x.dist=Math.round(base.filter(i=>precos[i.pid][x.estId]!=null).reduce((s,i)=>s+custoDist(i),0)*100)/100; });
+  const completos=porLoja.filter(x=>x.cob===n&&n>0).sort((a,b)=>a.total-b.total);
+  const incompletos=porLoja.filter(x=>x.cob<n).sort((a,b)=>a.total-b.total);
   return {n,itens,semPreco,foraCesta,completos,incompletos,dist,usadas,nLojas:lojas.length};
 }
 function renderRank(){
@@ -2240,10 +2284,11 @@ function renderRank(){
   if(!R.n){ $("rkBody").innerHTML=`<div class="empty">${rk.modo==="cesta"?"NENHUM ITEM TEM PREÇO EM TODOS OS MERCADOS.":"NENHUM ITEM DESTA LISTA TEM PREÇO RECENTE."}</div>`+
       (R.semPreco.length?`<div class="rknota">SEM PREÇO EM NENHUM MERCADO: ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`:""); return; }
   const max=Math.max(...R.completos.map(x=>x.total),...R.incompletos.map(x=>x.total),R.dist);
-  const melhor=R.completos.length?R.completos[R.completos.length-1]:null, pior=R.completos.length?R.completos[0]:null;
-  const linha=(x,i,cls,extra)=>{ const d=Math.round((x.total-R.dist)*100)/100;
+  const melhor=R.completos.length?R.completos[0]:null, pior=R.completos.length?R.completos[R.completos.length-1]:null;
+  const linha=(x,i,cls,extra)=>{ const d=Math.round((x.total-x.dist)*100)/100, inc=cls==="inc";
+    const sufixo=inc?` (NOS ${x.cob} ITENS)`:"";
     return `<div class="rkr ${cls}"><span class="pos">${i}</span><span class="n">${esc(estNome(x.estId))}${cls==="best"?" ★":""}${extra}</span>
-      <span class="v">${brl(x.total)}<small>${cls==="inc"?"INCOMPLETO":(d>0?"+"+brl(d):"= DISTRIBUINDO")}</small></span>
+      <span class="v">${lcd(x.total,"md "+(cls==="best"?"g":cls==="caro"?"r":""))}<small>${difCor(d," QUE A DISTRIBUÍDA"+sufixo," DA DISTRIBUÍDA"+sufixo)}</small></span>
       <span class="bar"><i style="width:${Math.max(4,Math.round(x.total/max*100))}%"></i></span></div>`; };
   let h=`<div class="rksec"><span>${rk.modo==="cesta"?`CESTA EM COMUM NOS ${R.nLojas} MERCADOS`:"SE COMPRASSE TUDO EM UM SÓ LUGAR"}</span><span>${R.n} ITE${R.n===1?"M":"NS"}</span></div>`;
   if(R.completos.length) h+=R.completos.map((x,i)=>{ const cls = x===melhor?"best": (x===pior&&R.completos.length>1?"caro":"");
@@ -2255,12 +2300,13 @@ function renderRank(){
   }
   if(rk.modo==="cesta"&&R.foraCesta.length) h+=`<div class="rknota">FORA DA COMPARAÇÃO (SEM PREÇO EM TODOS): ${R.foraCesta.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`;
   const usadas=Object.entries(R.usadas).sort((a,b)=>b[1]-a[1]);
-  h+=`<div class="rkdist"><div class="t"><span>DISTRIBUINDO${rk.modo==="cesta"?" A CESTA":""}</span><b>${brl(R.dist)}</b></div>
+  h+=`<div class="rkdist"><div class="t"><span>DISTRIBUINDO${rk.modo==="cesta"?" A CESTA":""}</span>${lcd(R.dist,"lg g")}</div>
     <div class="s">CADA ITEM NO MAIS BARATO · ${usadas.map(([e,c])=>`${esc(estNome(e))} (${c})`).join(" + ")}</div>`;
   if(melhor){
     const e1=Math.round((melhor.total-R.dist)*100)/100, e2=Math.round((pior.total-R.dist)*100)/100;
-    h+=`<div class="rkeco"><div>ECONOMIA vs MELHOR LOJA<b>${brl(Math.max(0,e1))}</b>${esc(estNome(melhor.estId))}</div>${R.completos.length>1?`<div>ECONOMIA vs MAIS CARA<b>${brl(Math.max(0,e2))}</b>${esc(estNome(pior.estId))}</div>`:""}</div></div>`;
-    if(usadas.length>1&&e1<10) h+=`<div class="rkwarn">⚠ DISTRIBUIR ECONOMIZA ${brl(Math.max(0,e1))} E EXIGE ${usadas.length} MERCADOS. COMPENSA A IDA?</div>`;
+    const caixa=(e,loja,tit)=>`<div>${tit}<br>${difCor(-e," QUE O "+esc(estNome(loja))," DO "+esc(estNome(loja)))}</div>`;
+    h+=`<div class="rkeco">${caixa(e1,melhor.estId,"DISTRIBUÍDA × MELHOR LOJA")}${R.completos.length>1?caixa(e2,pior.estId,"DISTRIBUÍDA × MAIS CARA"):""}</div></div>`;
+    if(usadas.length>1&&e1<10) h+=`<div class="rkwarn">⚠ DISTRIBUIR SAI ${difTxt(-Math.max(0,e1))} E EXIGE ${usadas.length} MERCADOS. COMPENSA A IDA?</div>`;
   } else h+=`</div>`;
   if(R.semPreco.length) h+=`<div class="rknota">SEM PREÇO RECENTE EM NENHUM MERCADO (FORA DA CONTA): ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`;
   $("rkBody").innerHTML=h;
@@ -2286,7 +2332,7 @@ function abrirMoverMenor(L,pid){
   $("mvCmp").innerHTML=`${origem}→<div class="c dst">★ ${esc(nDest)}<b>${brl(menor.valor)}</b></div>`;
   const d=aqui?Math.round((aqui.valor-menor.valor)*100)/100:0;
   $("mvEco").classList.toggle("hidden",!(d>0));
-  if(d>0) $("mvEco").textContent=`ECONOMIA: ${fmtQtd(q)} × ${brl(d)} = ${brl(Math.round(d*q*100)/100)}`;
+  if(d>0) $("mvEco").textContent=`${difTxt(-Math.round(d*q*100)/100)} (${fmtMedida(p,q)} × ${brl(d)})`;
   $("mvDest").innerHTML = f
     ? `VAI PARA: <b>${esc(f.nome)}</b> (LISTA JÁ EXISTE)`
     : `VAI PARA: <b>${esc(carimboDoGrupo(g)+"."+nDest)}</b> (LISTA NOVA)`;
@@ -2331,7 +2377,7 @@ function abrirHist(L,pid,aoSalvar){
   if(regs.length){
     let var_="";
     if(regs.length>1){ const a=regs[0].valor, b=regs[regs.length-1].valor, pc=Math.round((b-a)/a*100);
-      var_ = pc>0?`<span style="color:var(--warn)">▲ +${pc}% DESDE ${dCurta(regs[0].ts)}</span>`:pc<0?`<span style="color:var(--accent)">▼ ${pc}% DESDE ${dCurta(regs[0].ts)}</span>`:`<span>= DESDE ${dCurta(regs[0].ts)}</span>`; }
+      var_ = `<span style="color:${pc>0?"var(--warn)":pc<0?"var(--accent)":"inherit"}">${difPct(pc," DESDE "+dCurta(regs[0].ts))}</span>`; }
     $("hsGraf").innerHTML=`<div class="t"><span>R$</span>${var_}</div>`+graficoHist(regs,outra);
     $("hsGraf").classList.remove("hidden");
   }else $("hsGraf").classList.add("hidden");
@@ -2344,9 +2390,7 @@ $("hsValor").addEventListener("input",e=>{
   const v=num(e.target.value), u=hs&&hs.ult;
   if(!v||!u){ $("hsDif").innerHTML=""; return; }
   const dif=Math.round((v-u.valor)*100)/100;
-  $("hsDif").innerHTML = dif>0 ? `<span style="color:var(--warn)">▲ +${brl(dif)} DESDE A ÚLTIMA VEZ (${dCurta(u.ts)})</span>`
-    : dif<0 ? `<span style="color:var(--accent)">▼ −${brl(-dif)} DESDE A ÚLTIMA VEZ (${dCurta(u.ts)})</span>`
-    : `<span class="muted">= MESMO PREÇO DA ÚLTIMA VEZ (${dCurta(u.ts)})</span>`;
+  $("hsDif").innerHTML = difCor(dif,` QUE A ÚLTIMA VEZ (${dCurta(u.ts)})`,` DA ÚLTIMA VEZ (${dCurta(u.ts)})`);
 });
 $("hsCancel").onclick=()=>{ hide("mHist"); hs=null; };
 $("hsSave").onclick=()=>{
@@ -3060,10 +3104,10 @@ function renderPesq(){
       const ant=S.precos.filter(x=>x.produtoId===r.produtoId&&x.estabelecimentoId===r.estabelecimentoId&&x.id!==r.id&&x.ts<r.ts).sort((a,b)=>b.ts-a.ts)[0];
       const z=p.zonas&&p.zonas[r.estabelecimentoId];
       const d=ant?Math.round((r.valor-ant.valor)*100)/100:null;
-      const tag = ant==null?`<small class="muted">NOVO</small>`:d>0?`<small style="color:var(--warn)">▲ ${vNum2(d)}</small>`:d<0?`<small style="color:var(--accent)">▼ ${vNum2(-d)}</small>`:`<small class="muted">=</small>`;
+      const tag = ant==null?`<small class="muted">NOVO</small>`:`<small style="color:${d>0?"var(--warn)":d<0?"var(--accent)":"var(--muted)"}">${difTxt(d)}</small>`;
       return `<div class="pqr" data-pqr="${r.id}"><div class="thumb">${imgProduto(p)}</div><div class="m"><div class="n">${esc(p.nome)}</div>
         <div class="s">${esc(estNome(r.estabelecimentoId))}${z?" · "+esc(zonaRotuloPq(r.estabelecimentoId,z)):""} · ${ant?"ERA "+vNum2(ant.valor)+" ("+dCurta(ant.ts)+")":"1º PREÇO NESTA LOJA"}</div></div>
-        <div class="v">${vNum2(r.valor)}${tag}</div></div>`; }).join("")+`</div>`
+        <div class="v">${lcd(r.valor,"sm","",true)}${tag}</div></div>`; }).join("")+`</div>`
     : `<div class="empty">${pq.estId?"LIGUE A CÂMERA E APONTE PARA OS PRODUTOS.":"ESCOLHA O MERCADO, LIGUE A CÂMERA E APONTE PARA OS PRODUTOS."}<br>CADA PREÇO SALVO APARECE AQUI.</div>`;
 }
 const rotZ = z => `${z.codigo} · ${z.descricao||"SEM NOME ✏️"}`;
@@ -3183,7 +3227,7 @@ function pqDif(){
   const a=pq.abre, v=num($("pqValor").value), u=a&&a.ult;
   if(!v||!u){ $("pqDif").innerHTML=""; return; }
   const d=Math.round((v-u.valor)*100)/100;
-  $("pqDif").innerHTML = d>0?`<span style="color:var(--warn)">▲ +${brl(d)} DESDE ${dCurta(u.ts)}</span>`:d<0?`<span style="color:var(--accent)">▼ −${brl(-d)} DESDE ${dCurta(u.ts)}</span>`:`<span class="muted">= MESMO PREÇO DE ${dCurta(u.ts)}</span>`;
+  $("pqDif").innerHTML = difCor(d,` DESDE ${dCurta(u.ts)}`,` DE ${dCurta(u.ts)}`);
 }
 $("pqValor").addEventListener("input",e=>{
   const d=e.target.value.replace(/\D/g,"").replace(/^0+/,"").slice(0,8);
