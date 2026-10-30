@@ -277,6 +277,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .menu button.danger{border-color:#f0c9c2}
 /* leitura ao vivo */
 .mm{position:relative;height:150px;margin-top:8px;border-radius:12px;overflow:hidden;background:#000}
+.pdcam{position:sticky;top:-16px;z-index:3;margin:-4px 0 10px;box-shadow:0 6px 12px -6px rgba(0,0,0,.35)}
 .mm video,.scan video{width:100%;height:100%;object-fit:cover;display:block}
 .mira{position:absolute;left:8%;right:8%;top:50%;height:44%;transform:translateY(-50%);border:2px solid rgba(255,255,255,.9);border-radius:10px;box-shadow:0 0 0 999px rgba(0,0,0,.28)}
 .mira::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff3b30;opacity:.85}
@@ -461,7 +462,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-C</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-D</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -713,6 +714,13 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 
 <!-- Produto -->
 <div class="modal" id="mProd"><div class="sheet">
+  <div id="pdCam" class="mm hidden pdcam">
+    <video id="pdVideo" playsinline muted autoplay></video>
+    <div class="mira"></div>
+    <div class="mmMsg" id="pdCamMsg">APONTE PARA O CÓDIGO DE BARRAS</div>
+    <button id="pdTorch" class="mmBtn hidden" style="left:8px" aria-label="LANTERNA">🔦</button>
+    <button id="pdCamClose" class="mmBtn" style="right:8px" aria-label="DESLIGAR CÂMERA">✕</button>
+  </div>
   <h2 id="pdTitle">PRODUTO</h2>
   <div style="display:flex;gap:12px;align-items:center">
     <div class="thumb big" id="pdFoto">TOQUE PARA FOTOGRAFAR</div>
@@ -958,7 +966,7 @@ const primeiroNome = n => up(n).split(" ")[0]||"?";
 const rid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 function show(id){$(id).classList.add("show")}
-function hide(id){$(id).classList.remove("show")}
+function hide(id){$(id).classList.remove("show"); if(id==="mProd"&&typeof pararPdCam==="function") pararPdCam();}
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
 
 const VENDIDO = ["UN","PCT","CX","KG","G","L","BANDEJA","DÚZIA","FARDO","LATA","GARRAFA","MAÇO","ROLO","SACHÊ","POTE","VIDRO"];
@@ -1318,7 +1326,7 @@ function renderAtual(){
   $("title").textContent=titulos[ui.aba];
   $("title").classList.toggle("edit",ui.aba==="listas"&&!!L);
 }
-document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ui.aba=b.dataset.tab;if(ui.aba!=="listas")ui.lista=ui.lista;mostrar()});
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ if(b.dataset.tab!==ui.aba){ (ui.abaHist=ui.abaHist||[]).push(ui.aba); if(ui.abaHist.length>20) ui.abaHist.shift(); } ui.aba=b.dataset.tab;mostrar()});
 $("back").onclick=()=>{ui.lista=null;mostrar()};
 $("title").onclick=()=>{ const L=ui.aba==="listas"&&ui.lista&&S.listas[ui.lista]; if(!L) return;
   const n=up(prompt("NOME DA LISTA:",L.nome)||""); if(n) DB.update("listas",L.id,{nome:n}); };
@@ -3267,7 +3275,40 @@ $("pdZonas").addEventListener("click",e=>{
 function fotoPd(){ $("pdFoto").innerHTML=pd.foto?`<img src="${pd.foto}" alt="">`:"TOQUE PARA FOTOGRAFAR"; }
 $("pdFoto").onclick=()=>menuFoto(termosFoto($("pdNome").value,$("pdMarca").value,num($("pdCQtd").value),$("pdCUn").value),
   async f=>{ pd.foto=await reduzir(f,360,0.72); fotoPd(); if(pd.id){ DB.update("produtos",pd.id,{foto:pd.foto}); toast("FOTO SALVA"); } });
-$("pdLerBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(c){ $("pdBarras").value=c; consultarBase(c); } };
+// produto novo: câmera fixa no topo do cadastro, ligada até tocar no ✕ (cadastra vários em sequência)
+// editando: lê uma vez e fecha (só há um código para trocar)
+$("pdLerBarras").onclick=async()=>{
+  if(pd.id){ const c=await lerCodigoBarras(); if(c){ $("pdBarras").value=c; consultarBase(c); } return; }
+  if(pdc.ativo){ pararPdCam(); return; }
+  iniciarPdCam();
+};
+const pdc={ativo:false,leitor:null,ultimo:"",ultimoEm:0};
+async function iniciarPdCam(){
+  $("pdCam").classList.remove("hidden"); $("pdCamMsg").textContent="LIGANDO A CÂMERA…"; pdc.ativo=true;
+  $("pdLerBarras").textContent="■ PARAR";
+  try{
+    pdc.leitor=await LeitorAoVivo.iniciar($("pdVideo"),{
+      pausado:()=>document.querySelectorAll(".modal.show").length>1||!$("mProd").classList.contains("show"),
+      aoLer:c=>{ const agora=Date.now(); if(c===pdc.ultimo&&agora-pdc.ultimoEm<20000) return false;
+        pdc.ultimo=c; pdc.ultimoEm=agora; codigoNoCadastro(c); return true; },
+      torch:$("pdTorch")
+    });
+    if(!pdc.ativo){ pdc.leitor.parar(); pdc.leitor=null; return; }
+    $("pdCamMsg").textContent="APONTE PARA O CÓDIGO DE BARRAS";
+  }catch(e){ pararPdCam(); alert(e.message||"NÃO FOI POSSÍVEL LIGAR A CÂMERA."); }
+}
+function pararPdCam(){
+  pdc.ativo=false; pdc.ultimo="";
+  if(pdc.leitor){ pdc.leitor.parar(); pdc.leitor=null; }
+  $("pdCam").classList.add("hidden"); $("pdLerBarras").textContent="▥ LER";
+}
+$("pdCamClose").onclick=pararPdCam;
+function codigoNoCadastro(c){
+  const ja=Object.values(S.produtos).find(x=>x.barras===c);
+  if(ja){ $("pdBase").innerHTML=`<div class="achado nao">JÁ CADASTRADO: <b>${esc(ja.nome)}${ja.marca?" "+esc(ja.marca):""}</b> (${esc(ja.codigo||"")}) <button class="small" id="pdAbrirJa" data-id="${ja.id}">ABRIR</button></div>`; return; }
+  $("pdBarras").value=c; consultaBase.ultimo=""; consultarBase(c);
+}
+$("pdBase").addEventListener("click",e=>{ if(e.target.id==="pdAbrirJa"){ pararPdCam(); abrirProd(e.target.dataset.id); } });
 
 /* ---------- Ficha do produto pelo código de barras (Open Food Facts e bases irmãs) ----------
    Consulta foto, nome, marca e conteúdo. Só preenche o que estiver vazio e nunca troca foto tirada pelo usuário. */
@@ -3355,7 +3396,11 @@ $("pdSave").onclick=async()=>{
   catch(e){ codigo="PRODT"+Date.now().toString(36).toUpperCase(); toast("SEM INTERNET: ID PROVISÓRIO "+codigo); }
   $("pdSave").disabled=false;
   const id=DB.add("produtos",{...dados,codigo,criadoPor:eu().uid,criadoPorNome:eu().nome,criadoEm:Date.now()});
-  hide("mProd"); toast("PRODUTO "+codigo+" CADASTRADO");
+  toast("PRODUTO "+codigo+" CADASTRADO");
+  if(pdc.ativo&&!pd.cb){ // modo cadastro em sequência: formulário limpo, câmera continua ligada
+    const zonasAntes={...zonas}; abrirProd(null,{zonas:zonasAntes}); pdc.ultimo="";
+    $("pdBase").innerHTML=`<div class="achado nao">✔ ${esc(nome)} SALVO. APONTE PARA O PRÓXIMO PRODUTO.</div>`; return; }
+  hide("mProd");
   if(pd.cb) pd.cb(id);
 };
 $("pdDel").onclick=()=>{
@@ -3559,6 +3604,42 @@ $("pqVisita").addEventListener("click",e=>{
     DB.del("precos",r.id); pq.visita=pq.visita.filter(x=>x!==r.id); pqGuardar(); agendar(); }});
   if(S.produtos[r.produtoId]) ops.push({txt:"📦  VER / EDITAR PRODUTO",fn:()=>abrirProd(r.produtoId)});
   abrirMenu(p.nome||"PREÇO",`${estNome(r.estabelecimentoId)} · ${brl(r.valor)}`,ops);
+});
+
+
+/* ---------- botão VOLTAR (celular, teclado ou navegador): navega dentro do app em vez de sair ---------- */
+const FECHA={mSenha:"snCancel",mAdmin:"admFechar",mRec:"rcCancel",mRecLista:"rlCancel",mQtd:"qtCancel",mMover:"mvCancel",mHist:"hsCancel",
+  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel"};
+let saidaArmada=0;
+function voltarUmPasso(){
+  // 1) leitor em tela cheia
+  const scan=document.querySelector(".scan"); if(scan){ const x=scan.querySelector('[data-a="x"]'); if(x){ x.click(); return true; } }
+  // 2) janela aberta (a de cima)
+  const abertas=[...document.querySelectorAll(".modal.show")];
+  if(abertas.length){ const m=abertas[abertas.length-1];
+    const b=(FECHA[m.id]&&$(FECHA[m.id])) || [...m.querySelectorAll("button")].find(x=>/^(CANCELAR|FECHAR|AGORA NÃO|PULAR)$/.test(x.textContent.trim()));
+    if(b) b.click(); else hide(m.id);
+    if(m.id==="mMenu") hide("mMenu");
+    return true; }
+  // 3) câmera ligada
+  if(typeof mm!=="undefined"&&mm.ativo){ pararModoMercado(); return true; }
+  if(typeof pq!=="undefined"&&pq.ativo){ pararPesquisa(); return true; }
+  // 4) dentro de uma lista
+  if(ui.aba==="listas"&&ui.lista){ $("back").click(); return true; }
+  // 5) receitas → listas
+  if(ui.aba==="listas"&&ui.lr==="receitas"){ ui.lr="listas"; mostrar(); return true; }
+  // 6) outra aba → aba anterior
+  if(ui.aba!=="listas"){ const h=ui.abaHist||[]; let a=h.pop(); while(a&&a===ui.aba) a=h.pop(); ui.aba=a||"listas"; mostrar(); return true; }
+  return false;
+}
+try{ history.replaceState({oik:"base"},""); history.pushState({oik:"guarda"},""); }catch(e){}
+window.addEventListener("popstate",()=>{
+  if(!S.user||$("app").classList.contains("hidden")){ return; } // tela de login/espera: deixa o navegador agir
+  if(voltarUmPasso()){ saidaArmada=0; try{ history.pushState({oik:"guarda"},""); }catch(e){} return; }
+  const agora=Date.now();
+  if(agora-saidaArmada<2000){ history.back(); return; } // segundo toque: sai do app
+  saidaArmada=agora; toast("TOQUE VOLTAR DE NOVO PARA SAIR");
+  try{ history.pushState({oik:"guarda"},""); }catch(e){}
 });
 
 /* =====================================================================
