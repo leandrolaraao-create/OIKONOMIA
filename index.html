@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#ffffff">
 <meta name="application-name" content="Oikonomia">
 <meta name="apple-mobile-web-app-title" content="Oikonomia">
@@ -161,9 +161,9 @@ main{padding:12px 16px 150px;max-width:760px;margin:0 auto}
 .prow{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center}
 .prow .thumb{width:56px;height:56px;font-size:26px}
 /* janelas */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.modal{position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100%);background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
 .modal.show{display:flex}
-.sheet{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:92%;overflow:auto}
 .sheet h2{margin:0 0 6px;font-size:17px}
 .f{display:block;font-size:12px;color:var(--muted);margin:8px 0}
 .f input,.f select,.f textarea{margin-top:4px}
@@ -401,6 +401,15 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .fgbig img{max-width:100%;max-height:100%;object-fit:contain}
 .fgnome{font-size:19px;font-weight:900;margin-top:10px;line-height:1.2}
 .fgdesc{font-size:13px;color:var(--muted);font-weight:700;margin:2px 0 4px}
+/* busca: janela de produtos ocupa a tela acima do teclado; resultados rolam no meio */
+#mPick .sheet{height:96%;max-height:96%;display:flex;flex-direction:column;overflow:hidden}
+#mPick.foco .sheet{height:100%;max-height:100%;border-radius:0}
+#mPick .sheet>*{flex:none}
+#mPick #pkLista{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+#mPick.foco #pkAcoes{display:none!important}
+#pkBtns{margin-top:6px}
+mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
+.bgrp{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin:10px 0 2px}
 .iagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
 .iat{position:relative;padding:0;border:2px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;aspect-ratio:1;display:flex;flex-direction:column}
 .iat img{flex:1;min-height:0;width:100%;object-fit:contain;background:#fff}
@@ -531,7 +540,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-J</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-K</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -868,7 +877,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
     <input id="pkBusca" placeholder="BUSCAR">
     <button id="pkBarras" class="cam" title="LER CÓDIGO DE BARRAS">▥</button>
   </div>
-  <div style="display:flex;gap:6px;margin-bottom:6px">
+  <div id="pkAcoes" style="display:flex;gap:6px;margin-bottom:6px">
     <button id="pkNovo" class="small">+ CADASTRAR PRODUTO</button>
     <button id="pkMes" class="small">⭐ COMPRA DO MÊS</button>
   </div>
@@ -1073,6 +1082,9 @@ function passoMedida(p,q,dir){
 const primeiroNome = n => up(n).split(" ")[0]||"?";
 const rid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+(function(){ const vv=window.visualViewport; if(!vv) return;
+  const aj=()=>{ const r=document.documentElement.style; r.setProperty("--vvh",vv.height+"px"); r.setProperty("--vvt",vv.offsetTop+"px"); };
+  vv.addEventListener("resize",aj); vv.addEventListener("scroll",aj); aj(); })();
 let zModal=20;
 function show(id){const m=$(id); if(!document.querySelector(".modal.show")) zModal=20; m.style.zIndex=Math.min(++zModal,39); m.classList.add("show")} // abaixo do aviso (40) e do leitor em tela cheia (60)
 function hide(id){$(id).classList.remove("show"); if(id==="mProd"&&typeof pararPdCam==="function") pararPdCam();}
@@ -1552,7 +1564,7 @@ function renderListas(){
   const casa=l=>{ const s=statusLista(l);
     if(lui.filtro==="abertas"&&s.completa) return false;
     if(lui.filtro==="completas"&&!s.completa) return false;
-    return !q||up(l.nome).includes(q); };
+    return !q||semAc(l.nome).includes(semAc(q)); };
   const lista=Object.entries(blocos).map(([k,ls])=>{
     const pai=ls.find(l=>l.tipo==="NORMAL")||null;
     const filhos=ls.filter(l=>l!==pai).sort((a,b)=>(a.tipo==="LIVRE"?-1:b.tipo==="LIVRE"?1:a.nome.localeCompare(b.nome,"pt-BR")));
@@ -2547,7 +2559,7 @@ function rcAdicionar(pid){
 $("rcBusca").addEventListener("input",()=>{
   const q=$("rcBusca").value.trim(); if(!q){ $("rcSug").innerHTML=""; return; }
   const ps=filtrarProdutos(q).slice(0,8);
-  $("rcSug").innerHTML=ps.map(p=>`<div class="pick" data-rcs="${p.id}" style="grid-template-columns:48px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${ehFav(p)?'<span class="fav">❤️ </span>':""}${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+  $("rcSug").innerHTML=ps.map(p=>`<div class="pick" data-rcs="${p.id}" style="grid-template-columns:48px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${ehFav(p)?'<span class="fav">❤️ </span>':""}${marcar(p.nome,busca.toks)}</div><div class="sub">${marcar(descProduto(p),busca.toks)}</div></div></div>`).join("")
     +`<button class="small" id="rcCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
 });
 $("rcSug").addEventListener("click",e=>{
@@ -3152,10 +3164,65 @@ function abrirPicker(modo,nome){
   pk.jaNaLista = L ? new Set((L.itens||[]).map(x=>x.produtoId)) : new Set();
   renderPicker(); show("mPick");
 }
+/* ---------- BUSCA: sem acento, palavras em qualquer ordem, tolera 1 erro de digitação ---------- */
+// "Maçã" → "MACA" (letra a letra, para o destaque cair no lugar certo)
+const semAc = s => String(s??"").normalize("NFC").split("").map(c=>c.normalize("NFD")[0]).join("").toUpperCase();
+// distância entre palavras (troca, falta, sobra ou inversão de uma letra = 1)
+function distancia(a,b){
+  if(Math.abs(a.length-b.length)>1) return 9;
+  const m=a.length,n=b.length; let pp=null, p=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){ const c=[i];
+    for(let j=1;j<=n;j++){ c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));
+      if(pp&&i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1]) c[j]=Math.min(c[j],pp[j-2]+1); }
+    pp=p; p=c; }
+  return p[n];
+}
+// palavra digitada parecida com uma palavra do produto (só a partir de 4 letras; vale também para o começo da palavra, enquanto digita)
+function parecida(t,w){
+  if(t.length<4||!w) return false;
+  return distancia(t,w)<=1 || distancia(t,w.slice(0,t.length))<=1 || distancia(t,w.slice(0,t.length+1))<=1;
+}
+// devolve {ex: encontrados, pa: parecidos, toks}
+function buscar(lista,q,campos){
+  const toks=semAc(q).split(/\s+/).filter(Boolean);
+  if(!toks.length) return {ex:lista,pa:[],toks};
+  const ex=[], pa=[];
+  lista.forEach(p=>{
+    const txt=campos(p).map(semAc).join(" "), pal=txt.split(/[^A-Z0-9]+/).filter(Boolean);
+    let e=0, f=0;
+    toks.forEach(t=>{ if(txt.includes(t)) e++; else if(pal.some(w=>parecida(t,w))) f++; });
+    if(e===toks.length) ex.push(p);
+    else if(e+f===toks.length || (toks.length>=2 && e>=1 && e+f>=toks.length-1)) pa.push(p);
+  });
+  return {ex,pa,toks};
+}
+// marca em amarelo o trecho encontrado (ou a palavra parecida)
+function marcar(texto,toks){
+  const t=String(texto??""); if(!toks||!toks.length) return esc(t);
+  const n=semAc(t); if(n.length!==t.length) return esc(t);
+  const on=new Array(t.length).fill(false);
+  toks.forEach(k=>{
+    let i=n.indexOf(k);
+    if(i>=0){ while(i>=0){ for(let j=i;j<i+k.length;j++) on[j]=true; i=n.indexOf(k,i+k.length); } return; }
+    const re=/[A-Z0-9]+/g; let m; while((m=re.exec(n))){ if(parecida(k,m[0])) for(let j=m.index;j<m.index+m[0].length;j++) on[j]=true; }
+  });
+  let h="", a=false;
+  for(let i=0;i<t.length;i++){ if(on[i]!==a){ h+=on[i]?'<mark class="bk">':'</mark>'; a=on[i]; } h+=esc(t[i]); }
+  return h+(a?"</mark>":"");
+}
+let busca={toks:[],pa:new Set()}; // última busca de produtos (para destacar e separar ENCONTRADOS / PARECIDOS)
+const ordemProd=(a,b)=>a.nome.localeCompare(b.nome,"pt-BR")||ordemPreco(a)-ordemPreco(b)||up(a.marca).localeCompare(up(b.marca),"pt-BR");
 function filtrarProdutos(q){
-  q=up(q);
-  return Object.values(S.produtos).filter(p=>!q||[p.nome,p.marca,p.codigo,p.barras,p.obs,p.categoria].some(v=>up(v).includes(q)))
-    .sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR")||ordemPreco(a)-ordemPreco(b)||up(a.marca).localeCompare(up(b.marca),"pt-BR"));
+  const r=buscar(Object.values(S.produtos),q||"",p=>[p.nome,p.marca,p.codigo,p.barras,p.obs,p.categoria,p.embalagem]);
+  busca={toks:r.toks,pa:new Set(r.pa.map(p=>p.id))};
+  return [...r.ex.sort(ordemProd),...r.pa.sort(ordemProd)];
+}
+// cabeçalhos ENCONTRADOS / PARECIDOS (só quando há parecidos)
+function grupoBusca(ps,i){
+  if(!busca.pa.size||!busca.toks.length) return "";
+  const p=ps[i], antes=i?ps[i-1]:null, pa=busca.pa.has(p.id);
+  if(i===0) return `<div class="bgrp">${pa?"PARECIDOS":"ENCONTRADOS"}</div>`;
+  return pa&&!busca.pa.has(antes.id) ? `<div class="bgrp">PARECIDOS</div>` : "";
 }
 function renderPicker(){
   let ps=filtrarProdutos($("pkBusca").value);
@@ -3164,10 +3231,10 @@ function renderPicker(){
   contarPicker();
   if(!Object.keys(S.produtos).length) $("pkCount").textContent="NENHUM PRODUTO CADASTRADO. TOQUE EM “+ CADASTRAR PRODUTO”.";
   // categorias: escolher pelo preço (ML/G/UN), qualquer marca ou embalagem
-  const busca=up($("pkBusca").value), cats=categorias().filter(c=>c.ps.length>1);
+  const bq=semAc(up($("pkBusca").value)), cats=categorias().filter(c=>c.ps.length>1);
   let topo="";
-  if(busca.length>=2){
-    topo=cats.filter(c=>c.nome.includes(busca)||c.ps.some(p=>ps.includes(p))).slice(0,3).map(c=>{
+  if(bq.length>=2){
+    topo=cats.filter(c=>semAc(c.nome).includes(bq)||c.ps.some(p=>ps.includes(p))).slice(0,3).map(c=>{
       const ops=opcoesCat(c.ps,1,null), lojas=new Set(ops.map(x=>x.estId)).size;
       const faixa=ops.length?` · DE ${fmtPorUn(Math.min(...ops.map(x=>x.porUn)),c.un).replace("1 "+c.un+" = ","")} A ${fmtPorUn(Math.max(...ops.map(x=>x.porUn)),c.un).replace("1 "+c.un+" = ","")} POR ${c.un}`:"";
       return `<div class="catrow"><div class="m"><b>🏷️ ${esc(c.nome)}</b><small>CATEGORIA · ${c.ps.length} PRODUTOS${ops.length?` · ${ops.length} OPÇÕES EM ${lojas} LOJA${lojas>1?"S":""}`:""}${faixa}</small></div><button class="small primary" data-pkcat="${esc(c.nome)}">ESCOLHER PELO PREÇO ›</button></div>`;
@@ -3175,20 +3242,22 @@ function renderPicker(){
   } else if(cats.length){
     topo=`<div class="catchips">ESCOLHER PELO PREÇO: ${cats.map(c=>`<button class="small" data-pkcat="${esc(c.nome)}">🏷️ ${esc(c.nome)}</button>`).join("")}</div>`;
   }
-  $("pkLista").innerHTML=topo+ps.map(p=>{
+  $("pkLista").innerHTML=topo+ps.map((p,i)=>{
     const ja=pk.jaNaLista.has(p.id), s=pk.sel[p.id];
     const pl=precosPorLoja(p.id)[0];
     const f=freq[p.id];
-    return `<div class="pick">
+    return grupoBusca(ps,i)+`<div class="pick">
       <input type="checkbox" data-pk="${p.id}" ${s||ja?"checked":""} ${ja?"disabled":""}>
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${esc(descProduto(p))}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>${opsHtml(p)}
+      <div><div class="name" style="font-size:13px">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${marcar(p.nome,busca.toks)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${marcar(descProduto(p),busca.toks)}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>${opsHtml(p)}
         ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}${precoBase(p,pl.valor)?" · "+precoBase(p,pl.valor):""}</div>`:""}</div>
       <input class="q" data-pkq="${p.id}" inputmode="decimal" value="${s?fmtQtd(s):""}" placeholder="QTD" ${ja?"disabled":""}>
     </div>`;
   }).join("")||`<div class="empty">NADA ENCONTRADO.</div>`;
 }
 $("pkBusca").addEventListener("input",renderPicker);
+$("pkBusca").addEventListener("focus",()=>{ $("mPick").classList.add("foco"); setTimeout(()=>$("pkBusca").scrollIntoView({block:"nearest"}),250); });
+$("pkBusca").addEventListener("blur",()=>setTimeout(()=>{ if(document.activeElement!==$("pkBusca")) $("mPick").classList.remove("foco"); },150));
 $("pkBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return;
   const p=Object.values(S.produtos).find(x=>x.barras===c);
   if(p){ $("pkBusca").value=c; pk.sel[p.id]=pk.sel[p.id]||1; renderPicker(); }
@@ -3448,20 +3517,20 @@ $("fOk").onclick=()=>{
    ===================================================================== */
 function renderProdutos(){
   const ps=filtrarProdutos($("pBusca").value);
-  $("produtos").innerHTML=ps.map(p=>{
+  $("produtos").innerHTML=ps.map((p,i)=>grupoBusca(ps,i)+(()=>{
     const pl=precosPorLoja(p.id);
     const c=pl[0];
     return `<div class="card click prow" data-prod="${p.id}">
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${esc(p.nome)}</div>
-        <div class="sub">${esc(descProduto(p))}</div>
+      <div><div class="name">${ehFav(p)?`<span class="fav">❤️ </span>`:""}${marcar(p.nome,busca.toks)}</div>
+        <div class="sub">${marcar(descProduto(p),busca.toks)}</div>
         <div class="sub">${esc(p.codigo||"")}${p.barras?" · ▥ "+esc(p.barras):""}</div>
         ${opsHtml(p)}
         ${c?`<div class="sub" style="color:var(--accent);font-weight:700">MAIS BARATO: ${esc(estNome(c.estabelecimentoId))} ${brl(c.valor)} (${dCurta(c.ts)} · ${esc(primeiroNome(c.usuarioNome))})${precoBase(p,c.valor)?" · "+precoBase(p,c.valor):""}</div>`:`<div class="sub">SEM PREÇO</div>`}
         ${pl.length>1?`<div class="sub">${pl.length} ESTABELECIMENTOS COM PREÇO</div>`:""}
         <div class="tags"><button class="tag" data-rp="${p.id}">💲 PREÇO</button></div>
       </div></div>`;
-  }).join("")||`<div class="empty">${Object.keys(S.produtos).length?"NADA ENCONTRADO.":"NENHUM PRODUTO CADASTRADO."}</div>`;
+  })()).join("")||`<div class="empty">${Object.keys(S.produtos).length?"NADA ENCONTRADO.":"NENHUM PRODUTO CADASTRADO."}</div>`;
 }
 $("pBusca").addEventListener("input",agendar);
 $("pBuscaBar").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return; const p=Object.values(S.produtos).find(x=>x.barras===c);
@@ -3520,7 +3589,7 @@ $("rpBusca").addEventListener("input",()=>{
   const q=$("rpBusca").value.trim();
   if(!q){ $("rpSug").innerHTML=""; return; }
   const ps=filtrarProdutos(q).slice(0,6);
-  $("rpSug").innerHTML=ps.map(p=>`<div class="pick" data-rps="${p.id}" style="grid-template-columns:56px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+  $("rpSug").innerHTML=ps.map(p=>`<div class="pick" data-rps="${p.id}" style="grid-template-columns:56px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${marcar(p.nome,busca.toks)}</div><div class="sub">${marcar(descProduto(p),busca.toks)}</div></div></div>`).join("")
     +`<button class="small" id="rpCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
 });
 $("rpSug").addEventListener("click",e=>{
@@ -4016,7 +4085,7 @@ $("pqBusca").addEventListener("input",()=>{
   const q=$("pqBusca").value.trim();
   if(!q){ $("pqSug").innerHTML=""; return; }
   const ps=filtrarProdutos(q).slice(0,8);
-  $("pqSug").innerHTML=ps.map(p=>`<div class="pick" data-pqs="${p.id}" style="grid-template-columns:56px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${esc(p.nome)}</div><div class="sub">${esc(descProduto(p))}</div></div></div>`).join("")
+  $("pqSug").innerHTML=ps.map(p=>`<div class="pick" data-pqs="${p.id}" style="grid-template-columns:56px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${marcar(p.nome,busca.toks)}</div><div class="sub">${marcar(descProduto(p),busca.toks)}</div></div></div>`).join("")
     +`<button class="small" id="pqCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
 });
 $("pqSug").addEventListener("click",e=>{
