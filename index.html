@@ -531,7 +531,7 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-I</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 30.10-J</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -838,6 +838,13 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
   <div class="iagrid" id="iaGrid"></div>
   <div id="iaCamposW"><div class="sect">PREENCHER O CADASTRO</div><div class="hint">SÓ VÊM MARCADOS OS CAMPOS QUE ESTÃO VAZIOS.</div><div class="iacampos" id="iaCampos"></div></div>
   <div class="btns"><button id="iaCancel">CANCELAR</button><button id="iaOk" class="primary">USAR</button></div>
+</div></div>
+
+<!-- Sair do app (seta de voltar na tela inicial) -->
+<div class="modal" id="mSair"><div class="sheet">
+  <h2 style="margin:0">SAIR DO OIKONOMIA?</h2>
+  <div class="hint" style="margin-top:6px">SUAS LISTAS E PREÇOS FICAM SALVOS.</div>
+  <div class="btns"><button id="srSair">SAIR</button><button id="srFica" class="primary">CONTINUAR NO APP</button></div>
 </div></div>
 
 <!-- Estabelecimento -->
@@ -4118,8 +4125,7 @@ $("pqVisita").addEventListener("click",e=>{
 
 /* ---------- botão VOLTAR (celular, teclado ou navegador): navega dentro do app em vez de sair ---------- */
 const FECHA={mSenha:"snCancel",mAdmin:"admFechar",mRec:"rcCancel",mRecLista:"rlCancel",mQtd:"qtCancel",mMover:"mvCancel",mHist:"hsCancel",
-  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel",mIA:"iaCancel"};
-let saidaArmada=0;
+  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel",mIA:"iaCancel",mSair:"srFica"};
 function voltarUmPasso(){
   // 1) leitor em tela cheia
   const scan=document.querySelector(".scan"); if(scan){ const x=scan.querySelector('[data-a="x"]'); if(x){ x.click(); return true; } }
@@ -4141,15 +4147,29 @@ function voltarUmPasso(){
   if(ui.aba!=="listas"){ const h=ui.abaHist||[]; let a=h.pop(); while(a&&a===ui.aba) a=h.pop(); ui.aba=a||"listas"; mostrar(); return true; }
   return false;
 }
+/* ---------- trava da seta de voltar ----------
+   O app guarda uma "página extra" no histórico (a trava). A seta de voltar consome a trava e o app decide:
+   fecha janela, sai da lista, volta de aba… e na tela inicial pergunta SAIR DO OIKONOMIA?
+   O Chrome pode pular travas criadas sem toque na tela, por isso a trava é refeita a cada toque. */
+let saindo=false;
+const logado = () => !!S.user && !$("app").classList.contains("hidden");
+function armarGuarda(){ try{ if(!history.state||history.state.oik!=="guarda") history.pushState({oik:"guarda"},""); }catch(e){} }
 try{ history.replaceState({oik:"base"},""); history.pushState({oik:"guarda"},""); }catch(e){}
+["pointerdown","keydown"].forEach(t=>document.addEventListener(t,armarGuarda,true));
 window.addEventListener("popstate",()=>{
-  if(!S.user||$("app").classList.contains("hidden")){ return; } // tela de login/espera: deixa o navegador agir
-  if(voltarUmPasso()){ saidaArmada=0; try{ history.pushState({oik:"guarda"},""); }catch(e){} return; }
-  const agora=Date.now();
-  if(agora-saidaArmada<2000){ history.back(); return; } // segundo toque: sai do app
-  saidaArmada=agora; toast("TOQUE VOLTAR DE NOVO PARA SAIR");
-  try{ history.pushState({oik:"guarda"},""); }catch(e){}
+  if(saindo||!logado()) return; // tela de login/espera: deixa o navegador agir
+  armarGuarda();
+  if(voltarUmPasso()) return;
+  show("mSair");
 });
+$("srFica").onclick=()=>hide("mSair");
+$("srSair").onclick=()=>{
+  hide("mSair"); saindo=true;
+  history.go(-2); // trava + página do app → página anterior do navegador
+  setTimeout(()=>{ if(document.visibilityState==="visible"){ saindo=false; armarGuarda(); toast("PARA FECHAR, USE O BOTÃO DE ABAS DO NAVEGADOR"); } },800);
+};
+// rede de segurança: se o navegador pular a trava, ele mesmo pergunta "Sair do site?"
+window.addEventListener("beforeunload",e=>{ if(saindo||!logado()) return; e.preventDefault(); e.returnValue=""; });
 
 /* =====================================================================
    ESTABELECIMENTOS E ZONAS
