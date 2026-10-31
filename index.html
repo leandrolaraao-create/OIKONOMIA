@@ -26,6 +26,7 @@
   20. ESTABELECIMENTOS · HISTÓRICO · EXPORTAR PDF · INÍCIO
 
   HISTÓRICO DE VERSÕES (a mais nova em cima)
+  V 31.10-C  famílias separadas: produtos, lojas e preços de cada família; receita enviada leva nome/marca/tamanho
   V 31.10-B  sugestões próprias embaixo de NOME, MARCA e CATEGORIA no cadastro
   V 31.10-A  sem idade/validade de preço; opinião gravada por pessoa; favorito sai;
              COMPRA DO MÊS (caixa + quantidade) com LISTA DO MÊS e POR PREFERÊNCIA;
@@ -594,7 +595,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-B</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-C</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -1254,7 +1255,7 @@ const ADMINS = ["leandrolara.ao@gmail.com"].concat(DEMO?["l@x.com","leandro@x.co
 const ehAdmin = () => !!(S.user&&ADMINS.includes(String(S.user.email||"").toLowerCase()));
 const minhaFam = () => (S.user&&S.user.familiaId)||null;
 // listas, compras, receitas e preços gravam a família de quem criou
-const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos"]);
+const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos","produtos","estabelecimentos"]); // tudo é da família
 (function(){ const add0=DB.add.bind(DB), set0=DB.set.bind(DB);
   DB.add=(c,d)=>add0(c, COLS_FAM.has(c)&&d&&!("familiaId" in d)&&minhaFam()?{...d,familiaId:minhaFam()}:d);
   DB.set=(c,id,d,merge)=>set0(c,id, COLS_FAM.has(c)&&d&&!merge&&!("familiaId" in d)&&minhaFam()?{...d,familiaId:minhaFam()}:d, merge);
@@ -1351,6 +1352,7 @@ async function entrou(u){
   S.user={uid:u.uid,email:u.email,nome,familiaId:perfil.familiaId||null,status:perfil.status||"novo"};
   // administrador sem família: primeira vez nesta versão → cria a FAMÍLIA 01 e migra os dados
   if(admin&&!perfil.familiaId&&!perfil.offline){ await migrarParaFamilias(u,nome); }
+  if(admin&&!perfil.offline&&S.user.familiaId) await separarFamilias();
   if(!admin&&(S.user.status!=="ativo"||!S.user.familiaId)&&!perfil.offline){ telaEspera(); return; }
   try{ localStorage.setItem("lc3.perfil."+u.uid,JSON.stringify({nome:S.user.nome,familiaId:S.user.familiaId,status:"ativo"})); }catch(e){}
   $("espera").classList.add("hidden");
@@ -1361,10 +1363,10 @@ async function entrou(u){
   desligar=[
     DB.listen("usuarios",d=>{S.usuarios=byId(d);agendar();if(painel)renderPainel()}),
     DB.listen("familias",d=>{S.familias=byId(d);agendar();if(painel)renderPainel()}),
-    DB.listen("produtos",d=>{S.produtos=byId(d);agendar()}),
-    DB.listen("estabelecimentos",d=>{S.ests=byId(d);agendar();if(painel)renderPainel()}),
+    DB.listen("produtos",d=>{S.produtos=byId(d);agendar()},{eq:["familiaId",fam]}),
+    DB.listen("estabelecimentos",d=>{S.ests=byId(d);agendar();if(painel)renderPainel()},{eq:["familiaId",fam]}),
     // ts = data do preço (a escolhida no anúncio, ou a do registro); tsReg = quando foi digitado
-    DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar();if(painel)renderPainel()}),
+    DB.listen("precos",d=>{S.precos=d.map(r=>({...r,tsReg:r.ts,ts:r.dataPreco||r.ts})).sort((a,b)=>a.ts-b.ts);agendar();if(painel)renderPainel()},{eq:["familiaId",fam]}),
     DB.listen("realizados",d=>{S.realizados=byId(d);agendar()},{eq:["familiaId",fam]}),
     DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()},{eq:["familiaId",fam]}),
     DB.listen("receitas",d=>{S.receitas=byId(d);agendar()},{eq:["familiaId",fam]}),
@@ -1379,6 +1381,20 @@ function telaEspera(){
   const blq=S.user.status==="bloqueado";
   $("esTit").textContent = blq ? "ACESSO BLOQUEADO" : "AGUARDANDO LIBERAÇÃO";
   $("esTxt").textContent = blq ? "SEU ACESSO ESTÁ BLOQUEADO. FALE COM O ADMINISTRADOR." : "SEU ACESSO FOI CRIADO. O ADMINISTRADOR PRECISA ESCOLHER SUA FAMÍLIA E LIBERAR.";
+}
+// separação das famílias: produto, loja e preço sem família vão para a família de quem criou (ou a do administrador)
+async function separarFamilias(){
+  try{ if(localStorage.getItem("lc3.separado."+S.user.familiaId)) return; }catch(e){}
+  try{
+    const usu=await DB.getAll("usuarios"), famDe=Object.fromEntries(usu.map(x=>[x.id,x.familiaId]));
+    const minha=S.user.familiaId; let n=0;
+    for(const [c,quem] of [["produtos","criadoPor"],["estabelecimentos","criadoPor"],["precos","usuarioUid"]]){
+      const docs=(await DB.getAll(c)).filter(d=>!d.familiaId);
+      if(docs.length){ n+=docs.length; await DB.updMany(c,docs.map(d=>[d.id,{familiaId:famDe[d[quem]]||minha}])); }
+    }
+    try{ localStorage.setItem("lc3.separado."+minha,"1"); }catch(e){}
+    if(n) toast(`FAMÍLIAS SEPARADAS: ${n} REGISTRO${n>1?"S":""} AJUSTADO${n>1?"S":""}`);
+  }catch(e){ console.error(e); alert("NÃO FOI POSSÍVEL SEPARAR AS FAMÍLIAS ("+(e.code||e.message||e)+"). CONFIRA SE AS REGRAS NOVAS DO FIREBASE FORAM PUBLICADAS."); }
 }
 // migração única: cria a FAMÍLIA 01, coloca o administrador nela e leva listas, compras, receitas, preços e favoritos
 async function migrarParaFamilias(u,nome){
@@ -2564,6 +2580,21 @@ const mesTag = p => { const m=mesDe(p); return m?`<span class="freq mes">⭐ MÊ
 $("pdMarcas").addEventListener("click",e=>{ const r=e.target.closest("[data-abrirp]"); if(r) abrirProd(r.dataset.abrirp); });
 
 /* ---------- 📖 RECEITAS ---------- */
+// ficha do produto que viaja junto com a receita enviada para outra família
+const fichaProd = p => p ? {nome:p.nome||"",marca:p.marca||"",categoria:p.categoria||"",embalagem:p.embalagem||"",unidades:p.unidades||1,
+  conteudoQtd:p.conteudoQtd||null,conteudoUn:p.conteudoUn||"",vendidoPor:p.vendidoPor||"UN",barras:p.barras||""} : null;
+// acha no cadastro da minha família o produto de uma ficha (pelo código de barras, ou nome + marca + conteúdo)
+function acharPorFicha(f){
+  if(!f) return null; const ps=Object.values(S.produtos);
+  if(f.barras){ const b=ps.find(p=>p.barras===f.barras); if(b) return b; }
+  return ps.find(p=>semAc(p.nome)===semAc(f.nome)&&semAc(p.marca)===semAc(f.marca)&&(!f.conteudoQtd||(+p.conteudoQtd===+f.conteudoQtd&&p.conteudoUn===f.conteudoUn)))||null;
+}
+// ingredientes de outra família: troca pelo produto da minha família quando encontra
+function resolverItens(itens){
+  let mudou=false;
+  const r=(itens||[]).map(i=>{ if(S.produtos[i.produtoId]||!i.info) return i; const p=acharPorFicha(i.info); if(!p) return i; mudou=true; const {info,...x}=i; return {...x,produtoId:p.id}; });
+  return {itens:r,mudou};
+}
 function custoReceita(itens,fator=1){
   const ok=itens.filter(i=>S.produtos[i.produtoId]);
   const precos={}; ok.forEach(i=>{ precos[i.produtoId]={}; precosPorLoja(i.produtoId).forEach(r=>{ precos[i.produtoId][r.estabelecimentoId]=r.valor; }); });
@@ -2580,11 +2611,11 @@ function custoReceita(itens,fator=1){
 function renderReceitas(){
   const rs=Object.values(S.receitas).sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
   $("receitas").innerHTML = rs.length ? rs.map(r=>{
-    const its=(r.itens||[]).filter(i=>S.produtos[i.produtoId]);
+    const its=(r.itens||[]).filter(i=>S.produtos[i.produtoId]), faltam=(r.itens||[]).filter(i=>!S.produtos[i.produtoId]&&i.info&&!acharPorFicha(i.info)).length;
     const c=custoReceita(its);
     return `<div class="rcard" data-rcid="${r.id}">
       <div class="n"><span>${esc(r.nome)}</span><button class="kebab" data-rcmenu="${r.id}" style="border:none;background:none;padding:0 4px;font-size:20px">⋮</button></div>
-      <div class="m">${r.serve?`SERVE ${r.serve} · `:""}${its.length} INGREDIENTE${its.length===1?"":"S"} · CRIADA ${dLonga(r.criadoEm)}${r.criadoPorNome?" · "+esc(primeiroNome(r.criadoPorNome)):""}</div>
+      <div class="m">${r.serve?`SERVE ${r.serve} · `:""}${its.length} INGREDIENTE${its.length===1?"":"S"} · CRIADA ${dLonga(r.criadoEm)}${r.criadoPorNome?" · "+esc(primeiroNome(r.criadoPorNome)):""}${r.enviadaPorNome?" · ENVIADA POR "+esc(primeiroNome(r.enviadaPorNome)):""}${faltam?` · <b style="color:var(--gold)">${faltam} A CADASTRAR</b>`:""}</div>
       ${its.length?`<div class="rthumbs">${its.slice(0,6).map(i=>`<span>${imgProduto(S.produtos[i.produtoId])}</span>`).join("")}${its.length>6?`<span style="font-size:10px;font-weight:800">+${its.length-6}</span>`:""}</div>`:""}
       <div class="c"><span>${c.com?(c.estId?"CUSTO ESTIMADO · "+esc(estNome(c.estId)):`CUSTO ESTIMADO (MAIS BARATO DE CADA)${c.com<c.n?" · "+(c.n-c.com)+" SEM PREÇO":""}`):"SEM PREÇOS AINDA"}</span>${c.com?`<b>${brl(c.total)}</b>`:""}</div>
     </div>`; }).join("")
@@ -2605,7 +2636,9 @@ $("receitas").addEventListener("click",e=>{
 let rc=null;
 function abrirRec(id){
   const r=id?S.receitas[id]:null;
-  rc={id,itens:r?(r.itens||[]).map(i=>({...i})):[],criadoEm:r?r.criadoEm:Date.now()};
+  const res=resolverItens(r?r.itens:[]);
+  if(r&&res.mudou) DB.update("receitas",r.id,{itens:res.itens});
+  rc={id,itens:res.itens.map(i=>({...i})),criadoEm:r?r.criadoEm:Date.now()};
   $("rcTit").textContent=r?"RECEITA":"NOVA RECEITA";
   $("rcNome").value=r?r.nome:""; $("rcServe").value=r&&r.serve?r.serve:""; $("rcObs").value=r?(r.obs||""):"";
   $("rcData").value=dLonga(rc.criadoEm); $("rcBusca").value=""; $("rcSug").innerHTML="";
@@ -2617,6 +2650,8 @@ function renderRecItens(){
   const c=custoReceita(rc.itens);
   $("rcIngTit").textContent=`INGREDIENTES (${rc.itens.length})`;
   $("rcItens").innerHTML=rc.itens.map((i,k)=>{ const p=S.produtos[i.produtoId];
+    if(!p&&i.info) return `<div class="ring"><div class="thumb">❔</div><div class="x"><b>${esc(i.info.nome)}${i.info.marca?" · "+esc(i.info.marca):""}</b><small>NÃO CADASTRADO NA SUA FAMÍLIA${i.info.conteudoQtd?" · "+fmtQtd(i.info.conteudoQtd)+" "+esc(i.info.conteudoUn):""}</small></div>
+      <button class="small" data-rccad="${k}">+ CADASTRAR</button><button class="rm" data-rcrm="${k}" aria-label="TIRAR">✕</button></div>`;
     if(!p) return `<div class="ring"><div class="thumb">❔</div><div class="x"><b>PRODUTO REMOVIDO</b></div><button class="rm" data-rcrm="${k}">✕</button></div>`;
     const v=c.linha[p.id];
     return `<div class="ring"><div class="thumb">${imgProduto(p)}</div><div class="x"><b>${esc(p.nome)}</b><small>${esc(descProduto(p))}</small></div>
@@ -2635,6 +2670,13 @@ $("rcBusca").addEventListener("input",()=>{
   const ps=filtrarProdutos(q).slice(0,8);
   $("rcSug").innerHTML=ps.map(p=>`<div class="pick" data-rcs="${p.id}" style="grid-template-columns:48px 1fr;cursor:pointer"><div class="thumb">${imgProduto(p)}</div><div><div class="name" style="font-size:13px">${marcar(p.nome,busca.toks)}</div><div class="sub">${marcar(descProduto(p),busca.toks)}</div></div></div>`).join("")
     +`<button class="small" id="rcCriar" style="margin-top:6px">+ CADASTRAR “${esc(up(q))}”</button>`;
+});
+$("rcItens").addEventListener("click",e=>{
+  const b=e.target.closest("[data-rccad]"); if(!b||!rc) return; e.stopPropagation();
+  const k=+b.dataset.rccad, f=rc.itens[k]&&rc.itens[k].info; if(!f) return;
+  abrirProd(null,{...f},id=>{ if(!rc||!rc.itens[k]) return; const {info,...x}=rc.itens[k]; rc.itens[k]={...x,produtoId:id};
+    if(rc.id&&S.receitas[rc.id]) DB.update("receitas",rc.id,{itens:rc.itens.map(i=>({...i}))}); // já fica gravado na receita
+    setTimeout(renderRecItens,150); });
 });
 $("rcSug").addEventListener("click",e=>{
   const s=e.target.closest("[data-rcs]"); if(s){ rcAdicionar(s.dataset.rcs); return; }
@@ -2800,7 +2842,7 @@ function renderPainel(){
       return `<div class="admr"><div class="admav" style="border-radius:10px">🏠</div><div class="admm"><b>${esc(f.nome)}${f.id===minhaFam()?'<span class="admpill adm">A SUA</span>':""}</b><small>${nu} USUÁRIO${nu===1?"":"S"}${painel.cont?` · ${c.l} LISTA${c.l===1?"":"S"} · ${c.r} RECEITA${c.r===1?"":"S"}`:""}</small></div>
         <button class="small" data-admfren="${f.id}">✏️ RENOMEAR</button>${nu?"":`<button class="small danger" data-admfdel="${f.id}">🗑</button>`}</div>`; }).join("")+`</div>`;
     h+=`<button class="primary" id="admNovaFam" style="width:100%;padding:11px">+ NOVA FAMÍLIA</button>
-      <div class="hint" style="margin:8px 2px">SÓ DÁ PARA EXCLUIR FAMÍLIA SEM NINGUÉM DENTRO. LISTAS, COMPRAS, RECEITAS, OPINIÕES E COMPRA DO MÊS SÃO DE CADA FAMÍLIA; PREÇOS, PRODUTOS E LOJAS SÃO DE TODOS.</div>`;
+      <div class="hint" style="margin:8px 2px">SÓ DÁ PARA EXCLUIR FAMÍLIA SEM NINGUÉM DENTRO. TUDO É DE CADA FAMÍLIA: PRODUTOS, LOJAS, PREÇOS, LISTAS, COMPRAS, RECEITAS, OPINIÕES E COMPRA DO MÊS.</div>`;
   }
   else if(painel.aba==="lojas"){
     const es=Object.values(S.ests).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
@@ -2857,7 +2899,7 @@ async function excluirLoja(id){
   if(!ehAdmin()) return false;
   const e=S.ests[id]; if(!e) return false;
   const ps=S.precos.filter(r=>r.estabelecimentoId===id), prods=Object.values(S.produtos).filter(p=>p.zonas&&p.zonas[id]);
-  if(!confirm(`EXCLUIR ${e.nome}?\n\nISSO APAGA TAMBÉM ${ps.length} PREÇO${ps.length===1?"":"S"} REGISTRADO${ps.length===1?"":"S"} NELE (DE TODAS AS FAMÍLIAS) E A ZONA DE ${prods.length} PRODUTO${prods.length===1?"":"S"}.\nAS COMPRAS JÁ FEITAS NELE CONTINUAM.\n\nNÃO DÁ PARA DESFAZER.`)) return false;
+  if(!confirm(`EXCLUIR ${e.nome}?\n\nISSO APAGA TAMBÉM ${ps.length} PREÇO${ps.length===1?"":"S"} REGISTRADO${ps.length===1?"":"S"} NELE E A ZONA DE ${prods.length} PRODUTO${prods.length===1?"":"S"}.\nAS COMPRAS JÁ FEITAS NELE CONTINUAM.\n\nNÃO DÁ PARA DESFAZER.`)) return false;
   try{
     DB.del("estabelecimentos",id);
     if(ps.length) await DB.delMany("precos",ps.map(r=>r.id));
@@ -2899,7 +2941,7 @@ function enviarReceita(r){
   const outros=Object.entries(S.usuarios).filter(([uid,u])=>u.status==="ativo"&&u.familiaId&&u.familiaId!==minhaFam()).sort((a,b)=>(a[1].nome||"").localeCompare(b[1].nome||"","pt-BR"));
   if(!outros.length){ alert("NÃO HÁ USUÁRIOS DE OUTRAS FAMÍLIAS."); return; }
   abrirMenu("ENVIAR “"+r.nome+"” PARA…","A PESSOA RECEBE UMA CÓPIA NA FAMÍLIA DELA",outros.map(([uid,u])=>({txt:`👤  ${esc(u.nome)} · ${esc(famNome(u.familiaId))}`,fn:()=>{
-    DB.add("receitas",{nome:r.nome,serve:r.serve||null,obs:r.obs||"",itens:(r.itens||[]).map(i=>({...i})),familiaId:u.familiaId,
+    DB.add("receitas",{nome:r.nome,serve:r.serve||null,obs:r.obs||"",itens:(r.itens||[]).map(i=>({...i,info:fichaProd(S.produtos[i.produtoId])||i.info||null})),familiaId:u.familiaId,
       criadoEm:Date.now(),criadoPor:eu().uid,criadoPorNome:eu().nome,enviadaPor:eu().uid,enviadaPorNome:eu().nome,enviadaDe:minhaFam()});
     toast(`RECEITA ENVIADA PARA ${u.nome}`); }})));
 }
@@ -3829,9 +3871,9 @@ function abrirProd(id,pre={},cb=null){
   $("pdCodigo").textContent=p?(p.codigo||"—"):"GERADO AO SALVAR";
   $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):(pre.marca||"");
   $("pdVend").value=vendidoNorm(p?p.vendidoPor:pre.vendidoPor);
-  $("pdCQtd").value=p&&p.conteudoQtd?fmtQtd(p.conteudoQtd):""; $("pdCUn").value=p?(p.conteudoUn||""):"";
+  $("pdCQtd").value=p?(p.conteudoQtd?fmtQtd(p.conteudoQtd):""):(pre.conteudoQtd?fmtQtd(pre.conteudoQtd):""); $("pdCUn").value=p?(p.conteudoUn||""):(pre.conteudoUn||"");
   $("pdCat").value=p?(p.categoria||""):(pre.categoria||""); opcoesEmb(p?(p.embalagem||""):(pre.embalagem||""));
-  $("pdUnids").value=p&&+p.unidades>1?String(p.unidades):"";
+  $("pdUnids").value=p?(+p.unidades>1?String(p.unidades):""):(+pre.unidades>1?String(pre.unidades):"");
   { const m=p?mesDe(p):null; $("pdMes").checked=!!m; $("pdMesQtd").value=m&&m.qtd?fmtQtd(m.qtd):""; }
   document.querySelectorAll("#mProd .sug").forEach(x=>x.classList.add("hidden"));
   pdTotal();
