@@ -26,6 +26,7 @@
   20. ESTABELECIMENTOS · HISTÓRICO · EXPORTAR PDF · INÍCIO
 
   HISTÓRICO DE VERSÕES (a mais nova em cima)
+  V 31.10-B  sugestões próprias embaixo de NOME, MARCA e CATEGORIA no cadastro
   V 31.10-A  sem idade/validade de preço; opinião gravada por pessoa; favorito sai;
              COMPRA DO MÊS (caixa + quantidade) com LISTA DO MÊS e POR PREFERÊNCIA;
              VENDIDO POR (UNIDADE/PESO/GRANEL); embalagens editáveis por família;
@@ -510,7 +511,12 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
 .pqzs button.on{background:var(--tag);border-color:var(--tag-ink);color:var(--tag-ink)}
 .pqzs button.add{border-style:dashed;color:var(--accent);border-color:var(--accent)}
 #pqValor:focus{outline:none}
-.zsel{display:flex;gap:6px;align-items:center}.zsel select{flex:1;min-width:0}.zsel button{flex:none;width:44px;height:42px;padding:0;font-size:17px}
+.sug{margin:-4px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);max-height:230px;overflow:auto;box-shadow:0 6px 16px -8px rgba(0,0,0,.25)}
+.sug button{display:block;width:100%;text-align:left;border:none;border-radius:0;background:none;padding:10px 12px;font-size:14px;font-weight:700}
+.sug button+button{border-top:1px solid var(--line)}
+.sug button small{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+.sug .shd{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);padding:6px 12px 2px}
+.zsel{display:flex;gap:6px;align-items:center}.zsel input{flex:1;min-width:0}.zsel select{flex:1;min-width:0}.zsel button{flex:none;width:44px;height:42px;padding:0;font-size:17px}
 #pqSalvar{flex:2;white-space:nowrap}
 .rksec{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin:14px 0 6px;display:flex;justify-content:space-between;gap:8px}
 .rkr{display:grid;grid-template-columns:24px 1fr auto;gap:4px 8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
@@ -588,7 +594,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-A</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-B</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -852,9 +858,11 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button id="pdIA" class="small">🔍 BUSCAR FOTO</button><button id="pdOutroTam" class="small hidden">➕ OUTRO TAMANHO</button></div></div>
   </div>
   <label class="f">NOME<input id="pdNome" placeholder="EX.: LEITE CONDENSADO" autocomplete="off"></label>
-  <label class="f">MARCA<input id="pdMarca" placeholder="EX.: MOÇA" autocomplete="off"></label>
-  <label class="f">CATEGORIA <small style="font-weight:600;color:var(--muted)">(PARA COMPARAR MARCAS E EMBALAGENS)</small><input id="pdCat" list="dlCat" placeholder="EX.: ACHOCOLATADO PRONTO" autocomplete="off"></label>
-  <datalist id="dlCat"></datalist>
+  <div class="sug hidden" id="sg_pdNome"></div>
+  <label class="f">MARCA<div class="zsel"><input id="pdMarca" placeholder="EX.: MOÇA" autocomplete="off"><button type="button" class="small" data-sgall="pdMarca" aria-label="VER TODAS AS MARCAS">▾</button></div></label>
+  <div class="sug hidden" id="sg_pdMarca"></div>
+  <label class="f">CATEGORIA <small style="font-weight:600;color:var(--muted)">(PARA COMPARAR MARCAS E EMBALAGENS)</small><div class="zsel"><input id="pdCat" placeholder="EX.: ACHOCOLATADO PRONTO" autocomplete="off"><button type="button" class="small" data-sgall="pdCat" aria-label="VER TODAS AS CATEGORIAS">▾</button></div></label>
+  <div class="sug hidden" id="sg_pdCat"></div>
   <div class="row">
     <label class="f">VENDIDO POR<select id="pdVend"></select></label>
     <label class="f" style="flex:.7">CONTEÚDO (CADA)<input id="pdCQtd" inputmode="decimal" placeholder="395"></label>
@@ -3738,6 +3746,43 @@ function pdTotal(){
     : up($("pdCat").value) ? `<span style="color:var(--gold)">PARA COMPARAR NA CATEGORIA, INFORME O CONTEÚDO E A UNIDADE</span>` : "";
 }
 ["pdUnids","pdCQtd","pdCat"].forEach(i=>$(i).addEventListener("input",pdTotal));
+/* ---------- sugestões embaixo de NOME, MARCA e CATEGORIA: o que já existe, com o trecho em qualquer parte, sem acento ---------- */
+const FONTES_SUG={
+  pdNome:()=>{ const m={}; Object.values(S.produtos).forEach(p=>{ const n=up(p.nome); if(!n) return; (m[n]=m[n]||new Set()).add(up(p.marca)); });
+    return Object.entries(m).map(([v,ms])=>({v,info:[...ms].filter(Boolean).join(" · ")})); },
+  pdMarca:()=>[...new Set(Object.values(S.produtos).map(p=>up(p.marca)).filter(Boolean))].map(v=>({v})),
+  pdCat:()=>{ const m={}; Object.values(S.produtos).forEach(p=>{ const c=up(p.categoria); if(c) m[c]=(m[c]||0)+1; });
+    return Object.entries(m).map(([v,n])=>({v,info:n+" PRODUTO"+(n>1?"S":"")})); },
+};
+function mostrarSug(id,todas){
+  const el=$("sg_"+id), q=$(id).value.trim(), atual=up(q);
+  let ops=FONTES_SUG[id]().sort((a,b)=>a.v.localeCompare(b.v,"pt-BR"));
+  let toks=[];
+  if(!todas){ if(!q){ el.classList.add("hidden"); return; }
+    const r=buscar(ops,q,o=>[o.v]); toks=r.toks; const pa=new Set(r.pa);
+    ops=[...r.ex,...r.pa].filter(o=>o.v!==atual).slice(0,12).map(o=>({...o,pa:pa.has(o)})); }
+  if(!ops.length){ el.classList.add("hidden"); return; }
+  let h="", jaPa=false;
+  ops.forEach(o=>{ if(o.pa&&!jaPa){ h+=`<div class="shd">PARECIDOS</div>`; jaPa=true; }
+    h+=`<button type="button" data-sgv="${esc(o.v)}">${marcar(o.v,toks)}${o.info?`<small>${esc(o.info)}</small>`:""}</button>`; });
+  el.innerHTML=h; el.classList.remove("hidden");
+}
+Object.keys(FONTES_SUG).forEach(id=>{
+  const inp=$(id), el=$("sg_"+id);
+  inp.addEventListener("input",()=>mostrarSug(id,false));
+  inp.addEventListener("focus",()=>{ mostrarSug(id,false); setTimeout(()=>inp.scrollIntoView({block:"center",behavior:"smooth"}),300); });
+  inp.addEventListener("blur",()=>setTimeout(()=>el.classList.add("hidden"),180));
+  el.addEventListener("pointerdown",e=>e.preventDefault()); // não tira o foco do campo antes de escolher
+  el.addEventListener("click",e=>{ const b=e.target.closest("[data-sgv]"); if(!b) return;
+    inp.value=b.dataset.sgv; el.classList.add("hidden"); inp.dispatchEvent(new Event("input",{bubbles:true})); el.classList.add("hidden"); });
+});
+document.querySelectorAll("[data-sgall]").forEach(b=>{
+  b.addEventListener("pointerdown",e=>e.preventDefault());
+  b.addEventListener("click",e=>{ e.preventDefault(); const id=b.dataset.sgall, el=$("sg_"+id);
+    if(!el.classList.contains("hidden")){ el.classList.add("hidden"); return; }
+    $(id).focus(); mostrarSug(id,true); });
+});
+
 // ✏️ embalagens: incluir, renomear, excluir (guardado por família em config/{família})
 function salvarEmbalagens(l){
   const f=minhaFam(); if(!f){ alert("SEM FAMÍLIA."); return; }
@@ -3788,7 +3833,7 @@ function abrirProd(id,pre={},cb=null){
   $("pdCat").value=p?(p.categoria||""):(pre.categoria||""); opcoesEmb(p?(p.embalagem||""):(pre.embalagem||""));
   $("pdUnids").value=p&&+p.unidades>1?String(p.unidades):"";
   { const m=p?mesDe(p):null; $("pdMes").checked=!!m; $("pdMesQtd").value=m&&m.qtd?fmtQtd(m.qtd):""; }
-  $("dlCat").innerHTML=[...new Set(Object.values(S.produtos).map(x=>up(x.categoria)).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">`).join("");
+  document.querySelectorAll("#mProd .sug").forEach(x=>x.classList.add("hidden"));
   pdTotal();
   $("pdBarras").value=p?(p.barras||""):(pre.barras||""); $("pdObs").value=p?(p.obs||""):(pre.obs||"");
   const zonasDe = p ? (p.zonas||{}) : (pre.zonas||{});
