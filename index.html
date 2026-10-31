@@ -26,6 +26,8 @@
   20. ESTABELECIMENTOS · HISTÓRICO · EXPORTAR PDF · INÍCIO
 
   HISTÓRICO DE VERSÕES (a mais nova em cima)
+  V 31.10-D  + NOVO USUÁRIO no painel; itens da lista gravados um a um; vários códigos de barras
+             (sem zeros da frente); RANK + DISTRIBUIR viram 🏆 COMPARAR
   V 31.10-C  famílias separadas: produtos, lojas e preços de cada família; receita enviada leva nome/marca/tamanho
   V 31.10-B  sugestões próprias embaixo de NOME, MARCA e CATEGORIA no cadastro
   V 31.10-A  sem idade/validade de preço; opinião gravada por pessoa; favorito sai;
@@ -512,6 +514,9 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
 .pqzs button.on{background:var(--tag);border-color:var(--tag-ink);color:var(--tag-ink)}
 .pqzs button.add{border-style:dashed;color:var(--accent);border-color:var(--accent)}
 #pqValor:focus{outline:none}
+.pdcods{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:-2px 0 10px}
+.pdcods .cod{display:inline-flex;align-items:center;gap:4px;background:var(--chip);border-radius:99px;padding:3px 4px 3px 10px;font-size:11.5px;font-weight:800}
+.pdcods .cod button{border:none;background:none;padding:0 6px;font-size:13px;color:var(--warn)}
 .sug{margin:-4px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);max-height:230px;overflow:auto;box-shadow:0 6px 16px -8px rgba(0,0,0,.25)}
 .sug button{display:block;width:100%;text-align:left;border:none;border-radius:0;background:none;padding:10px 12px;font-size:14px;font-weight:700}
 .sug button+button{border-top:1px solid var(--line)}
@@ -595,7 +600,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-C</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-D</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -706,8 +711,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
     <button id="btnScan"><span>▥</span>MODO MERCADO</button>
     <button id="btnAddProd"><span>➕</span>PRODUTO</button>
     <button id="btnShare"><span>👥</span>COMPAR&shy;TILHAR</button>
-    <button id="btnDist"><span>🔀</span>DISTRIBUIR</button>
-    <button id="btnRank"><span>🏆</span>RANK</button>
+    <button id="btnRank"><span>🏆</span>COMPARAR</button>
     <button id="btnFim" class="primary"><span>✔</span>FINALIZAR</button>
   </div>
 
@@ -880,6 +884,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
     <label class="f">CÓDIGO DE BARRAS<input id="pdBarras" inputmode="numeric" autocomplete="off"></label>
     <button id="pdLerBarras" style="flex:none;align-self:flex-end;margin-bottom:8px">▥ LER</button>
   </div>
+  <div class="pdcods"><span class="hint" style="font-weight:800">OUTROS CÓDIGOS</span><span id="pdCods"></span><button type="button" class="small" id="pdMaisCod">+ OUTRO CÓDIGO</button></div>
   <div id="pdBase"></div>
   <label class="f">OBSERVAÇÃO<textarea id="pdObs" rows="2"></textarea></label>
   <div id="pdOpW"><div class="sect" style="display:flex;justify-content:space-between;gap:8px"><span>OPINIÃO DA FAMÍLIA</span></div><div class="opbox" id="pdOp"></div></div>
@@ -996,7 +1001,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <div class="btns"><button id="qtCancel">CANCELAR</button><button id="qtOk" class="primary">OK</button></div>
 </div></div>
 
-<!-- 🏆 RANK: se comprasse tudo em um só lugar × distribuindo -->
+<!-- 🏆 COMPARAR: tudo em um só lugar × distribuindo (antigos RANK e DISTRIBUIR) -->
 <div class="modal" id="mRank"><div class="sheet">
   <h2 id="rkTit" style="margin:0"></h2>
   <div class="hint" id="rkSub"></div>
@@ -1047,6 +1052,18 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
     <button data-adm="usuarios" class="on">👤 USUÁRIOS</button><button data-adm="familias">🏠 FAMÍLIAS</button><button data-adm="lojas">🏪 LOJAS</button><button data-adm="dados">⚠ DADOS</button>
   </div>
   <div id="admBody"></div>
+</div></div>
+
+<!-- Novo usuário (administrador) -->
+<div class="modal" id="mNovoUsr"><div class="sheet">
+  <h2 style="margin:0">+ NOVO USUÁRIO</h2>
+  <div class="hint" style="margin-top:4px">A CONTA JÁ NASCE LIBERADA NA FAMÍLIA ESCOLHIDA. A PESSOA PODE TROCAR A SENHA DEPOIS EM 🔑 TROCAR MINHA SENHA.</div>
+  <label class="f">NOME<input id="nuNome" autocomplete="off"></label>
+  <label class="f">E-MAIL<input id="nuEmail" type="email" autocomplete="off" style="text-transform:none"></label>
+  <label class="f">SENHA INICIAL (MÍNIMO 6)<input id="nuSenha" autocomplete="off" style="text-transform:none"></label>
+  <label class="f">FAMÍLIA<select id="nuFam"></select></label>
+  <div class="hint" id="nuMsg" style="color:var(--warn);margin-top:6px"></div>
+  <div class="btns"><button id="nuCancel">CANCELAR</button><button id="nuOk" class="primary">CRIAR</button></div>
 </div></div>
 
 <!-- Senha (painel, zerar, trocar minha senha) -->
@@ -1175,6 +1192,7 @@ const CONT_UN = ["","G","KG","ML","L","UN","M"];
    CAMADA DE DADOS: Firebase (produção) ou Local (demonstração)
    As gravações não esperam o servidor: funcionam offline e sincronizam depois.
    ===================================================================== */
+const APAGAR = {__apagar:true}; // marca de "apagar este pedaço" (DB.pedacos)
 const Local = {
   chave:"lc3.demo",
   dados:null, subs:[], authCbs:[], user:null,
@@ -1203,6 +1221,13 @@ const Local = {
   add(c,d){ const id=rid(); this.set(c,id,d); return id; },
   update(c,id,d){ if(!this.col(c)[id]) return; this.set(c,id,d,true); },
   // grava só um "pedaço" do documento (ex.: "op.UID"); valor null apaga o pedaço
+  pedacos(c,id,m){ const d=this.col(c)[id]; if(!d) return;
+    for(const [k,v] of Object.entries(m)){ const ps=k.split("."); let o=d;
+      for(let i=0;i<ps.length-1;i++){ if(!o[ps[i]]||typeof o[ps[i]]!=="object") o[ps[i]]={}; o=o[ps[i]]; }
+      if(v===APAGAR) delete o[ps[ps.length-1]]; else o[ps[ps.length-1]]=JSON.parse(JSON.stringify(v)); }
+    this.mudou(c); },
+  async criarConta(email,senha){ if(!email||!(String(senha).length>=6)) throw {code:"auth/weak-password"};
+    const uid="u_"+email.toLowerCase().replace(/[^a-z0-9]/g,"_"); if(this.col("usuarios")[uid]) throw {code:"auth/email-already-in-use"}; return uid; },
   campo(c,id,caminho,valor){ const d=this.col(c)[id]; if(!d) return; const ps=caminho.split("."); let o=d;
     for(let i=0;i<ps.length-1;i++){ if(!o[ps[i]]||typeof o[ps[i]]!=="object") o[ps[i]]={}; o=o[ps[i]]; }
     if(valor==null) delete o[ps[ps.length-1]]; else o[ps[ps.length-1]]=valor; this.mudou(c); },
@@ -1215,7 +1240,7 @@ const Fire = {
   async init(){
     const base=`https://www.gstatic.com/firebasejs/${FB_VERSAO}`;
     const [appM,fs,au]=await Promise.all([import(base+"/firebase-app.js"),import(base+"/firebase-firestore.js"),import(base+"/firebase-auth.js")]);
-    this.fs=fs; this.au=au;
+    this.fs=fs; this.au=au; this.appM=appM;
     const app=appM.initializeApp(FIREBASE_CONFIG);
     try{ this.db=fs.initializeFirestore(app,{ignoreUndefinedProperties:true,localCache:fs.persistentLocalCache({tabManager:fs.persistentMultipleTabManager()})}); }
     catch(e){ this.db=fs.getFirestore(app); }
@@ -1243,6 +1268,14 @@ const Fire = {
   add(c,d){ const r=this.fs.doc(this.fs.collection(this.db,c)); this.fs.setDoc(r,d).catch(e=>this.erro(e)); return r.id; },
   update(c,id,d){ this.fs.updateDoc(this.fs.doc(this.db,c,id),d).catch(e=>this.erro(e)); },
   // grava só um "pedaço" do documento (ex.: "op.UID"): duas pessoas ao mesmo tempo não se apagam; null apaga o pedaço
+  // várias gavetas de uma vez: {"it.ABC":{...}, "it.XYZ":APAGAR, nome:"..."}
+  pedacos(c,id,m){ const o={}; for(const [k,v] of Object.entries(m)) o[k]=v===APAGAR?this.fs.deleteField():v;
+    this.fs.updateDoc(this.fs.doc(this.db,c,id),o).catch(e=>this.erro(e)); },
+  // conta nova pelo administrador: usa uma 2ª conexão para não deslogar quem está criando
+  async criarConta(email,senha){ const au=this.au, sec=this.appM.initializeApp(FIREBASE_CONFIG,"novo"+Date.now()), a2=au.getAuth(sec);
+    try{ try{ await au.setPersistence(a2,au.inMemoryPersistence); }catch(e){}
+      const c=await au.createUserWithEmailAndPassword(a2,email,senha); const uid=c.user.uid; await au.signOut(a2); return uid; }
+    finally{ try{ await this.appM.deleteApp(sec); }catch(e){} } },
   campo(c,id,caminho,valor){ this.fs.updateDoc(this.fs.doc(this.db,c,id),{[caminho]:valor==null?this.fs.deleteField():valor}).catch(e=>this.erro(e)); },
   del(c,id){ this.fs.deleteDoc(this.fs.doc(this.db,c,id)).catch(e=>this.erro(e)); },
   async proximo(nome){ const fs=this.fs, ref=fs.doc(this.db,"contadores",nome);
@@ -1255,7 +1288,37 @@ const ADMINS = ["leandrolara.ao@gmail.com"].concat(DEMO?["l@x.com","leandro@x.co
 const ehAdmin = () => !!(S.user&&ADMINS.includes(String(S.user.email||"").toLowerCase()));
 const minhaFam = () => (S.user&&S.user.familiaId)||null;
 // listas, compras, receitas e preços gravam a família de quem criou
+/* ITENS DA LISTA gravados um a um: no banco ficam em it.{produtoId} = {produtoId, qtd, quer, o (ordem)}.
+   O app continua lendo L.itens (lista em ordem); toda gravação de "itens" vira só o que mudou,
+   assim duas pessoas mexendo em itens diferentes ao mesmo tempo (ou sem sinal) não se apagam. */
+const semOrdem = x => { const {o,...r}=x; return r; };
+const igualItem = (a,b) => JSON.stringify(Object.keys(a).sort().map(k=>[k,a[k]]))===JSON.stringify(Object.keys(b).sort().map(k=>[k,b[k]]));
+function normLista(l){
+  if(l&&l.it&&typeof l.it==="object"){ const its=Object.values(l.it).filter(x=>x&&x.produtoId).sort((a,b)=>(a.o||0)-(b.o||0));
+    return {...l,itens:its.map(semOrdem),_mapa:true}; }
+  return l;
+}
+function itensParaMapa(itens,inicio=0){ const m={}; (itens||[]).forEach((x,i)=>{ if(x&&x.produtoId) m[x.produtoId]={...semOrdem(x),o:inicio+i}; }); return m; }
 const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos","produtos","estabelecimentos"]); // tudo é da família
+(function(){ const add0l=DB.add.bind(DB), set0l=DB.set.bind(DB), upd0=DB.update.bind(DB);
+  const semItens = d => { if(!d) return d; const {_mapa,...d2}=d; if(!("itens" in d2)) return d2; const {itens,it,...r}=d2; return {...r,it:itensParaMapa(itens,Date.now())}; };
+  DB.add=(c,d)=>add0l(c, c==="listas"?semItens(d):d);
+  DB.set=(c,id,d,merge)=>set0l(c,id, c==="listas"&&!merge?semItens(d):d, merge);
+  DB.update=(c,id,d)=>{
+    if(c!=="listas"||!d||!("itens" in d)) return upd0(c,id,d);
+    const {itens,_mapa,it,...resto}=d, atual=S.listas[id];
+    if(!atual||!atual._mapa){ // lista antiga (ou ainda não carregada): grava o mapa inteiro e tira o formato antigo
+      return DB.pedacos(c,id,{...resto,it:itensParaMapa(itens,Date.now()),itens:APAGAR}); }
+    const ant=Object.fromEntries((atual.itens||[]).map(x=>[x.produtoId,x])), novo=Object.fromEntries((itens||[]).map(x=>[x.produtoId,x]));
+    const ordAnt=Object.fromEntries(Object.values((atual.it)||{}).filter(x=>x&&x.produtoId).map(x=>[x.produtoId,x.o]));
+    const m={...resto}; let prox=Date.now();
+    Object.keys(ant).forEach(pid=>{ if(!novo[pid]) m["it."+pid]=APAGAR; });
+    (itens||[]).forEach(x=>{ if(!x||!x.produtoId) return; const a=ant[x.produtoId];
+      if(!a) m["it."+x.produtoId]={...semOrdem(x),o:prox++};
+      else if(!igualItem(semOrdem(x),semOrdem(a))) m["it."+x.produtoId]={...semOrdem(x),o:ordAnt[x.produtoId]??prox++}; });
+    if(Object.keys(m).length) DB.pedacos(c,id,m);
+  };
+})();
 (function(){ const add0=DB.add.bind(DB), set0=DB.set.bind(DB);
   DB.add=(c,d)=>add0(c, COLS_FAM.has(c)&&d&&!("familiaId" in d)&&minhaFam()?{...d,familiaId:minhaFam()}:d);
   DB.set=(c,id,d,merge)=>set0(c,id, COLS_FAM.has(c)&&d&&!merge&&!("familiaId" in d)&&minhaFam()?{...d,familiaId:minhaFam()}:d, merge);
@@ -1371,7 +1434,7 @@ async function entrou(u){
     DB.listen("finalizacoes",d=>{S.finalizacoes=d;agendar()},{eq:["familiaId",fam]}),
     DB.listen("receitas",d=>{S.receitas=byId(d);agendar()},{eq:["familiaId",fam]}),
     DB.listen("config",d=>{S.config=d.find(x=>x.id===fam)||{};},{eq:["familiaId",fam]}),
-    DB.listen("listas",d=>{S.listas=byId(d);agendar();setTimeout(limparFilhasVazias,0)},["membros",u.uid]),
+    DB.listen("listas",d=>{S.listas=byId(d.map(normLista));agendar();setTimeout(limparFilhasVazias,0)},["membros",u.uid]),
   ];
   mostrar();
 }
@@ -1382,6 +1445,36 @@ function telaEspera(){
   $("esTit").textContent = blq ? "ACESSO BLOQUEADO" : "AGUARDANDO LIBERAÇÃO";
   $("esTxt").textContent = blq ? "SEU ACESSO ESTÁ BLOQUEADO. FALE COM O ADMINISTRADOR." : "SEU ACESSO FOI CRIADO. O ADMINISTRADOR PRECISA ESCOLHER SUA FAMÍLIA E LIBERAR.";
 }
+// + NOVO USUÁRIO: cria a conta no Firebase e o cadastro já liberado
+function abrirNovoUsuario(){
+  const fs=Object.values(S.familias).sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0));
+  if(!fs.length){ alert("CRIE UMA FAMÍLIA PRIMEIRO (ABA FAMÍLIAS)."); return; }
+  ["nuNome","nuEmail","nuSenha"].forEach(i=>$(i).value=""); $("nuMsg").textContent="";
+  $("nuFam").innerHTML=fs.map(f=>`<option value="${f.id}" ${f.id===minhaFam()?"selected":""}>${esc(f.nome)}</option>`).join("");
+  $("nuOk").disabled=false; show("mNovoUsr"); setTimeout(()=>$("nuNome").focus(),60);
+}
+$("nuCancel").onclick=()=>hide("mNovoUsr");
+$("nuOk").onclick=async()=>{
+  const nome=up($("nuNome").value), email=$("nuEmail").value.trim().toLowerCase(), senha=$("nuSenha").value, fam=$("nuFam").value;
+  const msg=t=>$("nuMsg").textContent=t;
+  if(!nome) return msg("INFORME O NOME.");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return msg("E-MAIL INVÁLIDO.");
+  if(senha.length<6) return msg("A SENHA PRECISA TER PELO MENOS 6 CARACTERES.");
+  if(!S.familias[fam]) return msg("ESCOLHA A FAMÍLIA.");
+  $("nuOk").disabled=true; msg("CRIANDO…");
+  try{
+    const uid=await DB.criarConta(email,senha);
+    DB.set("usuarios",uid,{nome,email,status:"ativo",familiaId:fam,criadoEm:Date.now(),criadoPor:eu().uid});
+    hide("mNovoUsr"); toast(`${nome} CRIADO NA ${famNome(fam)}`);
+    alert(`USUÁRIO CRIADO!\n\nPASSE PARA ${nome}:\nE-MAIL: ${email}\nSENHA: ${senha}\n\nELE JÁ PODE ENTRAR NO APP.`);
+  }catch(e){
+    const c=String(e&&e.code||"");
+    msg(c.includes("email-already-in-use")?"ESSE E-MAIL JÁ TEM CONTA. SE A PESSOA SE CADASTROU SOZINHA, ELA APARECE EM NOVOS PARA LIBERAR."
+      : c.includes("weak-password")?"SENHA FRACA: USE PELO MENOS 6 CARACTERES."
+      : c.includes("invalid-email")?"E-MAIL INVÁLIDO."
+      : "NÃO FOI POSSÍVEL CRIAR ("+(c||e.message||e)+").");
+  }finally{ $("nuOk").disabled=false; }
+};
 // separação das famílias: produto, loja e preço sem família vão para a família de quem criou (ou a do administrador)
 async function separarFamilias(){
   try{ if(localStorage.getItem("lc3.separado."+S.user.familiaId)) return; }catch(e){}
@@ -2198,7 +2291,7 @@ document.addEventListener("visibilitychange",()=>{ if(document.hidden&&mm.ativo)
 function tratarCodigoNaLista(c){
   const L2=S.listas[ui.lista]; if(!L2) return;
   if(!lojaSel(L2)){ alert("ESCOLHA PRIMEIRO O ESTABELECIMENTO NO TOPO DA LISTA."); return; }
-  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  const p=produtoPorCodigo(c);
   if(p){
     if((L2.itens||[]).some(it=>it.produtoId===p.id)){ irParaItem(L2,p.id); return; }
     abrirFora(L2,p.id); return;
@@ -2582,11 +2675,11 @@ $("pdMarcas").addEventListener("click",e=>{ const r=e.target.closest("[data-abri
 /* ---------- 📖 RECEITAS ---------- */
 // ficha do produto que viaja junto com a receita enviada para outra família
 const fichaProd = p => p ? {nome:p.nome||"",marca:p.marca||"",categoria:p.categoria||"",embalagem:p.embalagem||"",unidades:p.unidades||1,
-  conteudoQtd:p.conteudoQtd||null,conteudoUn:p.conteudoUn||"",vendidoPor:p.vendidoPor||"UN",barras:p.barras||""} : null;
+  conteudoQtd:p.conteudoQtd||null,conteudoUn:p.conteudoUn||"",vendidoPor:p.vendidoPor||"UN",barras:p.barras||"",codigos:p.codigos||[]} : null;
 // acha no cadastro da minha família o produto de uma ficha (pelo código de barras, ou nome + marca + conteúdo)
 function acharPorFicha(f){
   if(!f) return null; const ps=Object.values(S.produtos);
-  if(f.barras){ const b=ps.find(p=>p.barras===f.barras); if(b) return b; }
+  for(const cd of [f.barras,...(f.codigos||[])]){ if(!cd) continue; const b=produtoPorCodigo(cd); if(b) return b; }
   return ps.find(p=>semAc(p.nome)===semAc(f.nome)&&semAc(p.marca)===semAc(f.marca)&&(!f.conteudoQtd||(+p.conteudoQtd===+f.conteudoQtd&&p.conteudoUn===f.conteudoUn)))||null;
 }
 // ingredientes de outra família: troca pelo produto da minha família quando encontra
@@ -2684,7 +2777,7 @@ $("rcSug").addEventListener("click",e=>{
     abrirProd(null,{nome},id=>{ const t=n=>{ if(S.produtos[id]) rcAdicionar(id); else if(n<30) setTimeout(()=>t(n+1),100); }; t(0); }); }
 });
 $("rcBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return;
-  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  const p=produtoPorCodigo(c);
   if(p){ rcAdicionar(p.id); return; }
   if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c},id=>{ const t=n=>{ if(S.produtos[id]) rcAdicionar(id); else if(n<30) setTimeout(()=>t(n+1),100); }; t(0); });
 };
@@ -2829,12 +2922,13 @@ function renderPainel(){
   if(painel.aba==="usuarios"){
     const novos=us.filter(u=>!admin(u)&&(u.status!=="ativo"&&u.status!=="bloqueado"||!u.familiaId&&u.status!=="bloqueado"));
     const lib=us.filter(u=>!novos.includes(u)).sort((a,b)=>(a.nome||"").localeCompare(b.nome||"","pt-BR"));
+    h+=`<button class="primary" id="admNovoUsr" style="width:100%;padding:11px;margin-top:4px">+ NOVO USUÁRIO</button>`;
     h+=`<div class="admsec"><span>NOVOS · AGUARDANDO LIBERAÇÃO</span><span>${novos.length}</span></div>`;
     h+= novos.length ? `<div class="admbox">`+novos.map(u=>`<div class="admr"><div class="admav">${esc((u.nome||"?")[0])}</div><div class="admm"><b>${esc(u.nome||"SEM NOME")}<span class="admpill novo">NOVO</span></b><small>${esc(u.email||"")}${u.criadoEm?" · ENTROU "+dCurta(u.criadoEm)+" "+hora(u.criadoEm):""}</small></div>
         <div class="admacts"><select data-admfam="${u.uid}">${Object.keys(S.familias).length?famOpts(""):`<option value="">CRIE UMA FAMÍLIA PRIMEIRO</option>`}</select><button class="primary small" data-admlib="${u.uid}">✔ LIBERAR</button><button class="small danger" data-admblq="${u.uid}" title="BLOQUEAR">✕</button></div></div>`).join("")+`</div>`
-      : `<div class="hint" style="margin:0 2px 8px">NINGUÉM ESPERANDO. CRIE O USUÁRIO NO CONSOLE DO FIREBASE; NO PRIMEIRO ACESSO ELE APARECE AQUI.</div>`;
+      : `<div class="hint" style="margin:0 2px 8px">NINGUÉM ESPERANDO. QUEM SE CADASTRA SOZINHO NA TELA DE LOGIN APARECE AQUI.</div>`;
     h+=`<div class="admsec"><span>USUÁRIOS LIBERADOS</span><span>${lib.length}</span></div><div class="admbox">`+lib.map(u=>`<div class="admr"><div class="admav">${esc((u.nome||"?")[0])}</div><div class="admm"><b>${esc(u.nome||"SEM NOME")}${admin(u)?'<span class="admpill adm">ADMIN</span>':""}${u.status==="bloqueado"?'<span class="admpill blq">BLOQUEADO</span>':""}</b><small>${esc(famNome(u.familiaId))} · ${esc(u.email||"")}</small></div><button class="small" data-admed="${u.uid}">✏️</button></div>`).join("")+`</div>`;
-    h+=`<div class="hint" style="margin:6px 2px">CRIAR USUÁRIO E SENHA, REDEFINIR SENHA OU EXCLUIR A CONTA DE VEZ: NO CONSOLE DO FIREBASE (AUTHENTICATION).</div>`;
+    h+=`<div class="hint" style="margin:6px 2px">REDEFINIR A SENHA DE OUTRA PESSOA OU EXCLUIR A CONTA DE VEZ: NO CONSOLE DO FIREBASE (AUTHENTICATION).</div>`;
   }
   else if(painel.aba==="familias"){
     const fs=Object.values(S.familias).sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0));
@@ -2867,6 +2961,7 @@ $("admBody").addEventListener("click",async e=>{
     DB.set("usuarios",d.admlib,{status:"ativo",familiaId:f},true); toast("USUÁRIO LIBERADO NA "+famNome(f)); return; }
   if(d.admblq){ if(confirm("BLOQUEAR ESTE USUÁRIO? ELE NÃO VAI ACESSAR NADA ATÉ VOCÊ DESBLOQUEAR.")) DB.set("usuarios",d.admblq,{status:"bloqueado"},true); return; }
   if(d.admed){ editarUsuario(d.admed); return; }
+  if(t.id==="admNovoUsr"){ abrirNovoUsuario(); return; }
   if(t.id==="admNovaFam"){ const n=up(prompt("NOME DA NOVA FAMÍLIA:","FAMÍLIA "+String(Object.keys(S.familias).length+1).padStart(2,"0"))||""); if(n) DB.add("familias",{nome:n,criadoEm:Date.now(),criadoPor:eu().uid}); return; }
   if(d.admfren){ const f=S.familias[d.admfren]; const n=up(prompt("NOVO NOME DA FAMÍLIA:",f.nome)||""); if(n) DB.update("familias",f.id,{nome:n}); return; }
   if(d.admfdel){ const f=S.familias[d.admfdel]; if(Object.values(S.usuarios).some(u=>u.familiaId===f.id)){ alert("A FAMÍLIA AINDA TEM USUÁRIOS."); return; }
@@ -2984,15 +3079,15 @@ function renderRank(){
   if(!rk) return; const L=S.listas[rk.lid]; if(!L) return;
   const R=calcRank(L,rk.modo);
   $("rkTit").textContent=semCarimbo(L.nome)||L.nome;
-  $("rkSub").textContent=`${R.itens.length} ITE${R.itens.length===1?"M":"NS"}${L.grupo?" NO GRUPO":""} · ÚLTIMO PREÇO DE CADA LOJA`;
+  $("rkSub").textContent=`🏆 COMPARAR LOJAS · ${R.itens.length} ITE${R.itens.length===1?"M":"NS"}${L.grupo?" NO GRUPO":""} · ÚLTIMO PREÇO DE CADA LOJA · TOQUE NUMA LOJA PARA COMPRAR TUDO NELA`;
   document.querySelectorAll("[data-rkm]").forEach(b=>b.classList.toggle("on",b.dataset.rkm===rk.modo));
-  if(!R.n){ $("rkBody").innerHTML=`<div class="empty">${rk.modo==="cesta"?"NENHUM ITEM TEM PREÇO EM TODOS OS MERCADOS.":"NENHUM ITEM DESTA LISTA TEM PREÇO RECENTE."}</div>`+
+  if(!R.n){ $("rkBody").innerHTML=`<div class="empty">${rk.modo==="cesta"?"NENHUM ITEM TEM PREÇO EM TODOS OS MERCADOS.":"NENHUM ITEM DESTA LISTA TEM PREÇO."}</div>`+
       (R.semPreco.length?`<div class="rknota">SEM PREÇO EM NENHUM MERCADO: ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`:""); return; }
   const max=Math.max(...R.completos.map(x=>x.total),...R.incompletos.map(x=>x.total),R.dist);
   const melhor=R.completos.length?R.completos[0]:null, pior=R.completos.length?R.completos[R.completos.length-1]:null;
   const linha=(x,i,cls,extra)=>{ const d=Math.round((x.total-x.dist)*100)/100, inc=cls==="inc";
     const sufixo=inc?` (NOS ${x.cob} ITENS)`:"";
-    return `<div class="rkr ${cls}"><span class="pos">${i}</span><span class="n">${esc(estNome(x.estId))}${cls==="best"?" ★":""}${extra}</span>
+    return `<div class="rkr ${cls}" data-rkest="${x.estId}" style="cursor:pointer"><span class="pos">${i}</span><span class="n">${esc(estNome(x.estId))}${cls==="best"?" ★":""}${extra}</span>
       <span class="v">${lcd(x.total,"md "+(cls==="best"?"g":cls==="caro"?"r":""))}<small>${difCor(d," QUE A DISTRIBUÍDA"+sufixo," DA DISTRIBUÍDA"+sufixo)}</small></span>
       <span class="bar"><i style="width:${Math.max(4,Math.round(x.total/max*100))}%"></i></span></div>`; };
   let h=`<div class="rksec"><span>${rk.modo==="cesta"?`CESTA EM COMUM NOS ${R.nLojas} MERCADOS`:"SE COMPRASSE TUDO EM UM SÓ LUGAR"}</span><span>${R.n} ITE${R.n===1?"M":"NS"}</span></div>`;
@@ -3010,13 +3105,21 @@ function renderRank(){
   if(melhor){
     const e1=Math.round((melhor.total-R.dist)*100)/100, e2=Math.round((pior.total-R.dist)*100)/100;
     const caixa=(e,loja,tit)=>`<div>${tit}<br>${difCor(-e," QUE O "+esc(estNome(loja))," DO "+esc(estNome(loja)))}</div>`;
-    h+=`<div class="rkeco">${caixa(e1,melhor.estId,"DISTRIBUÍDA × MELHOR LOJA")}${R.completos.length>1?caixa(e2,pior.estId,"DISTRIBUÍDA × MAIS CARA"):""}</div></div>`;
+    h+=`<div class="rkeco">${caixa(e1,melhor.estId,"DISTRIBUÍDA × MELHOR LOJA")}${R.completos.length>1?caixa(e2,pior.estId,"DISTRIBUÍDA × MAIS CARA"):""}</div>
+      <button class="primary" id="rkDistribuir" style="width:100%;margin-top:10px;padding:11px">🔀 CRIAR AS LISTAS POR LOJA</button></div>`;
     if(usadas.length>1&&e1<10) h+=`<div class="rkwarn">⚠ DISTRIBUIR SAI ${difTxt(-Math.max(0,e1))} E EXIGE ${usadas.length} MERCADOS. COMPENSA A IDA?</div>`;
-  } else h+=`</div>`;
-  if(R.semPreco.length) h+=`<div class="rknota">SEM PREÇO RECENTE EM NENHUM MERCADO (FORA DA CONTA): ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`;
+  } else h+=`<button class="primary" id="rkDistribuir" style="width:100%;margin-top:10px;padding:11px">🔀 CRIAR AS LISTAS POR LOJA</button></div>`;
+  if(R.semPreco.length) h+=`<div class="rknota">SEM PREÇO EM NENHUM MERCADO (FORA DA CONTA): ${R.semPreco.map(i=>esc(S.produtos[i.pid].nome)).join(" · ")}</div>`;
   $("rkBody").innerHTML=h;
 }
 $("btnRank").onclick=()=>{ const L=S.listas[ui.lista]; if(!L) return; rk={lid:L.id,modo:"lista"}; renderRank(); show("mRank"); };
+$("rkBody").addEventListener("click",e=>{
+  if(!rk) return; const L=S.listas[rk.lid]; if(!L) return;
+  if(e.target.closest("#rkDistribuir")){ hide("mRank"); rk=null; abrirDistribuir(L); return; }
+  const r=e.target.closest("[data-rkest]"); if(!r||!S.ests[r.dataset.rkest]) return;
+  if(!confirm(`COMPRAR TUDO NO ${estNome(r.dataset.rkest)}?\n\nA LISTA PASSA A USAR ESSA LOJA (OS PREÇOS E O "AQUI" DOS CARTÕES).`)) return;
+  setLojaSel(L,r.dataset.rkest); hide("mRank"); rk=null; agendar(); toast("LOJA ESCOLHIDA: "+estNome(r.dataset.rkest));
+});
 $("rkTog").addEventListener("click",e=>{ const b=e.target.closest("[data-rkm]"); if(!b||!rk) return; rk.modo=b.dataset.rkm; renderRank(); });
 $("rkFechar").onclick=()=>{ hide("mRank"); rk=null; };
 /* ---------- toque no MAIS BARATO: confirma e move para a lista da loja mais barata ---------- */
@@ -3280,6 +3383,11 @@ function abrirPicker(modo,nome){
   pk.jaNaLista = L ? new Set((L.itens||[]).map(x=>x.produtoId)) : new Set();
   renderPicker(); show("mPick");
 }
+/* ---------- CÓDIGO DE BARRAS: um produto pode ter vários (fardo, unidade, promoção); zeros da frente não contam ---------- */
+const normCod = c => String(c||"").replace(/\D/g,"").replace(/^0+/,"");
+const codigosDe = p => [p&&p.barras,...((p&&p.codigos)||[])].map(normCod).filter(Boolean);
+const temCodigo = (p,c) => { const n=normCod(c); return !!n&&codigosDe(p).includes(n); };
+const produtoPorCodigo = (c,exceto) => Object.values(S.produtos).find(p=>p.id!==exceto&&temCodigo(p,c))||null;
 /* ---------- BUSCA: sem acento, palavras em qualquer ordem, tolera 1 erro de digitação ---------- */
 // "Maçã" → "MACA" (letra a letra, para o destaque cair no lugar certo)
 const semAc = s => String(s??"").normalize("NFC").split("").map(c=>c.normalize("NFD")[0]).join("").toUpperCase();
@@ -3374,7 +3482,7 @@ $("pkBusca").addEventListener("input",renderPicker);
 $("pkBusca").addEventListener("focus",()=>{ $("mPick").classList.add("foco"); setTimeout(()=>$("pkBusca").scrollIntoView({block:"nearest"}),250); });
 $("pkBusca").addEventListener("blur",()=>setTimeout(()=>{ if(document.activeElement!==$("pkBusca")) $("mPick").classList.remove("foco"); },150));
 $("pkBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return;
-  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  const p=produtoPorCodigo(c);
   if(p){ $("pkBusca").value=c; pk.sel[p.id]=pk.sel[p.id]||1; renderPicker(); }
   else if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c},id=>{pk.sel[id]=1;renderPicker()}); };
 function contarPicker(){
@@ -3552,7 +3660,7 @@ function abrirDistribuir(L){
   $("dOk").textContent = [criar?`CRIAR ${criar}`:"", atualizar?`ATUALIZAR ${atualizar}`:""].filter(Boolean).join(" · ") || "DISTRIBUIR";
   show("mDist");
 }
-$("btnDist").onclick=()=>{ const L=S.listas[ui.lista]; if(L) abrirDistribuir(L); };
+
 $("dCancel").onclick=()=>{ hide("mDist"); if(plano&&!ui.lista) abrirLista(plano.L.id); };
 // junta as listas repetidas da mesma loja no grupo (fica a mais antiga); devolve loja → {lista, itens}
 function juntarRepetidas(g){
@@ -3675,7 +3783,7 @@ function renderProdutos(){
   })()).join("")||`<div class="empty">${Object.keys(S.produtos).length?"NADA ENCONTRADO.":"NENHUM PRODUTO CADASTRADO."}</div>`;
 }
 $("pBusca").addEventListener("input",agendar);
-$("pBuscaBar").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return; const p=Object.values(S.produtos).find(x=>x.barras===c);
+$("pBuscaBar").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return; const p=produtoPorCodigo(c);
   if(p) abrirProd(p.id); else if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c}); };
 $("btnNovoProd").onclick=()=>abrirProd(null);
 $("produtos").addEventListener("click",e=>{
@@ -3741,7 +3849,7 @@ $("rpSug").addEventListener("click",e=>{
 $("rpEscolhido").addEventListener("click",e=>{ if(e.target.id==="rpTrocar"){ rp.pid=null; rpProdutoUI(); $("rpBusca").focus(); rpAtualizar(); } });
 $("rpBarras").onclick=async()=>{
   const c=await lerCodigoBarras(); if(!c) return;
-  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  const p=produtoPorCodigo(c);
   if(p){ rp.pid=p.id; rpProdutoUI(); rpAtualizar(); return; }
   if(!confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) return;
   hide("mPrecoRapido"); abrirProd(null,{barras:c},id=>reabrirRp(id));
@@ -3788,6 +3896,16 @@ function pdTotal(){
     : up($("pdCat").value) ? `<span style="color:var(--gold)">PARA COMPARAR NA CATEGORIA, INFORME O CONTEÚDO E A UNIDADE</span>` : "";
 }
 ["pdUnids","pdCQtd","pdCat"].forEach(i=>$(i).addEventListener("input",pdTotal));
+// outros códigos de barras do produto (fardo, unidade, promoção…)
+function renderPdCods(){ $("pdCods").innerHTML=pd.codigos.map((c,i)=>`<span class="cod">▥ ${esc(c)}<button type="button" data-cdel="${i}" aria-label="TIRAR">✕</button></span>`).join("")||`<span class="hint">NENHUM</span>`; }
+$("pdCods").addEventListener("click",e=>{ const b=e.target.closest("[data-cdel]"); if(!b) return; pd.codigos.splice(+b.dataset.cdel,1); renderPdCods(); });
+$("pdMaisCod").onclick=async()=>{
+  const c=normCod(await lerCodigoBarras()); if(!c) return;
+  if(normCod($("pdBarras").value)===c||pd.codigos.some(x=>normCod(x)===c)){ toast("ESSE CÓDIGO JÁ ESTÁ NESTE PRODUTO"); return; }
+  if(!normCod($("pdBarras").value)){ $("pdBarras").value=c; toast("CÓDIGO PRINCIPAL PREENCHIDO"); return; }
+  const dup=produtoPorCodigo(c,pd.id); if(dup&&!confirm(`O CÓDIGO ${c} JÁ ESTÁ NO PRODUTO ${dup.nome}. ACRESCENTAR MESMO ASSIM?`)) return;
+  pd.codigos.push(c); renderPdCods(); toast("CÓDIGO ACRESCENTADO · TOQUE EM SALVAR");
+};
 /* ---------- sugestões embaixo de NOME, MARCA e CATEGORIA: o que já existe, com o trecho em qualquer parte, sem acento ---------- */
 const FONTES_SUG={
   pdNome:()=>{ const m={}; Object.values(S.produtos).forEach(p=>{ const n=up(p.nome); if(!n) return; (m[n]=m[n]||new Set()).add(up(p.marca)); });
@@ -3866,7 +3984,7 @@ $("pdMesQtd").addEventListener("input",()=>{ if(num($("pdMesQtd").value)>0) $("p
 ["pdCUn","pdEmb"].forEach(i=>$(i).addEventListener("change",pdTotal));
 function abrirProd(id,pre={},cb=null){
   const p=id?S.produtos[id]:null;
-  pd={id,foto:p?p.foto||null:null,cb,opMeu:p?((opinioes(p).find(o=>o.uid===eu().uid)||{}).v||null):null};
+  pd={id,foto:p?p.foto||null:null,cb,codigos:p?[...(p.codigos||[])]:[...(pre.codigos||[])],opMeu:p?((opinioes(p).find(o=>o.uid===eu().uid)||{}).v||null):null};
   $("pdTitle").textContent=p?"EDITAR PRODUTO":"NOVO PRODUTO";
   $("pdCodigo").textContent=p?(p.codigo||"—"):"GERADO AO SALVAR";
   $("pdNome").value=p?p.nome:(pre.nome||""); $("pdMarca").value=p?(p.marca||""):(pre.marca||"");
@@ -3906,7 +4024,7 @@ function abrirProd(id,pre={},cb=null){
         + `<details class="todos"><summary>VER TODOS OS REGISTROS (${rs.length})</summary>${todos}</details>`
       : `<div class="hint">NENHUM PREÇO AINDA.</div>`;
   }
-  renderPdOp();
+  renderPdCods(); renderPdOp();
   $("pdOutroTam").classList.toggle("hidden",!p);
   $("pdDel").classList.toggle("hidden",!p||!ehAdmin());
   show("mProd");
@@ -4109,7 +4227,7 @@ function pararPdCam(){
 }
 $("pdCamClose").onclick=pararPdCam;
 function codigoNoCadastro(c){
-  const ja=Object.values(S.produtos).find(x=>x.barras===c);
+  const ja=produtoPorCodigo(c);
   if(ja){ $("pdBase").innerHTML=`<div class="achado nao">JÁ CADASTRADO: <b>${esc(ja.nome)}${ja.marca?" "+esc(ja.marca):""}</b> (${esc(ja.codigo||"")}) <button class="small" id="pdAbrirJa" data-id="${ja.id}">ABRIR</button></div>`; return; }
   $("pdBarras").value=c; consultaBase.ultimo=""; consultarBase(c);
 }
@@ -4189,12 +4307,12 @@ $("pdCancel").onclick=()=>hide("mProd");
 $("pdSave").onclick=async()=>{
   const nome=up($("pdNome").value); if(!nome){alert("INFORME O NOME.");$("pdNome").focus();return}
   const barras=$("pdBarras").value.replace(/\D/g,"");
-  if(barras){ const dup=Object.values(S.produtos).find(x=>x.barras===barras&&x.id!==pd.id); if(dup&&!confirm(`O CÓDIGO ${barras} JÁ ESTÁ NO PRODUTO ${dup.codigo} (${dup.nome}). SALVAR MESMO ASSIM?`)) return; }
+  for(const cd of [barras,...pd.codigos]){ if(!cd) continue; const dup=produtoPorCodigo(cd,pd.id); if(dup&&!confirm(`O CÓDIGO ${cd} JÁ ESTÁ NO PRODUTO ${dup.codigo} (${dup.nome}). SALVAR MESMO ASSIM?`)) return; }
   const zonas={}; document.querySelectorAll("#pdZonas [data-zona]").forEach(s=>{if(s.value&&s.value!=="__nova")zonas[s.dataset.zona]=s.value});
   const cq=num($("pdCQtd").value);
   const nu=Math.round(num($("pdUnids").value));
   const dados={nome,marca:up($("pdMarca").value),vendidoPor:$("pdVend").value,conteudoQtd:cq>0?cq:null,conteudoUn:$("pdCUn").value,
-    categoria:up($("pdCat").value),embalagem:$("pdEmb").value,unidades:nu>1?nu:1,
+    categoria:up($("pdCat").value),embalagem:$("pdEmb").value,unidades:nu>1?nu:1,codigos:pd.codigos.filter(c=>normCod(c)&&normCod(c)!==normCod(barras)),
     barras,obs:up($("pdObs").value),zonas,foto:pd.foto||null,atualizadoPor:eu().uid,atualizadoEm:Date.now()};
   // compra do mês da família (gaveta da família: não mexe na de outras famílias)
   const mq=num($("pdMesQtd").value), mesNovo=$("pdMes").checked?{on:true,qtd:mq>0?mq:null}:null;
@@ -4295,7 +4413,7 @@ function pararPesquisa(){
 $("pqClose").onclick=pararPesquisa;
 function tratarCodigoPesquisa(c){
   if(!pqExigeLoja()) return;
-  const p=Object.values(S.produtos).find(x=>x.barras===c);
+  const p=produtoPorCodigo(c);
   if(p){ abrirPq(p.id); return; }
   pqCadastrar({barras:c});
 }
@@ -4419,7 +4537,7 @@ $("pqVisita").addEventListener("click",e=>{
 
 /* ---------- botão VOLTAR (celular, teclado ou navegador): navega dentro do app em vez de sair ---------- */
 const FECHA={mSenha:"snCancel",mAdmin:"admFechar",mRec:"rcCancel",mRecLista:"rlCancel",mQtd:"qtCancel",mMover:"mvCancel",mHist:"hsCancel",
-  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel",mIA:"iaCancel",mSair:"srFica",mPref:"pfCancel",mEmb:"emFechar"};
+  mFora:"foNao",mPq:"pqPular",mPreco:"prCancel",mAinda:"aiCancel",mProd:"pdCancel",mEst:"esCancel",mPrecoRapido:"rpCancel",mRank:"rkFechar",mPick:"pkCancel",mCat:"ctCancel",mIA:"iaCancel",mSair:"srFica",mPref:"pfCancel",mEmb:"emFechar",mNovoUsr:"nuCancel"};
 function voltarUmPasso(){
   // 1) leitor em tela cheia
   const scan=document.querySelector(".scan"); if(scan){ const x=scan.querySelector('[data-a="x"]'); if(x){ x.click(); return true; } }
