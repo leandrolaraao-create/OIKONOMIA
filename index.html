@@ -26,6 +26,8 @@
   20. ESTABELECIMENTOS · HISTÓRICO · EXPORTAR PDF · INÍCIO
 
   HISTÓRICO DE VERSÕES (a mais nova em cima)
+  V 01.11-A  leitor lê o quadro inteiro (código em pé ou deitado), mais resolução e foco; mira ⟲;
+             faixa com o número lido: produto conhecido segue sozinho, novo pede CADASTRAR
   V 31.10-D  + NOVO USUÁRIO no painel; itens da lista gravados um a um; vários códigos de barras
              (sem zeros da frente); RANK + DISTRIBUIR viram 🏆 COMPARAR
   V 31.10-C  famílias separadas: produtos, lojas e preços de cada família; receita enviada leva nome/marca/tamanho
@@ -334,6 +336,16 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .mira{position:absolute;left:8%;right:8%;top:50%;height:44%;transform:translateY(-50%);border:2px solid rgba(255,255,255,.9);border-radius:10px;box-shadow:0 0 0 999px rgba(0,0,0,.28)}
 .mira::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff3b30;opacity:.85}
 .mira.ok{border-color:#3fe08a}
+.mira.vert{left:50%;right:auto;width:34%;height:86%!important;transform:translate(-50%,-50%)}
+.lfaixa{position:absolute;left:0;right:0;bottom:0;z-index:4;background:rgba(10,14,12,.86);color:#fff;padding:7px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.lfaixa .cod{font-family:DSEG7,monospace;font-size:15px;letter-spacing:.04em;color:#7dffb4}
+.lfaixa .tx{flex:1;min-width:120px;font-size:11.5px;font-weight:800;line-height:1.2}
+.lfaixa.novo .cod{color:#ffd76a}.lfaixa.aviso .cod{color:#ff9f8a}
+.lfaixa .bt{display:flex;gap:6px;width:100%}
+.lfaixa .bt button{flex:1;padding:8px 4px;font-size:11.5px;font-weight:800;border-radius:9px;background:#2a302d;color:#fff;border:1px solid #4a524d}
+.lfaixa .bt button.p{background:var(--accent);border-color:var(--accent)}
+.lgira{position:absolute;top:8px;left:52px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:17px;padding:0;z-index:3}
+.scan .lgira{top:56px;left:60px}
 .mmMsg{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#fff;font-size:11px;font-weight:800;text-shadow:0 1px 3px #000}
 .mmBtn{position:absolute;top:8px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:16px;padding:0}
 #btnScan.on{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -600,7 +612,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 31.10-D</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 01.11-A</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -2268,7 +2280,10 @@ async function iniciarModoMercado(){
         const agora=Date.now();
         if(c===mm.ultimo&&agora-mm.ultimoEm<20000) return false; // mesmo produto: só lê de novo depois de 20 s
         mm.ultimo=c; mm.ultimoEm=agora;
-        tratarCodigoNaLista(c); return true;
+        const p=produtoPorCodigo(c);
+        if(p){ mm.leitor?.mostrar({cod:c,txt:"✔ "+esc(p.nome)+(p.marca?" · "+esc(p.marca):"")}); tratarCodigoNaLista(c); }
+        else mm.leitor?.mostrar({cod:c,cls:"novo",txt:"NÃO CADASTRADO",botoes:[{t:"CADASTRAR",p:true,fn:()=>tratarCodigoNaLista(c)},{t:"LER OUTRO"}]});
+        return true;
       },
       torch:$("mmTorch")
     });
@@ -2779,7 +2794,7 @@ $("rcSug").addEventListener("click",e=>{
 $("rcBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return;
   const p=produtoPorCodigo(c);
   if(p){ rcAdicionar(p.id); return; }
-  if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c},id=>{ const t=n=>{ if(S.produtos[id]) rcAdicionar(id); else if(n<30) setTimeout(()=>t(n+1),100); }; t(0); });
+  abrirProd(null,{barras:c},id=>{ const t=n=>{ if(S.produtos[id]) rcAdicionar(id); else if(n<30) setTimeout(()=>t(n+1),100); }; t(0); });
 };
 $("rcItens").addEventListener("click",e=>{
   const rm=e.target.closest("[data-rcrm]"); if(rm){ rc.itens.splice(+rm.dataset.rcrm,1); renderRecItens(); return; }
@@ -3275,7 +3290,7 @@ const LeitorAoVivo={
     if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)) throw new Error("ESTE NAVEGADOR NÃO PERMITE CÂMERA AO VIVO. USE A OPÇÃO FOTO.");
     let stream;
     try{
-      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}}});
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}});
     }catch(e){
       const n=e&&e.name;
       if(n==="NotAllowedError"||n==="SecurityError") throw new Error("A CÂMERA FOI BLOQUEADA. PERMITA O ACESSO À CÂMERA NAS CONFIGURAÇÕES DO NAVEGADOR PARA ESTE SITE.");
@@ -3289,19 +3304,29 @@ const LeitorAoVivo={
     // lanterna, quando o aparelho permite
     const track=stream.getVideoTracks()[0]; let luz=false;
     try{ const cap=track.getCapabilities&&track.getCapabilities(); if(torch&&cap&&cap.torch){ torch.classList.remove("hidden");
-      torch.onclick=async()=>{ luz=!luz; try{ await track.applyConstraints({advanced:[{torch:luz}]}); }catch(e){} }; } }catch(e){}
+      torch.onclick=async()=>{ luz=!luz; try{ await track.applyConstraints({advanced:[{torch:luz}]}); }catch(e){} }; }
+      // foco contínuo, quando o aparelho permite (ajuda com código pequeno, de perto)
+      if(cap&&Array.isArray(cap.focusMode)&&cap.focusMode.includes("continuous")) track.applyConstraints({advanced:[{focusMode:"continuous"}]}).catch(()=>{}); }catch(e){}
+    // faixa do número lido + mira que gira (código em pé)
+    const caixa=video.parentElement;
+    let faixa=caixa.querySelector(".lfaixa"); if(!faixa){ faixa=document.createElement("div"); faixa.className="lfaixa hidden"; caixa.appendChild(faixa); }
+    let gira=caixa.querySelector(".lgira"); if(!gira){ gira=document.createElement("button"); gira.type="button"; gira.className="lgira"; gira.textContent="⟲"; gira.setAttribute("aria-label","GIRAR A MIRA"); caixa.appendChild(gira); }
+    gira.classList.remove("hidden");
+    gira.onclick=e=>{ e.stopPropagation(); const m=caixa.querySelector(".mira"); if(m) m.classList.toggle("vert"); };
+    let parado=false, tFaixa=null;
     const cv=document.createElement("canvas"), cx=cv.getContext("2d",{willReadFrequently:true});
-    let ativo=true, ocupado=false;
+    let ativo=true, ocupado=false, volta=0;
     const mira=video.parentElement.querySelector(".mira");
     const passo=async()=>{
       if(!ativo) return;
-      if(!ocupado&&video.readyState>=2&&!(pausado&&pausado())){
+      if(!ocupado&&!parado&&video.readyState>=2&&!(pausado&&pausado())){
         ocupado=true;
         try{
           const vw=video.videoWidth, vh=video.videoHeight;
           if(vw&&vh){
-            // analisa a faixa central (onde fica a mira), reduzida para ser rápido
-            const sw=vw*0.9, sh=vh*0.5, sx=(vw-sw)/2, sy=(vh-sh)/2, esc=Math.min(1,960/sw);
+            // alterna: faixa do meio (rápido, código deitado) e o quadro inteiro (código em pé, torto ou fora da mira)
+            const todo=(volta++)%2===1;
+            const sw=todo?vw:vw*0.9, sh=todo?vh:vh*0.5, sx=(vw-sw)/2, sy=(vh-sh)/2, esc=Math.min(1,(todo?1280:960)/Math.max(sw,sh));
             cv.width=Math.round(sw*esc); cv.height=Math.round(sh*esc);
             cx.drawImage(video,sx,sy,sw,sh,0,0,cv.width,cv.height);
             const r=await leitor.det.detect(cv);
@@ -3317,13 +3342,27 @@ const LeitorAoVivo={
       if(ativo) setTimeout(passo,180);
     };
     passo();
-    return { parar(){ ativo=false; try{ if(luz) track.applyConstraints({advanced:[{torch:false}]}); }catch(e){}
-      stream.getTracks().forEach(t=>t.stop()); video.srcObject=null; if(torch) torch.classList.add("hidden"); } };
+    const esconder=()=>{ clearTimeout(tFaixa); faixa.classList.add("hidden"); faixa.innerHTML=""; };
+    return {
+      parar(){ ativo=false; esconder(); gira.classList.add("hidden"); try{ if(luz) track.applyConstraints({advanced:[{torch:false}]}); }catch(e){}
+        stream.getTracks().forEach(t=>t.stop()); video.srcObject=null; if(torch) torch.classList.add("hidden"); },
+      // mostra o número lido para conferência. Com botões, a leitura espera a escolha; sem botões, some sozinha.
+      mostrar({cod,txt,cls="",botoes=[],auto=1800}){
+        clearTimeout(tFaixa);
+        faixa.className="lfaixa "+cls;
+        faixa.innerHTML=`<span class="cod">${esc(normCod(cod)||cod)}</span><span class="tx">${txt}</span>`+(botoes.length?`<div class="bt">${botoes.map((b,i)=>`<button type="button" data-lfb="${i}" class="${b.p?"p":""}">${esc(b.t)}</button>`).join("")}</div>`:"");
+        if(botoes.length){ parado=true;
+          faixa.onclick=e=>{ const b=e.target.closest("[data-lfb]"); if(!b) return; e.stopPropagation(); parado=false; esconder(); const f=botoes[+b.dataset.lfb].fn; if(f) f(); }; }
+        else{ faixa.onclick=null; tFaixa=setTimeout(esconder,auto); }
+      },
+      esconder
+    };
   }
 };
 
 // ▥ nas outras telas: câmera ao vivo em tela cheia, lê uma vez e fecha (com opções FOTO e DIGITAR)
-function lerCodigoBarras(){
+// opc.cadastro=true: código para o produto em edição (avisa se já é de outro produto); senão procura o produto
+function lerCodigoBarras(opc={}){
   obterDetector().catch(()=>{});
   return new Promise(res=>{
     const ov=document.createElement("div"); ov.className="scan";
@@ -3340,7 +3379,16 @@ function lerCodigoBarras(){
       else if(a.dataset.a==="dig"){ const v=(prompt("DIGITE O NÚMERO DO CÓDIGO DE BARRAS:")||"").replace(/\D/g,""); if(v) fim(v); }
       else if(a.dataset.a==="foto"){ if(leitor){leitor.parar();leitor=null;} feito=true; ov.remove(); res(await lerCodigoFoto()); }
     });
-    LeitorAoVivo.iniciar(ov.querySelector("video"),{aoLer:c=>{ fim(c); return true; }, torch:ov.querySelector('[data-a="luz"]')})
+    const aoLer=c=>{ if(!leitor) { fim(c); return true; }
+      if(opc.cadastro){ const dup=produtoPorCodigo(c,opc.exceto);
+        if(dup) leitor.mostrar({cod:c,cls:"aviso",txt:"JÁ É DE "+esc(dup.nome)+(dup.marca?" · "+esc(dup.marca):""),botoes:[{t:"USAR MESMO ASSIM",fn:()=>fim(c)},{t:"LER OUTRO"}]});
+        else{ leitor.mostrar({cod:c,txt:"✔ CÓDIGO LIDO",auto:900}); setTimeout(()=>fim(c),900); }
+        return true; }
+      const p=produtoPorCodigo(c);
+      if(p){ leitor.mostrar({cod:c,txt:"✔ "+esc(p.nome)+(p.marca?" · "+esc(p.marca):""),auto:1200}); setTimeout(()=>fim(c),1200); }
+      else leitor.mostrar({cod:c,cls:"novo",txt:"NÃO CADASTRADO",botoes:[{t:"CADASTRAR",p:true,fn:()=>fim(c)},{t:"LER OUTRO"}]});
+      return true; };
+    LeitorAoVivo.iniciar(ov.querySelector("video"),{aoLer, torch:ov.querySelector('[data-a="luz"]')})
       .then(l=>{ if(feito) l.parar(); else leitor=l; })
       .catch(err=>{ if(feito) return; ov.querySelector(".msg").textContent=err.message+" USE FOTO OU DIGITAR."; });
   });
@@ -3484,7 +3532,7 @@ $("pkBusca").addEventListener("blur",()=>setTimeout(()=>{ if(document.activeElem
 $("pkBarras").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return;
   const p=produtoPorCodigo(c);
   if(p){ $("pkBusca").value=c; pk.sel[p.id]=pk.sel[p.id]||1; renderPicker(); }
-  else if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c},id=>{pk.sel[id]=1;renderPicker()}); };
+  else abrirProd(null,{barras:c},id=>{pk.sel[id]=1;renderPicker()}); };
 function contarPicker(){
   const n=Object.keys(pk.sel).length;
   $("pkCount").textContent = n ? `${n} SELECIONADO${n>1?"S":""}` : "MARQUE OS PRODUTOS E AJUSTE A QUANTIDADE";
@@ -3784,7 +3832,7 @@ function renderProdutos(){
 }
 $("pBusca").addEventListener("input",agendar);
 $("pBuscaBar").onclick=async()=>{ const c=await lerCodigoBarras(); if(!c) return; const p=produtoPorCodigo(c);
-  if(p) abrirProd(p.id); else if(confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) abrirProd(null,{barras:c}); };
+  if(p) abrirProd(p.id); else abrirProd(null,{barras:c}); };
 $("btnNovoProd").onclick=()=>abrirProd(null);
 $("produtos").addEventListener("click",e=>{
   const rp=e.target.closest("[data-rp]"); if(rp){ e.stopPropagation(); abrirPrecoRapido(rp.dataset.rp); return; }
@@ -3851,7 +3899,6 @@ $("rpBarras").onclick=async()=>{
   const c=await lerCodigoBarras(); if(!c) return;
   const p=produtoPorCodigo(c);
   if(p){ rp.pid=p.id; rpProdutoUI(); rpAtualizar(); return; }
-  if(!confirm(`CÓDIGO ${c} NÃO CADASTRADO. CADASTRAR AGORA?`)) return;
   hide("mPrecoRapido"); abrirProd(null,{barras:c},id=>reabrirRp(id));
 };
 // volta para o preço rápido depois de cadastrar o produto, mantendo o que já foi preenchido
@@ -3900,10 +3947,9 @@ function pdTotal(){
 function renderPdCods(){ $("pdCods").innerHTML=pd.codigos.map((c,i)=>`<span class="cod">▥ ${esc(c)}<button type="button" data-cdel="${i}" aria-label="TIRAR">✕</button></span>`).join("")||`<span class="hint">NENHUM</span>`; }
 $("pdCods").addEventListener("click",e=>{ const b=e.target.closest("[data-cdel]"); if(!b) return; pd.codigos.splice(+b.dataset.cdel,1); renderPdCods(); });
 $("pdMaisCod").onclick=async()=>{
-  const c=normCod(await lerCodigoBarras()); if(!c) return;
+  const c=normCod(await lerCodigoBarras({cadastro:true,exceto:pd.id})); if(!c) return;
   if(normCod($("pdBarras").value)===c||pd.codigos.some(x=>normCod(x)===c)){ toast("ESSE CÓDIGO JÁ ESTÁ NESTE PRODUTO"); return; }
   if(!normCod($("pdBarras").value)){ $("pdBarras").value=c; toast("CÓDIGO PRINCIPAL PREENCHIDO"); return; }
-  const dup=produtoPorCodigo(c,pd.id); if(dup&&!confirm(`O CÓDIGO ${c} JÁ ESTÁ NO PRODUTO ${dup.nome}. ACRESCENTAR MESMO ASSIM?`)) return;
   pd.codigos.push(c); renderPdCods(); toast("CÓDIGO ACRESCENTADO · TOQUE EM SALVAR");
 };
 /* ---------- sugestões embaixo de NOME, MARCA e CATEGORIA: o que já existe, com o trecho em qualquer parte, sem acento ---------- */
@@ -4201,7 +4247,7 @@ $("iaOk").onclick=async()=>{
 // produto novo: câmera fixa no topo do cadastro, ligada até tocar no ✕ (cadastra vários em sequência)
 // editando: lê uma vez e fecha (só há um código para trocar)
 $("pdLerBarras").onclick=async()=>{
-  if(pd.id){ const c=await lerCodigoBarras(); if(c){ $("pdBarras").value=c; consultarBase(c); } return; }
+  if(pd.id){ const c=await lerCodigoBarras({cadastro:true,exceto:pd.id}); if(c){ $("pdBarras").value=c; consultarBase(c); } return; }
   if(pdc.ativo){ pararPdCam(); return; }
   iniciarPdCam();
 };
@@ -4227,7 +4273,11 @@ function pararPdCam(){
 }
 $("pdCamClose").onclick=pararPdCam;
 function codigoNoCadastro(c){
-  const ja=produtoPorCodigo(c);
+  const ja=produtoPorCodigo(c,pd.id);
+  if(pdc.leitor){
+    if(ja) pdc.leitor.mostrar({cod:c,cls:"aviso",txt:"JÁ CADASTRADO: "+esc(ja.nome)+(ja.marca?" · "+esc(ja.marca):""),botoes:[{t:"ABRIR",p:true,fn:()=>{ pararPdCam(); abrirProd(ja.id); }},{t:"LER OUTRO"}]});
+    else pdc.leitor.mostrar({cod:c,txt:"✔ CÓDIGO PREENCHIDO",auto:1800});
+  }
   if(ja){ $("pdBase").innerHTML=`<div class="achado nao">JÁ CADASTRADO: <b>${esc(ja.nome)}${ja.marca?" "+esc(ja.marca):""}</b> (${esc(ja.codigo||"")}) <button class="small" id="pdAbrirJa" data-id="${ja.id}">ABRIR</button></div>`; return; }
   $("pdBarras").value=c; consultaBase.ultimo=""; consultarBase(c);
 }
@@ -4398,7 +4448,11 @@ async function iniciarPesquisa(){
       pausado:()=>document.querySelector(".modal.show")!==null,
       aoLer:c=>{ const agora=Date.now();
         if(c===pq.ultimo&&agora-pq.ultimoEm<20000) return false;
-        pq.ultimo=c; pq.ultimoEm=agora; tratarCodigoPesquisa(c); return true; },
+        pq.ultimo=c; pq.ultimoEm=agora;
+        const p=produtoPorCodigo(c);
+        if(p){ pq.leitor?.mostrar({cod:c,txt:"✔ "+esc(p.nome)+(p.marca?" · "+esc(p.marca):"")}); tratarCodigoPesquisa(c); }
+        else pq.leitor?.mostrar({cod:c,cls:"novo",txt:"NÃO CADASTRADO",botoes:[{t:"CADASTRAR",p:true,fn:()=>tratarCodigoPesquisa(c)},{t:"LER OUTRO"}]});
+        return true; },
       torch:$("pqTorch")
     });
     if(!pq.ativo){ pq.leitor.parar(); pq.leitor=null; return; }
