@@ -26,6 +26,9 @@
   20. ESTABELECIMENTOS · HISTÓRICO · EXPORTAR PDF · INÍCIO
 
   HISTÓRICO DE VERSÕES (a mais nova em cima)
+  V 02.11-B  ECONOMIA EM PALAVRAS SIMPLES: selo + sua escolha / mais barato aqui / mais barato de todos, sempre com a loja;
+             "VALE A PENA IR?"; botões TROCAR AQUI MESMO, COMPRAR EM OUTRA LOJA (troca ou mantém o produto) e MANTER;
+             depois da compra "ACHOU PROMOÇÃO"; caixa do topo "DAVA PARA ECONOMIZAR AQUI"
   V 02.11-A  ECONOMIA: referência = grama/ml/unidade mais barata da categoria no dia da criação; cartão, caixa no topo e
              FINALIZAR; escolher produtos com filtros que viram etiquetas (CATEGORIA, NOME, MARCA) e QUANTO QUER
   V 01.11-B  câmera volta a 1280×720 sem foco forçado (imagem preta em alguns celulares); religa sozinha se ficar preta
@@ -340,6 +343,30 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .mira::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff3b30;opacity:.85}
 .mira.ok{border-color:#3fe08a}
 .mira.vert{left:50%;right:auto;width:34%;height:86%!important;transform:translate(-50%,-50%)}
+/* cartão de economia (V 02.11-B) */
+.eco{margin:0 12px}
+.eco .selo2{display:flex;gap:10px;align-items:center;border-radius:14px;padding:10px 12px}
+.eco .selo2 .e{font-size:26px;line-height:1;flex:none}
+.eco .selo2 b{display:block;font-size:14px;line-height:1.25}.eco .selo2 small{display:block;font-size:11px;font-weight:700;color:#4b544e;margin-top:2px}
+.eco .selo2.g{background:#e3f4ea}.eco .selo2.g b{color:var(--accent)}
+.eco .selo2.y{background:#fff3cf}.eco .selo2.y b{color:#8a5a00}
+.eco .selo2.r{background:#fde5df}.eco .selo2.r b{color:var(--warn)}
+.eco .selo2.c{background:var(--chip)}.eco .selo2.c b{color:var(--ink)}
+.eco .lbox{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:8px;background:#fafbfa}
+.eco .lbox .t{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.eco .lrow{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;margin-top:7px;font-size:12px;font-weight:800}
+.eco .lrow .ic{font-size:15px;text-align:center}.eco .lrow small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.eco .lrow .v{text-align:right;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.eco .lrow .v small{text-align:right}.eco .lrow .v.g{color:var(--accent)}.eco .lrow .v.r{color:var(--warn)}
+.eco .dec2{margin-top:8px;font-size:11.5px;font-weight:800;background:#eef3fb;color:var(--tag-ink);border-radius:10px;padding:8px 10px}
+.eco .bts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.eco .bts button{display:flex;gap:10px;align-items:center;text-align:left;border-radius:12px;padding:9px 12px;font-size:12.5px;font-weight:900;border:1.5px solid var(--line);background:#fff;color:var(--ink);width:100%;min-height:0;height:auto}
+.eco .bts button .e{font-size:19px;flex:none}.eco .bts button small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.eco .bts button.p{background:var(--accent);border-color:var(--accent);color:#fff}.eco .bts button.p small{color:#d8efe2}
+.eco .bts button.c{border-color:var(--tag-ink);color:var(--tag-ink)}
+.eco .mini{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:#fafbfa;width:100%;text-align:left;height:auto;min-height:0;color:var(--ink)}
+.eco .mini .e{font-size:19px;flex:none}.eco .mini b{display:block;font-size:12.5px}.eco .mini small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.eco .mini .lk{margin-left:auto;font-size:11px;font-weight:900;color:var(--tag-ink);white-space:nowrap}
 .ecoln{margin:6px 12px 0;font-size:11px;font-weight:800;color:var(--muted)}
 .ecoln.up{color:var(--warn)}.ecoln.dn{color:var(--accent)}
 .ecoln small{display:block;font-size:9.5px;font-weight:700;color:var(--muted)}
@@ -629,7 +656,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 02.11-A</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 02.11-B</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -1373,7 +1400,7 @@ const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos"
    ESTADO
    ===================================================================== */
 const S = { user:null, usuarios:{}, familias:{}, produtos:{}, ests:{}, precos:[], listas:{}, realizados:{}, finalizacoes:[], receitas:{} };
-const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compras", fechados:new Set(), abertos:new Set() };
+const ui = { aba:"listas", lista:null, filtro:"all", ordem:"lista", hist:"compras", fechados:new Set(), abertos:new Set(), ecoAbre:new Set() };
 let desligar=[];
 const byId = arr => Object.fromEntries(arr.map(d=>[d.id,d]));
 const nomeUsuario = uid => (S.usuarios[uid]||{}).nome || "?";
@@ -1944,10 +1971,15 @@ function renderLista(L){
   itens.forEach(it=>{ if(realizado(L,it.produtoId)) return; nFalta++; const v=(estId&&precoNaLoja(it.produtoId,estId))??(precosPorLoja(it.produtoId)[0]||{}).valor; if(v) falta+=v*(it.qtd||1); });
   $("tFalta").innerHTML=lcd(falta,"md y full");
   $("tFaltaS").textContent=`${nFalta} ITE${nFalta===1?"M":"NS"} · ESTIMADO`;
-  { const E=ecoLista(L);
-    $("tEcoL").textContent = E.d>0 ? "PAGANDO A MAIS ~" : "ECONOMIA ~";
-    $("tEco").innerHTML = E.n ? lcd(Math.abs(E.d),"md full "+(E.d>0?"r":"g")) : lcd(0,"md full");
-    $("tEcoS").textContent = E.n ? `VS MAIS BARATO · ${E.n} NA CONTA${E.fora?" · "+E.fora+" FORA":""}` : "SEM ITENS COM CATEGORIA E CONTEÚDO"; }
+  { const E=ecoTopo(L,estId), sub=[];
+    if(E.aqui>0){ $("tEcoL").textContent="😬 DAVA PARA ECONOMIZAR"; $("tEco").innerHTML=lcd(E.aqui,"md full r"); sub.push("AQUI MESMO"); }
+    else if(E.promo>0){ $("tEcoL").textContent="🎉 ACHOU EM PROMOÇÕES"; $("tEco").innerHTML=lcd(E.promo,"md full g"); }
+    else { $("tEcoL").textContent=estId?"😄 TUDO NO MAIS BARATO":"ECONOMIA"; $("tEco").innerHTML=lcd(0,"md full g"); }
+    if(E.fora>0) sub.push(`+ ${brl(E.fora)} SE FOR ${E.lojas.length===1?"AO "+estNome(E.lojas[0]):"A OUTRAS LOJAS"}`);
+    if(E.manter>0) sub.push(`📌 MANTIDAS: ${brl(E.manter)} A MAIS`);
+    if(E.promo>0&&E.aqui>0) sub.push(`🎉 PROMOÇÕES: ${brl(E.promo)}`);
+    if(!estId) sub.push("ESCOLHA A LOJA NO TOPO");
+    $("tEcoS").textContent=sub.join(" · "); }
   $("countLine").textContent=`${reais.length} DE ${itens.length} COMPRADOS`+(estId?"":" · ESCOLHA O ESTABELECIMENTO ACIMA PARA REGISTRAR");
   // itens
   let vis=itens.filter(it=>{const d=!!realizado(L,it.produtoId);return ui.filtro==="all"||(ui.filtro==="todo"&&!d)||(ui.filtro==="done"&&d)});
@@ -1980,7 +2012,11 @@ function cardItem(L,it,estId){
   let resumo="";
   if(r){
     resumo=`<div class="comprado">✔ COMPRADO POR ${esc(r.usuarioNome)} · ${esc(r.estNome||estNome(r.estabelecimentoId))}${r.valor?`<br><b>${fmtQtd(r.qtd)} × ${brl(r.valor)} = ${brl(r.total)}</b>`:""} · ${dCurta(r.ts)} ${hora(r.ts)}${r.listaId!==L.id&&S.listas[r.listaId]?`<br><small>NA LISTA ${esc(S.listas[r.listaId].nome)}</small>`:""}</div>`;
-  }else if(cat&&cat.resumo){
+  }
+  const eco = ehCat(p) ? ecoCard(L,it,estId) : null;
+  if(r){ /* já montado acima */ }
+  else if(eco){ resumo=""; }
+  else if(cat&&cat.resumo){
     resumo=cat.resumo;
   }else if(!menor){
     resumo=`<div class="resumo2"><div class="vazio">SEM PREÇO REGISTRADO EM NENHUMA LOJA</div></div>`;
@@ -2030,7 +2066,7 @@ function cardItem(L,it,estId){
         <div class="tags">${chips}</div>
       </div>
     </div>
-    ${resumo}${ecoHtml(L,it)}${cat?cat.extra:""}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
+    ${resumo}${eco||ecoHtml(L,it)}${cat?cat.extra:""}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
     <div class="acts">${botao}
       <button class="ib cif" data-hist="${p.id}" aria-label="PREÇOS NESTA LOJA">$</button>
       <div class="stepq${uv?" med":""}"><button data-qmenos="${p.id}" aria-label="MENOS">−</button><span data-qedit="${p.id}">${fmtMedida(p,q)}</span><button data-qmais="${p.id}" aria-label="MAIS">+</button></div>
@@ -2048,6 +2084,184 @@ function ecoItem(L,it){
   else{ const est=lojaSel(L), v=(est&&precoNaLoja(p.id,est))??(precosPorLoja(p.id)[0]||{}).valor; if(!v) return null; qtd=+it.qtd||1; custo=qtd*v; }
   const refCusto=it.ref.pu*qtd*ct.q;
   return {d:Math.round((custo-refCusto)*100)/100,real,custo,refCusto,un:ct.un};
+}
+/* ---------- ECONOMIA EM PALAVRAS SIMPLES (V 02.11-B) ----------
+   Para o item ainda não comprado: SUA ESCOLHA (aqui) × MAIS BARATO AQUI × MAIS BARATO DE TODOS, sempre com a loja.
+   Depois de comprado: o que pagou × o menor preço conhecido na criação da lista. */
+const art = n => /A$/.test(String(n).trim())?"A":"O"; // A MOÇA, O ITALAC
+const comArt = n => art(n)+" "+n;
+const nomeCurto = (o,p) => (p&&o.nome!==p.nome?o.nome+" · ":"")+(o.marca||o.nome);
+// em qual loja este item vai ser comprado (lista de loja do grupo que tem o item)
+function lojaDoItem(L,pid){
+  if(ehLoja(L)) return L.estabelecimentoId||null;
+  if(!L.grupo) return null;
+  const f=listasDoGrupo(L.grupo).find(l=>ehLoja(l)&&(l.itens||[]).some(x=>x.produtoId===pid));
+  return f?f.estabelecimentoId:null;
+}
+// as contas do item (sem compra): null quando não dá para comparar
+function ecoContas(L,it,estId){
+  const p=S.produtos[it.produtoId]; if(!p||!ehCat(p)) return null;
+  const ct=contTotal(p); if(!ct) return null;
+  const un=ct.un, N=necessidade(it,p), membros=membrosCat(p.categoria,un);
+  if(!membros.some(o=>o.id===p.id)) membros.push(p);
+  const todos=opcoesCat(membros,N,null,p.id); if(!todos.length) return null;
+  const aquiR=estId?precosPorLoja(p.id).find(x=>x.estabelecimentoId===estId):null;
+  const sua=aquiR?{...opcao(p,aquiR.valor,N),estId}:null;
+  const melhorAqui=estId?(opcoesCat(membros,N,estId,p.id)[0]||null):null;
+  const melhor=todos[0];
+  const baseAqui = sua&&melhorAqui ? (melhorAqui.total<sua.total-0.004?melhorAqui:sua) : (sua||melhorAqui);
+  const dAqui = sua&&melhorAqui&&melhorAqui.o.id!==p.id ? Math.max(0,Math.round((sua.total-melhorAqui.total)*100)/100) : 0;
+  const fora = baseAqui&&melhor.estId!==estId ? Math.max(0,Math.round((baseAqui.total-melhor.total)*100)/100) : (!estId?0:0);
+  const dTodos = sua ? Math.max(0,Math.round((sua.total-melhor.total)*100)/100) : 0;
+  return {p,un,N,sua,melhorAqui,melhor,baseAqui,dAqui,fora,dTodos};
+}
+// quanto a escolha mantida custa a mais (contra o mais barato daqui; se aqui já é o mais barato, contra o de todos)
+function custoManter(c){
+  if(!c||!c.sua) return null;
+  if(c.dAqui>0) return {d:c.dAqui,o:c.melhorAqui};
+  if(c.dTodos>0) return {d:c.dTodos,o:c.melhor};
+  return null;
+}
+function ecoLinha(ic,tit,sub,valor,cls,dif){
+  return `<div class="lrow"><span class="ic">${ic}</span><span>${tit}<small>${sub}</small></span><span class="v ${cls||""}">${brl(valor)}${dif?`<small>${dif}</small>`:""}</span></div>`;
+}
+const ecoMenos = d => d>0.004?`▼ ${brl(d)} MENOS`:"";
+function ecoCard(L,it,estId){
+  const p=S.produtos[it.produtoId]; if(!p||!ehCat(p)) return null;
+  const r=realizado(L,p.id);
+  if(r) return ecoCardComprado(L,it,p,r);
+  const c=ecoContas(L,it,estId); if(!c) return null;
+  const {sua,melhorAqui,melhor,un,N}=c, aqui=estId?estNome(estId):"";
+  const titPara=`PARA ${fmtFino(N,un)}`+(it.quer?"":` (${fmtQtd(+it.qtd||1)} × ${esc(rotEmbCurta(p))})`);
+  const minha=nomeCurto(p);
+  // vai ser comprado em outra loja (está na lista daquela loja)
+  const outraLoja=lojaDoItem(L,p.id);
+  const aberto=ui.ecoAbre.has(p.id);
+  if(outraLoja&&outraLoja!==estId&&!aberto){
+    const v=precoNaLoja(p.id,outraLoja);
+    return `<div class="eco"><button class="mini" data-ecover="${p.id}"><span class="e">🚗</span><div><b>VAI SER COMPRADO NO ${esc(estNome(outraLoja))}</b><small>ESTÁ NA LISTA DO ${esc(estNome(outraLoja))}${v!=null?" · LÁ: "+brl(opcao(p,v,N).total):" · SEM PREÇO LÁ"}</small></div><span class="lk">VER OPÇÕES ›</span></button></div>`;
+  }
+  if(!estId){
+    return `<div class="eco"><div class="selo2 c"><span class="e">📍</span><div><b>ESCOLHA NO TOPO ONDE VOCÊ ESTÁ COMPRANDO</b><small>Assim o app compara os preços desta loja com os das outras</small></div></div>
+      <div class="lbox"><div class="t">${titPara}</div>${ecoLinha("★",`MAIS BARATO DE TODOS · ${esc(nomeCurto(melhor.o,p))}`,`NO ${esc(estNome(melhor.estId))} · ${melhor.leva} × ${brl(melhor.valor)}`,melhor.total,"g")}</div></div>`;
+  }
+  // escolha mantida: cartão encolhido
+  const cm=custoManter(c);
+  if(it.manter&&!aberto&&sua){
+    return `<div class="eco"><button class="mini" data-ecover="${p.id}"><span class="e">📌</span><div><b>VOCÊ ESCOLHEU ${esc(comArt(minha))} · ${brl(sua.total)}</b><small>${sua.leva} × ${brl(sua.valor)} AQUI NO ${esc(aqui)}${cm?` · ${brl(cm.d)} A MAIS QUE ${esc(comArt(nomeCurto(cm.o.o,p)))}${cm.o.estId!==estId?" NO "+esc(estNome(cm.o.estId)):""}`:""}</small></div><span class="lk">VER OPÇÕES ›</span></button></div>`;
+  }
+  let selo, linhas="", dec="", bts=[];
+  const melhorFora = melhor.estId!==estId && c.baseAqui && melhor.total<c.baseAqui.total-0.004;
+  const melhorFora2 = !c.baseAqui && melhor.estId!==estId;
+  const nomeMelhorAqui = melhorAqui?nomeCurto(melhorAqui.o,p):"";
+  if(sua){
+    linhas+=ecoLinha("📍",`SUA ESCOLHA · ${esc(minha)}`,`AQUI NO ${esc(aqui)} · ${sua.leva} × ${brl(sua.valor)}`,sua.total,"");
+  } else {
+    linhas+=`<div class="lrow"><span class="ic">📍</span><span>SUA ESCOLHA · ${esc(minha)}<small>AQUI NO ${esc(aqui)}</small></span><span class="v" style="color:var(--muted)">SEM PREÇO</span></div>`;
+  }
+  if(melhorAqui&&melhorAqui.o.id!==p.id&&(!sua||melhorAqui.total<sua.total-0.004))
+    linhas+=ecoLinha(melhorFora||melhorFora2?"🏪":"★",`MAIS BARATO${melhorFora||melhorFora2?" AQUI":""} · ${esc(nomeMelhorAqui)}`,`AQUI NO ${esc(aqui)} · ${melhorAqui.leva} × ${brl(melhorAqui.valor)}`,melhorAqui.total,"g",sua?ecoMenos(sua.total-melhorAqui.total):"");
+  if(melhorFora||melhorFora2)
+    linhas+=ecoLinha("🚗",`MAIS BARATO DE TODOS · ${esc(nomeCurto(melhor.o,p))}`,`NO ${esc(estNome(melhor.estId))} · ${melhor.leva} × ${brl(melhor.valor)}`,melhor.total,"g",sua?ecoMenos(sua.total-melhor.total):"");
+  const btTroca = c.dAqui>0 ? `<button class="p" data-ecotroca="${p.id}|${melhorAqui.o.id}"><span class="e">🔄</span><div>TROCAR PELO ${esc(nomeMelhorAqui)} · AQUI MESMO<small>CONTINUA NO ${esc(aqui)}, MESMA QUANTIDADE (${fmtFino(N,un)})</small></div></button>` : "";
+  const btIr = melhorFora||melhorFora2 ? `<button class="c" data-ecoir="${p.id}"><span class="e">🚗</span><div>COMPRAR NO ${esc(estNome(melhor.estId))}<small>VAI PARA A LISTA DO ${esc(estNome(melhor.estId))} (CRIA SE NÃO EXISTIR)</small></div></button>` : "";
+  const btManter = sua&&cm ? `<button data-ecomanter="${p.id}"><span class="e">📌</span><div>MANTER ${esc(comArt(minha))}<small>PREFIRO ESTA, MESMO PAGANDO ${brl(cm.d)} A MAIS</small></div></button>` : "";
+  if(!sua){
+    selo=`<div class="selo2 c"><span class="e">❔</span><div><b>SEM PREÇO D${art(minha)} ${esc(minha)} AQUI NO ${esc(aqui)}</b><small>Toque em $ para registrar o preço quando encontrar</small></div></div>`;
+    if(melhorAqui&&melhorAqui.o.id!==p.id) bts.push(`<button class="p" data-ecotroca="${p.id}|${melhorAqui.o.id}"><span class="e">🔄</span><div>TROCAR PELO ${esc(nomeMelhorAqui)} · AQUI MESMO<small>${brl(melhorAqui.total)} PARA ${fmtFino(N,un)}</small></div></button>`);
+    if(btIr) bts.push(btIr);
+  } else if(c.dTodos<=0.004){
+    selo=`<div class="selo2 g"><span class="e">😄</span><div><b>VOCÊ JÁ ESTÁ NO MAIS BARATO</b><small>Nenhuma loja tem mais barato para ${fmtFino(N,un)}</small></div></div>`;
+  } else if(!melhorFora){
+    selo=`<div class="selo2 r"><span class="e">😬</span><div><b>AQUI MESMO, ${esc(comArt(nomeMelhorAqui))} SAI ${brl(c.dAqui)} MAIS BARATO</b><small>Não precisa sair do ${esc(aqui)} para economizar</small></div></div>`;
+    bts=[btTroca,btManter];
+  } else {
+    selo=`<div class="selo2 y"><span class="e">🤔</span><div><b>NO ${esc(estNome(melhor.estId))} SAI ${brl(c.dTodos)} MAIS BARATO</b><small>${c.dAqui>0?`Mas aqui mesmo ${esc(comArt(nomeMelhorAqui))} já economiza ${brl(c.dAqui)}`:`Aqui no ${esc(aqui)}, a sua escolha já é a mais barata`}</small></div></div>`;
+    const quemAqui=c.dAqui>0?nomeMelhorAqui:minha;
+    dec=`<div class="dec2">VALE A PENA IR AO ${esc(estNome(melhor.estId))}? SÓ POR ESTE ITEM, A DIFERENÇA ENTRE ${esc(comArt(quemAqui))} AQUI E ${esc(comArt(nomeCurto(melhor.o,p)))} LÁ É <b>${brl(c.fora)}</b>.</div>`;
+    bts=[btTroca,btIr,btManter];
+  }
+  bts=bts.filter(Boolean);
+  return `<div class="eco">${selo}<div class="lbox"><div class="t">${titPara}</div>${linhas}</div>${dec}${bts.length?`<div class="bts">${bts.join("")}</div>`:""}</div>`;
+}
+// depois de comprado: o que pagou × o menor preço que conhecíamos ao criar a lista
+function ecoCardComprado(L,it,p,r){
+  const e=ecoItem(L,it); if(!e||!e.real) return null;
+  const ref=S.produtos[it.ref.pid], q=+r.qtd||1, ct=contTotal(p), nm=nomeCurto(p);
+  let selo;
+  if(e.d<-0.004) selo=`<div class="selo2 g"><span class="e">🎉</span><div><b>ACHOU PROMOÇÃO: ${brl(-e.d)} A MENOS</b><small>que o menor preço que conhecíamos ao criar a lista</small></div></div>`;
+  else if(e.d<=0.004) selo=`<div class="selo2 g"><span class="e">😄</span><div><b>PAGOU O MENOR PREÇO CONHECIDO</b><small>O mesmo valor do mais barato da criação da lista</small></div></div>`;
+  else if(it.manter) selo=`<div class="selo2 c"><span class="e">📌</span><div><b>ESCOLHA MANTIDA: ${brl(e.d)} A MAIS</b><small>que o menor preço que conhecíamos ao criar a lista</small></div></div>`;
+  else selo=`<div class="selo2 r"><span class="e">😬</span><div><b>PAGOU ${brl(e.d)} A MAIS</b><small>que o menor preço que conhecíamos ao criar a lista</small></div></div>`;
+  const loja=r.estNome||estNome(r.estabelecimentoId);
+  const refLoja=it.ref.estId?estNome(it.ref.estId):"";
+  let h=`<div class="eco" style="margin-top:8px">${selo}<div class="lbox"><div class="t">PARA ${fmtFino(q*ct.q,ct.un)}</div>`+
+    ecoLinha("✔",`VOCÊ PAGOU · ${esc(nm)}`,`NO ${esc(loja)} · ${fmtQtd(q)} × ${brl(r.valor)}`,e.custo,"")+
+    ecoLinha("★",`MENOR PREÇO CONHECIDO${ref?" · "+esc(nomeCurto(ref,p)):""}`,`${refLoja?"NO "+esc(refLoja)+" · ":""}NA CRIAÇÃO DA LISTA`,Math.round(e.refCusto*100)/100,e.d<-0.004?"r":"g",
+      e.d<-0.004?`▲ ${brl(-e.d)} MAIS`:e.d>0.004?`▼ ${brl(e.d)} MENOS`:"")+`</div>`;
+  if(e.d<-0.004) h+=`<div class="dec2">O PREÇO D${/A$/.test(nm)?"A":"O"} ${esc(nm)} NO ${esc(loja)} FOI ATUALIZADO PARA ${brl(r.valor)}: NAS PRÓXIMAS LISTAS ELE JÁ ENTRA NA COMPARAÇÃO.</div>`;
+  return h+`</div>`;
+}
+// 📌 MANTER: grava a escolha no item, em todas as listas do grupo
+function manterItem(L,pid,v){
+  L=S.listas[L.id]||L;
+  const ls=[...new Map([...(L.grupo?listasDoGrupo(L.grupo):[]),L].map(l=>[l.id,S.listas[l.id]||l])).values()];
+  ls.forEach(l=>{ if(!(l.itens||[]).some(x=>x.produtoId===pid)) return;
+    DB.update("listas",l.id,{itens:(l.itens||[]).map(x=>{ if(x.produtoId!==pid) return x; const {manter,...y}=x; return v?{...y,manter:true}:y; })}); });
+}
+// 🚗 COMPRAR EM OUTRA LOJA: o item vai para a LISTA DA LOJA (cria se não existir), trocando ou não o produto
+function irParaLoja(L,de,para,dest){
+  L=S.listas[L.id]||L; const p=S.produtos[de], o=S.produtos[para]; if(!p||!o) return;
+  const it0=(L.itens||[]).find(x=>x.produtoId===de); if(!it0) return;
+  const {manter,...base}=it0; let novo=base;
+  if(para!==de){ const N=necessidade(it0,p), ct=contTotal(o); novo={...base,produtoId:para,qtd:Math.max(1,Math.ceil(N/ct.q-1e-9)),quer:{v:N,un:ct.un}}; }
+  const g=garantirGrupo(L);
+  const todas=[...new Map([...listasDoGrupo(g),L].map(l=>[l.id,S.listas[l.id]||l])).values()];
+  const destino=todas.find(l=>ehLoja(l)&&l.estabelecimentoId===dest);
+  todas.forEach(l=>{
+    if(destino&&l.id===destino.id) return;
+    if(!(l.itens||[]).some(x=>x.produtoId===de)) return;
+    if(ehLoja(l)){ salvarItens(l,(l.itens||[]).filter(x=>x.produtoId!==de)); return; }
+    // lista principal / completa: o item continua nela (já com o produto escolhido)
+    const ja=para!==de&&(l.itens||[]).some(x=>x.produtoId===para), itens=[];
+    (l.itens||[]).forEach(x=>{ if(x.produtoId===de){ if(!ja) itens.push({...novo}); } else if(x.produtoId===para) itens.push({...x,qtd:novo.qtd,quer:novo.quer}); else itens.push(x); });
+    DB.update("listas",l.id,{itens});
+  });
+  let nome;
+  if(destino){ nome=destino.nome; DB.update("listas",destino.id,{itens:[...(destino.itens||[]).filter(x=>x.produtoId!==de&&x.produtoId!==para),{...novo}]}); }
+  else { const m=matrizDoGrupo(g)||L; nome=`${carimboDoGrupo(g)}.LISTA DO ${estNome(dest)}`;
+    DB.add("listas",{nome,tipo:"LOJA",estabelecimentoId:dest,itens:[{...novo}],grupo:g,origem:m.id,membros:L.membros||[eu().uid],criadoPor:eu().uid,criadoEm:Date.now()}); }
+  ui.ecoAbre.delete(de);
+  toast(`${p.nome} FOI PARA A LISTA DO ${estNome(dest)}`+(para!==de?`, TROCADO PELO ${nomeCurto(o,p)}`:""));
+}
+function abrirIrLoja(L,pid){
+  L=S.listas[L.id]||L; const it=(L.itens||[]).find(x=>x.produtoId===pid); if(!it) return;
+  const c=ecoContas(L,it,lojaSel(L)); if(!c) return;
+  const {p,melhor,N,un}=c, dest=melhor.estId, loja=estNome(dest);
+  const aviso=o=>{ const n=opinioes(o).filter(x=>x.v==="nao"); return n.length?`<small style="display:block;color:var(--warn)">${n.map(x=>"🚫 "+esc(primeiroNome(x.nome))+" "+OPS.nao.frase).join(" · ")}</small>`:""; };
+  const ops=[];
+  if(melhor.o.id!==p.id)
+    ops.push({txt:`🔄 TROCAR PELO ${esc(nomeCurto(melhor.o,p))} · ${brl(melhor.total)}<small style="display:block;font-weight:700">★ O MAIS BARATO DE TODOS · ${melhor.leva} × ${brl(melhor.valor)} NO ${esc(loja)}</small>${aviso(melhor.o)}`,fn:()=>irParaLoja(L,pid,melhor.o.id,dest)});
+  const v=precoNaLoja(p.id,dest), x=v!=null?opcao(p,v,N):null;
+  ops.push({txt:`${melhor.o.id===p.id?"🚗 LEVAR":"📌 MANTER"} ${esc(comArt(nomeCurto(p)))}${x?" · "+brl(x.total):""}<small style="display:block;font-weight:700">${x?`PREÇO D${/A$/.test(nomeCurto(p))?"A":"O"} ${esc(nomeCurto(p))} NO ${esc(loja)} · ${x.leva} × ${brl(x.valor)}`:"SEM PREÇO LÁ"}</small>`,fn:()=>irParaLoja(L,pid,pid,dest)});
+  abrirMenu(melhor.o.id!==p.id?`LEVAR QUAL PRODUTO PARA O ${loja}?`:`COMPRAR NO ${loja}?`,
+    `${ehLoja(L)?"SAI DA LISTA DO "+estNome(L.estabelecimentoId)+" E ":""}VAI PARA A LISTA DO ${loja} · PARA ${fmtFino(N,un)}`,ops);
+}
+// caixa do topo: quanto ainda dá para economizar aqui, fora daqui, escolhas mantidas e promoções achadas
+function ecoTopo(L,estId){
+  let aqui=0,fora=0,manter=0,nm=0,promo=0,lojas=new Set();
+  (L.itens||[]).forEach(it=>{
+    const p=S.produtos[it.produtoId]; if(!p||!ehCat(p)) return;
+    if(realizado(L,p.id)){ const e=ecoItem(L,it); if(e&&e.real&&e.d<0) promo+=-e.d; return; }
+    if(!estId) return;
+    const ol=lojaDoItem(L,p.id); if(ol&&ol!==estId) return;
+    const c=ecoContas(L,it,estId); if(!c||!c.sua) return;
+    if(it.manter){ const cm=custoManter(c); if(cm){ manter+=cm.d; nm++; } return; }
+    aqui+=c.dAqui;
+    if(c.fora>0){ fora+=c.fora; lojas.add(c.melhor.estId); }
+  });
+  const r2=v=>Math.round(v*100)/100;
+  return {aqui:r2(aqui),fora:r2(fora),manter:r2(manter),nm,promo:r2(promo),lojas:[...lojas]};
 }
 // o preço deste produto mudou desde a criação da lista (na mesma loja da foto)?
 function mudancaItem(L,it){
@@ -2129,7 +2343,7 @@ function cardCat(L,it,p,estId){
           <div class="cacts"><span class="d"></span><button class="small" data-cathist="${o.id}">$ REGISTRAR</button></div></div>`).join("")+`</div>`;
     }
   }
-  return {resumo,extra,N,un};
+  return {resumo,extra:extra.replace(/<div class="catnota">[\s\S]*?<\/div>|<div class="catfaixa[^"]*">[\s\S]*?<\/div>/g,""),N,un};
 }
 // TROCAR: o item passa a ser outro produto da categoria, levando o suficiente para o que você quer
 function trocarItem(L,de,para){
@@ -2155,12 +2369,13 @@ function trocarItemAgora(L,de,para,N,ct,leva,o){
   listas.forEach(l=>{
     const tem=(l.itens||[]).some(x=>x.produtoId===para), itens=[];
     (l.itens||[]).forEach(x=>{
-      if(x.produtoId===de){ if(!tem) itens.push({...x,produtoId:para,qtd:leva,quer}); }
+      if(x.produtoId===de){ if(!tem){ const {manter,...y}=x; itens.push({...y,produtoId:para,qtd:leva,quer}); } }
       else if(x.produtoId===para) itens.push({...x,qtd:leva,quer});
       else itens.push(x);
     });
     DB.update("listas",l.id,{itens});
   });
+  ui.ecoAbre.delete(de);
   toast("TROCADO POR "+o.nome+(o.marca?" · "+o.marca:""));
 }
 // "FILHA DE: …" leva até a matriz
@@ -2198,6 +2413,10 @@ $("itens").addEventListener("click",e=>{
   if((id=pick("excluir"))){ removerItem(L,id); return; }
   if((id=pick("hist"))){ if(!exigirLoja(L)) return; abrirHist(L,id); return; }
   if((id=pick("movermb"))){ abrirMoverMenor(L,id); return; }
+  if((id=pick("ecotroca"))){ const [de,para]=id.split("|"); trocarItem(L,de,para); return; }
+  if((id=pick("ecoir"))){ abrirIrLoja(L,id); return; }
+  if((id=pick("ecomanter"))){ ui.ecoAbre.delete(id); manterItem(L,id,true); toast("ESCOLHA MANTIDA"); return; }
+  if((id=pick("ecover"))){ ui.ecoAbre.add(id); agendar(); return; }
   if((id=pick("cattog"))){ catFechados.has(id)?catFechados.delete(id):catFechados.add(id); agendar(); return; }
   if((id=pick("cathist"))){ if(!exigirLoja(L)) return; abrirHist(L,id); return; }
   if((id=pick("trocar"))){ const [de,para]=id.split("|"); trocarItem(L,de,para); return; }
@@ -3899,7 +4118,7 @@ $("btnFim").onclick=()=>{
   const R=resumoEco(L,meus,estId);
   $("fSum").innerHTML=`<div><span>ITENS COMPRADOS AQUI</span><b>${meus.length}</b></div>`+
     `<div><span>TOTAL</span><b>${brl(meus.reduce((s,r)=>s+(r.total||0),0))}</b></div>`+
-    (R.n?`<div><span>${R.d>0?"PAGOU A MAIS QUE O MAIS BARATO":"ECONOMIA (VS MAIS BARATO)"}<small style="display:block;font-weight:600">${R.n} ITE${R.n===1?"M":"NS"} NA CONTA${R.fora?" · "+R.fora+" FORA (SEM CATEGORIA OU CONTEÚDO)":""}</small></span><b style="color:${R.d>0?"var(--warn)":"var(--accent)"}">${R.d>0?"▲":R.d<0?"▼":"="} ${brl(Math.abs(R.d))}</b></div>`:"")+
+    (R.n?`<div><span>${R.d>0?"😬 PAGOU A MAIS QUE O MENOR PREÇO CONHECIDO":R.d<0?"🎉 ACHOU EM PROMOÇÕES":"😄 PAGOU O MENOR PREÇO CONHECIDO"}<small style="display:block;font-weight:600">${R.n} ITE${R.n===1?"M":"NS"} NA CONTA${R.fora?" · "+R.fora+" FORA (SEM CATEGORIA OU CONTEÚDO)":""}</small></span><b style="color:${R.d>0?"var(--warn)":"var(--accent)"}">${R.d>0?"▲":R.d<0?"▼":"="} ${brl(Math.abs(R.d))}</b></div>`:"")+
     (R.nm?`<div><span>PREÇOS QUE MUDARAM DESDE A CRIAÇÃO<small style="display:block;font-weight:600">${R.nm} ITE${R.nm===1?"M":"NS"}</small></span><b style="color:${R.m>0?"var(--warn)":"var(--accent)"}">${R.m>0?"▲":"▼"} ${brl(Math.abs(R.m))}</b></div>`:"")+
     `<div><span>ITENS QUE FALTAM</span><b>${falt.length}</b></div>`;
   $("fFalta").textContent=falt.length?"FALTAM: "+falt.map(it=>(S.produtos[it.produtoId]||{}).nome||"?").join(", ")+". CONTINUAM NA LISTA PARA COMPRAR EM OUTRO ESTABELECIMENTO.":"NADA FALTANDO. LISTA COMPLETA! 🎉";
