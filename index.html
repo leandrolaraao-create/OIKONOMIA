@@ -26,6 +26,8 @@
   20. ESTABELECIMENTOS · HISTÓRICO · EXPORTAR PDF · INÍCIO
 
   HISTÓRICO DE VERSÕES (a mais nova em cima)
+  V 02.11-A  ECONOMIA: referência = grama/ml/unidade mais barata da categoria no dia da criação; cartão, caixa no topo e
+             FINALIZAR; escolher produtos com filtros que viram etiquetas (CATEGORIA, NOME, MARCA) e QUANTO QUER
   V 01.11-B  câmera volta a 1280×720 sem foco forçado (imagem preta em alguns celulares); religa sozinha se ficar preta
   V 01.11-A  leitor lê o quadro inteiro (código em pé ou deitado), mais resolução e foco; mira ⟲;
              faixa com o número lido: produto conhecido segue sozinho, novo pede CADASTRAR
@@ -338,6 +340,20 @@ details.todos summary{font-size:12px;font-weight:700;color:var(--tag-ink);cursor
 .mira::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff3b30;opacity:.85}
 .mira.ok{border-color:#3fe08a}
 .mira.vert{left:50%;right:auto;width:34%;height:86%!important;transform:translate(-50%,-50%)}
+.ecoln{margin:6px 12px 0;font-size:11px;font-weight:800;color:var(--muted)}
+.ecoln.up{color:var(--warn)}.ecoln.dn{color:var(--accent)}
+.ecoln small{display:block;font-size:9.5px;font-weight:700;color:var(--muted)}
+.ecoln.mud{font-size:10.5px}
+.totals.t4{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.fchips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px}
+.fchips button{border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800;background:var(--ink);color:#fff;border-color:var(--ink)}
+.fsec{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);margin:8px 0 4px}
+.fsugs{display:flex;flex-wrap:wrap;gap:6px}
+.fsugs button{border-radius:99px;padding:6px 11px;font-size:11.5px;font-weight:800;background:#eef6f1;color:var(--accent);border-color:#bfe0cc}
+.fsugs button small{font-weight:700;color:var(--muted);margin-left:4px}
+.fquer{display:flex;gap:8px;align-items:flex-end;background:#f3f8f5;border:1px solid #bfe0cc;border-radius:12px;padding:6px 10px;margin:4px 0 6px}
+.fquer .f{margin:0;flex:1}.fquer .ctun{margin-bottom:6px}
+.pkun{font-size:10.5px;font-weight:800;color:var(--muted)}.pkun.g{color:var(--accent)}.pkun.r{color:var(--warn)}
 .lfaixa{position:absolute;left:0;right:0;bottom:0;z-index:4;background:rgba(10,14,12,.86);color:#fff;padding:7px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
 .lfaixa .cod{font-family:DSEG7,monospace;font-size:15px;letter-spacing:.04em;color:#7dffb4}
 .lfaixa .tx{flex:1;min-width:120px;font-size:11.5px;font-weight:800;line-height:1.2}
@@ -613,7 +629,7 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
   <header>
     <div class="top">
       <button id="back" class="back hidden" aria-label="VOLTAR">‹</button>
-      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 01.11-B</span></div><h1 id="title">LISTAS</h1></div>
+      <div class="ttl"><div class="marca">OIKONOMIA <span style="font-weight:600;letter-spacing:.05em;color:var(--muted)">V 02.11-A</span></div><h1 id="title">LISTAS</h1></div>
       <button id="who" class="who" title="ALTERAR MEU NOME"></button>
       <button id="sair" class="who" title="SAIR">SAIR</button>
       <button id="btnMenuListas" class="kebab hidden" title="MAIS OPÇÕES">⋮</button>
@@ -624,10 +640,11 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
         <select id="selLoja"></select>
         <button id="btnPdfLista" style="flex:none" title="EXPORTAR PDF">📄</button>
       </div>
-      <div class="totals">
+      <div class="totals t4">
         <div><div class="tl">JÁ GASTO AQUI</div><div id="tLoja"></div><div class="tsub" id="tLojaS"></div></div>
         <div><div class="tl" id="tGrupoL">JÁ GASTO NA LISTA</div><div id="tGrupo"></div><div class="tsub" id="tGrupoS"></div></div>
         <div><div class="tl">FALTA GASTAR ~</div><div id="tFalta"></div><div class="tsub" id="tFaltaS"></div></div>
+        <div><div class="tl" id="tEcoL">ECONOMIA ~</div><div id="tEco"></div><div class="tsub" id="tEcoS"></div></div>
       </div>
       <div id="mm" class="mm hidden">
         <video id="mmVideo" playsinline muted autoplay></video>
@@ -949,7 +966,8 @@ mark.bk{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
 <div class="modal" id="mPick"><div class="sheet">
   <h2 id="pkTitle">PRODUTOS</h2>
   <div class="search">
-    <input id="pkBusca" placeholder="BUSCAR">
+    <input id="pkBusca" placeholder="BUSCAR: CATEGORIA, NOME OU MARCA">
+    <button id="pkCats" class="cam" title="VER TODAS AS CATEGORIAS">▾</button>
     <button id="pkBarras" class="cam" title="LER CÓDIGO DE BARRAS">▥</button>
   </div>
   <div id="pkAcoes" style="display:flex;gap:6px;margin-bottom:6px">
@@ -1305,13 +1323,27 @@ const minhaFam = () => (S.user&&S.user.familiaId)||null;
    O app continua lendo L.itens (lista em ordem); toda gravação de "itens" vira só o que mudou,
    assim duas pessoas mexendo em itens diferentes ao mesmo tempo (ou sem sinal) não se apagam. */
 const semOrdem = x => { const {o,...r}=x; return r; };
+/* ECONOMIA: ao entrar na lista, cada item guarda uma "foto" do dia:
+   ref = a grama/ml/unidade mais barata da CATEGORIA (qualquer loja) e pv = o preço mais barato do próprio produto */
+const puMin = p => { const ct=contTotal(p); if(!ct) return null; let m=null;
+  precosPorLoja(p.id).forEach(r=>{ const u=r.valor/ct.q; if(!m||u<m.pu) m={pu:u,estId:r.estabelecimentoId,pid:p.id}; }); return m; };
+function fotoItem(x){
+  try{
+    const p=S.produtos[x.produtoId]; if(!p) return x; let y=x;
+    if(!y.ref&&ehCat(p)){ const un=contTotal(p).un; let m=null;
+      membrosCat(p.categoria,un).forEach(o=>{ const a=puMin(o); if(a&&(!m||a.pu<m.pu)) m=a; });
+      if(m) y={...y,ref:{pu:m.pu,un,pid:m.pid,estId:m.estId,ts:Date.now()}}; }
+    if(!y.pv||y.pv.pid!==y.produtoId){ const r=precosPorLoja(p.id)[0]; const {pv,...sem}=y; y=r?{...sem,pv:{v:r.valor,estId:r.estabelecimentoId,pid:p.id}}:sem; }
+    return y;
+  }catch(e){ return x; }
+}
 const igualItem = (a,b) => JSON.stringify(Object.keys(a).sort().map(k=>[k,a[k]]))===JSON.stringify(Object.keys(b).sort().map(k=>[k,b[k]]));
 function normLista(l){
   if(l&&l.it&&typeof l.it==="object"){ const its=Object.values(l.it).filter(x=>x&&x.produtoId).sort((a,b)=>(a.o||0)-(b.o||0));
     return {...l,itens:its.map(semOrdem),_mapa:true}; }
   return l;
 }
-function itensParaMapa(itens,inicio=0){ const m={}; (itens||[]).forEach((x,i)=>{ if(x&&x.produtoId) m[x.produtoId]={...semOrdem(x),o:inicio+i}; }); return m; }
+function itensParaMapa(itens,inicio=0){ const m={}; (itens||[]).forEach((x,i)=>{ if(x&&x.produtoId) m[x.produtoId]={...semOrdem(fotoItem(x)),o:inicio+i}; }); return m; }
 const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos","produtos","estabelecimentos"]); // tudo é da família
 (function(){ const add0l=DB.add.bind(DB), set0l=DB.set.bind(DB), upd0=DB.update.bind(DB);
   const semItens = d => { if(!d) return d; const {_mapa,...d2}=d; if(!("itens" in d2)) return d2; const {itens,it,...r}=d2; return {...r,it:itensParaMapa(itens,Date.now())}; };
@@ -1327,8 +1359,8 @@ const COLS_FAM=new Set(["listas","realizados","finalizacoes","receitas","precos"
     const m={...resto}; let prox=Date.now();
     Object.keys(ant).forEach(pid=>{ if(!novo[pid]) m["it."+pid]=APAGAR; });
     (itens||[]).forEach(x=>{ if(!x||!x.produtoId) return; const a=ant[x.produtoId];
-      if(!a) m["it."+x.produtoId]={...semOrdem(x),o:prox++};
-      else if(!igualItem(semOrdem(x),semOrdem(a))) m["it."+x.produtoId]={...semOrdem(x),o:ordAnt[x.produtoId]??prox++}; });
+      if(!a) m["it."+x.produtoId]={...semOrdem(fotoItem(x)),o:prox++};
+      else if(!igualItem(semOrdem(x),semOrdem(a))) m["it."+x.produtoId]={...semOrdem(x.pv&&x.pv.pid!==x.produtoId?fotoItem(x):x),o:ordAnt[x.produtoId]??prox++}; });
     if(Object.keys(m).length) DB.pedacos(c,id,m);
   };
 })();
@@ -1912,6 +1944,10 @@ function renderLista(L){
   itens.forEach(it=>{ if(realizado(L,it.produtoId)) return; nFalta++; const v=(estId&&precoNaLoja(it.produtoId,estId))??(precosPorLoja(it.produtoId)[0]||{}).valor; if(v) falta+=v*(it.qtd||1); });
   $("tFalta").innerHTML=lcd(falta,"md y full");
   $("tFaltaS").textContent=`${nFalta} ITE${nFalta===1?"M":"NS"} · ESTIMADO`;
+  { const E=ecoLista(L);
+    $("tEcoL").textContent = E.d>0 ? "PAGANDO A MAIS ~" : "ECONOMIA ~";
+    $("tEco").innerHTML = E.n ? lcd(Math.abs(E.d),"md full "+(E.d>0?"r":"g")) : lcd(0,"md full");
+    $("tEcoS").textContent = E.n ? `VS MAIS BARATO · ${E.n} NA CONTA${E.fora?" · "+E.fora+" FORA":""}` : "SEM ITENS COM CATEGORIA E CONTEÚDO"; }
   $("countLine").textContent=`${reais.length} DE ${itens.length} COMPRADOS`+(estId?"":" · ESCOLHA O ESTABELECIMENTO ACIMA PARA REGISTRAR");
   // itens
   let vis=itens.filter(it=>{const d=!!realizado(L,it.produtoId);return ui.filtro==="all"||(ui.filtro==="todo"&&!d)||(ui.filtro==="done"&&d)});
@@ -1994,7 +2030,7 @@ function cardItem(L,it,estId){
         <div class="tags">${chips}</div>
       </div>
     </div>
-    ${resumo}${cat?cat.extra:""}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
+    ${resumo}${ecoHtml(L,it)}${cat?cat.extra:""}${comp}${dica?`<div class="dica" style="margin:6px 12px 0">${dica}</div>`:""}
     <div class="acts">${botao}
       <button class="ib cif" data-hist="${p.id}" aria-label="PREÇOS NESTA LOJA">$</button>
       <div class="stepq${uv?" med":""}"><button data-qmenos="${p.id}" aria-label="MENOS">−</button><span data-qedit="${p.id}">${fmtMedida(p,q)}</span><button data-qmais="${p.id}" aria-label="MAIS">+</button></div>
@@ -2002,6 +2038,35 @@ function cardItem(L,it,estId){
       <button class="ib" data-mais="${p.id}" aria-label="MAIS OPÇÕES">⋯</button>
     </div>
   </div>`;
+}
+/* ---------- ECONOMIA do item: o que pagou (ou vai pagar) × a grama/ml/unidade mais barata da categoria no dia da criação ---------- */
+function ecoItem(L,it){
+  const p=S.produtos[it.produtoId]; if(!p||!it.ref||!ehCat(p)) return null;
+  const ct=contTotal(p); if(ct.un!==it.ref.un) return null;
+  const r=realizado(L,p.id); let custo, qtd, real=false;
+  if(r&&r.valor){ qtd=+r.qtd||1; custo=+r.total||qtd*r.valor; real=true; }
+  else{ const est=lojaSel(L), v=(est&&precoNaLoja(p.id,est))??(precosPorLoja(p.id)[0]||{}).valor; if(!v) return null; qtd=+it.qtd||1; custo=qtd*v; }
+  const refCusto=it.ref.pu*qtd*ct.q;
+  return {d:Math.round((custo-refCusto)*100)/100,real,custo,refCusto,un:ct.un};
+}
+// o preço deste produto mudou desde a criação da lista (na mesma loja da foto)?
+function mudancaItem(L,it){
+  if(!it.pv||it.pv.pid!==it.produtoId||realizado(L,it.produtoId)) return null;
+  const agora=precoNaLoja(it.produtoId,it.pv.estId); if(agora==null) return null;
+  const d=Math.round((agora-it.pv.v)*100)/100; return d?{d,estId:it.pv.estId,qtd:+it.qtd||1}:null;
+}
+function ecoLista(L){
+  let d=0,n=0,fora=0,real=0;
+  (L.itens||[]).forEach(it=>{ const e=ecoItem(L,it); if(e){ d+=e.d; n++; if(e.real) real++; } else fora++; });
+  return {d:Math.round(d*100)/100,n,fora,real};
+}
+function ecoHtml(L,it){
+  const e=ecoItem(L,it), m=mudancaItem(L,it); let h="";
+  if(e){ const ref=S.produtos[it.ref.pid];
+    const t = e.d>0?`▲ ${brl(e.d)} ACIMA DO MAIS BARATO DA CATEGORIA`:e.d<0?`▼ ${brl(-e.d)} ABAIXO DO MAIS BARATO DA CATEGORIA`:`= NO PREÇO DO MAIS BARATO DA CATEGORIA`;
+    h+=`<div class="ecoln ${e.d>0?"up":e.d<0?"dn":""}">${e.real?"✔ ":"~ "}${t}<small>REFERÊNCIA NA CRIAÇÃO: ${fmtPorUn(it.ref.pu,it.ref.un)}${ref?" ("+esc(ref.nome)+(ref.marca?" · "+esc(ref.marca):"")+")":""}</small></div>`; }
+  if(m) h+=`<div class="ecoln mud ${m.d>0?"up":"dn"}">${m.d>0?"▲ O PREÇO SUBIU":"▼ O PREÇO BAIXOU"} ${brl(Math.abs(m.d))} NO ${esc(estNome(m.estId))} DESDE A CRIAÇÃO DA LISTA</div>`;
+  return h;
 }
 /* ---------- cartão de produto com CATEGORIA: compara por ML/G/UN para o que você quer ---------- */
 const catFechados=new Set();
@@ -3432,7 +3497,7 @@ async function lerCodigoFoto(){
    ===================================================================== */
 let pk={modo:null,nome:"",sel:{}};
 function abrirPicker(modo,nome){
-  pk={modo,nome:nome||"",sel:{},quer:{},mes:false};
+  pk={modo,nome:nome||"",sel:{},quer:{},mes:false,f:{cat:"",nome:"",marca:""},verCats:false,N:0,grosso:false};
   const L=modo==="add"&&S.listas[ui.lista];
   $("pkTitle").textContent = modo==="nova" ? `NOVA LISTA: ${nome}` : "ADICIONAR PRODUTOS";
   $("pkBusca").value="";
@@ -3512,26 +3577,44 @@ function renderPicker(){
   const freq=Object.fromEntries(frequentes().map(f=>[f.pid,f]));
   contarPicker();
   if(!Object.keys(S.produtos).length) $("pkCount").textContent="NENHUM PRODUTO CADASTRADO. TOQUE EM “+ CADASTRAR PRODUTO”.";
-  // categorias: escolher pelo preço (ML/G/UN), qualquer marca ou embalagem
-  const bq=semAc(up($("pkBusca").value)), cats=categorias().filter(c=>c.ps.length>1);
+  // filtros que viram etiquetas: CATEGORIA, NOME, MARCA (cada um restringe a lista)
+  const F=pk.f, igual=(a,b)=>semAc(a)===semAc(b);
+  ps=ps.filter(p=>(!F.cat||igual(p.categoria,F.cat))&&(!F.nome||igual(p.nome,F.nome))&&(!F.marca||igual(p.marca,F.marca)));
+  const catAtual=F.cat?categorias().find(c=>igual(c.nome,F.cat)):null, unCat=catAtual?catAtual.un:null;
+  const N=catAtual&&pk.N>0?pk.N:0;
+  // com categoria: do mais barato ao mais caro pela grama/ml/unidade (ou pelo total, se disse quanto quer)
+  const opcP = p => { if(!catAtual||!ehCat(p)||contTotal(p).un!==unCat) return null; const m=puMin(p); if(!m) return null;
+    const ct=contTotal(p), r=precosPorLoja(p.id)[0]; return {pu:m.pu, leva:N?Math.max(1,Math.ceil(N/ct.q-1e-9)):null, total:N?Math.max(1,Math.ceil(N/ct.q-1e-9))*r.valor:null}; };
+  const op=Object.fromEntries(ps.map(p=>[p.id,opcP(p)]));
+  if(catAtual) ps=[...ps].sort((a,b)=>{ const x=op[a.id], y=op[b.id]; if(!x&&!y) return 0; if(!x) return 1; if(!y) return -1; return N?(x.total-y.total):(x.pu-y.pu); });
+  const melhor=catAtual?Object.values(op).filter(Boolean).reduce((m,x)=>!m||(N?x.total<m.total:x.pu<m.pu)?x:m,null):null;
   let topo="";
-  if(bq.length>=2){
-    topo=cats.filter(c=>semAc(c.nome).includes(bq)||c.ps.some(p=>ps.includes(p))).slice(0,3).map(c=>{
-      const ops=opcoesCat(c.ps,1,null), lojas=new Set(ops.map(x=>x.estId)).size;
-      const faixa=ops.length?` · DE ${fmtPorUn(Math.min(...ops.map(x=>x.porUn)),c.un).replace("1 "+c.un+" = ","")} A ${fmtPorUn(Math.max(...ops.map(x=>x.porUn)),c.un).replace("1 "+c.un+" = ","")} POR ${c.un}`:"";
-      return `<div class="catrow"><div class="m"><b>🏷️ ${esc(c.nome)}</b><small>CATEGORIA · ${c.ps.length} PRODUTOS${ops.length?` · ${ops.length} OPÇÕES EM ${lojas} LOJA${lojas>1?"S":""}`:""}${faixa}</small></div><button class="small primary" data-pkcat="${esc(c.nome)}">ESCOLHER PELO PREÇO ›</button></div>`;
-    }).join("");
-  } else if(cats.length){
-    topo=`<div class="catchips">ESCOLHER PELO PREÇO: ${cats.map(c=>`<button class="small" data-pkcat="${esc(c.nome)}">🏷️ ${esc(c.nome)}</button>`).join("")}</div>`;
+  const chips=[["cat","🏷 "],["nome","NOME: "],["marca","MARCA: "]].filter(([k])=>F[k]).map(([k,pre])=>`<button data-pkfx="${k}">${pre}${esc(F[k])} ✕</button>`).join("");
+  if(chips) topo+=`<div class="fchips">${chips}</div>`;
+  if(catAtual) topo+=`<div class="fquer"><label class="f">QUANTO VOCÊ QUER? <small style="font-weight:600">(OPCIONAL)</small><input id="pkQuer" inputmode="decimal" autocomplete="off" value="${pk.N?fmtQtd(Math.round((pk.grosso?pk.N/1000:pk.N)*1000)/1000):""}" placeholder="—"></label>
+      <div class="ctun">${UNS_CAT[unCat].map((u,k)=>`<button type="button" data-pkun="${k}" class="${(k===1)===pk.grosso?"on":""}">${u}</button>`).join("")}</div></div>`;
+  // sugestões: categorias / nomes / marcas que batem com o que foi digitado (ou todas as categorias pela ▾)
+  const bq=semAc(up($("pkBusca").value)).trim();
+  if(bq.length>=2||pk.verCats){
+    const base=Object.values(S.produtos).filter(p=>(!F.cat||igual(p.categoria,F.cat))&&(!F.nome||igual(p.nome,F.nome))&&(!F.marca||igual(p.marca,F.marca)));
+    const grupo=(k,campo,tit,pre,todas)=>{ if(F[k]) return ""; const m={};
+      base.forEach(p=>{ const v=up(p[campo]); if(v) m[v]=(m[v]||0)+1; });
+      let vs=Object.entries(m).filter(([v])=>todas||semAc(v).includes(bq)).sort((a,b)=>a[0].localeCompare(b[0],"pt-BR"));
+      if(!todas) vs=vs.slice(0,6); if(!vs.length) return "";
+      return `<div class="fsec">${tit}</div><div class="fsugs">${vs.map(([v,n])=>`<button data-pkf="${k}" data-v="${esc(v)}">${pre}${marcar(v,todas?[]:[bq])}<small>${n}</small></button>`).join("")}</div>`; };
+    topo+=grupo("cat","categoria","CATEGORIAS","🏷 ",pk.verCats&&bq.length<2)+(bq.length>=2?grupo("nome","nome","NOMES","")+grupo("marca","marca","MARCAS",""):"");
+    if(bq.length>=2) topo+=`<div class="fsec">PRODUTOS</div>`;
   }
   $("pkLista").innerHTML=topo+ps.map((p,i)=>{
+    const o=op[p.id], dif=o&&melhor?(N?(o.total-melhor.total):Math.round((o.pu/melhor.pu-1)*100)):null;
+    const linhaUn = o ? `<div class="pkun ${dif===0||dif<0.005?"g":"r"}">${fmtPorUn(o.pu,unCat)}${N?` · LEVA ${o.leva} = ${brl(o.total)}`:""} · ${o===melhor||dif<=0?"★ O MAIS BARATO":N?difTxt(dif):"▲ "+dif+"% ACIMA DO MAIS BARATO"}</div>` : "";
     const ja=pk.jaNaLista.has(p.id), s=pk.sel[p.id];
     const pl=precosPorLoja(p.id)[0];
     const f=freq[p.id];
     return grupoBusca(ps,i)+`<div class="pick">
       <input type="checkbox" data-pk="${p.id}" ${s||ja?"checked":""} ${ja?"disabled":""}>
       <div class="thumb">${imgProduto(p)}</div>
-      <div><div class="name" style="font-size:13px">${marcar(p.nome,busca.toks)}${mesTag(p)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${marcar(descProduto(p),busca.toks)}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>${opsHtml(p)}
+      <div><div class="name" style="font-size:13px">${marcar(p.nome,busca.toks)}${mesTag(p)}${f?`<span class="freq">COMPRADO ${f.vezes}×</span>`:""}</div><div class="sub">${marcar(descProduto(p),busca.toks)}${ja?" · JÁ NA LISTA":""}${pk.quer[p.id]?` · <b style="color:var(--accent)">QUERO ${fmtFino(pk.quer[p.id].v,pk.quer[p.id].un)}</b>`:""}</div>${opsHtml(p)}${linhaUn}
         ${pl?`<div class="sub" style="color:var(--accent)">${brl(pl.valor)} · ${esc(estNome(pl.estabelecimentoId))}${precoBase(p,pl.valor)?" · "+precoBase(p,pl.valor):""}</div>`:""}</div>
       <input class="q" data-pkq="${p.id}" inputmode="decimal" value="${s?fmtQtd(s):""}" placeholder="QTD" ${ja?"disabled":""}>
     </div>`;
@@ -3591,7 +3674,11 @@ $("pkLista").addEventListener("change",e=>{
   const id=e.target.dataset.pk;
   if(id){
     const q=$("pkLista").querySelector(`[data-pkq="${id}"]`);
-    if(e.target.checked){ pk.sel[id]=pk.sel[id]||1; q.value=fmtQtd(pk.sel[id]); } else { delete pk.sel[id]; delete pk.quer[id]; q.value=""; }
+    if(e.target.checked){
+      const p=S.produtos[id], cA=pk.f.cat?categorias().find(c=>semAc(c.nome)===semAc(pk.f.cat)):null;
+      if(cA&&pk.N>0&&p&&ehCat(p)&&contTotal(p).un===cA.un){ pk.sel[id]=Math.max(1,Math.ceil(pk.N/contTotal(p).q-1e-9)); pk.quer[id]={v:pk.N,un:cA.un}; }
+      else pk.sel[id]=pk.sel[id]||1;
+      q.value=fmtQtd(pk.sel[id]); } else { delete pk.sel[id]; delete pk.quer[id]; q.value=""; }
     contarPicker(); return;
   }
   const qid=e.target.dataset.pkq;
@@ -3599,7 +3686,16 @@ $("pkLista").addEventListener("change",e=>{
     if(v>0){ pk.sel[qid]=v; c.checked=true; } else { delete pk.sel[qid]; c.checked=false; e.target.value=""; }
     contarPicker(); }
 });
-$("pkLista").addEventListener("click",e=>{ const b=e.target.closest("[data-pkcat]"); if(b) abrirCat(b.dataset.pkcat); });
+$("pkLista").addEventListener("click",e=>{
+  let b;
+  if((b=e.target.closest("[data-pkf]"))){ pk.f[b.dataset.pkf]=b.dataset.v; if(b.dataset.pkf==="cat"){ pk.N=0; pk.grosso=false; } pk.verCats=false; $("pkBusca").value=""; renderPicker(); return; }
+  if((b=e.target.closest("[data-pkfx]"))){ pk.f[b.dataset.pkfx]=""; if(b.dataset.pkfx==="cat") pk.N=0; renderPicker(); return; }
+  if((b=e.target.closest("[data-pkun]"))){ const g=b.dataset.pkun==="1"; if(g!==pk.grosso){ pk.grosso=g; } renderPicker(); return; }
+});
+$("pkLista").addEventListener("input",e=>{ if(e.target.id!=="pkQuer") return; const v=num(e.target.value);
+  pk.N=v>0?Math.round(v*(pk.grosso?1000:1)*1000)/1000:0;
+  clearTimeout(pk.tq); pk.tq=setTimeout(()=>{ const pos=e.target.selectionStart; renderPicker(); const q=$("pkQuer"); if(q){ q.focus(); try{q.setSelectionRange(pos,pos);}catch(_){} } },500); });
+$("pkCats").onclick=()=>{ pk.verCats=!pk.verCats; renderPicker(); };
 $("pkNovo").onclick=()=>abrirProd(null,{},id=>{pk.sel[id]=1;renderPicker()});
 $("pkBtns").addEventListener("click",e=>{
   const id=e.target.id; if(!id) return;
@@ -3800,12 +3896,24 @@ $("btnFim").onclick=()=>{
   const falt=(L.itens||[]).filter(it=>!realizado(L,it.produtoId));
   if(!meus.length){alert("VOCÊ AINDA NÃO REGISTROU COMPRAS NESTE ESTABELECIMENTO NESTA LISTA.");return}
   $("fLoja").textContent=`${estNome(estId)} · ${eu().nome}`;
+  const R=resumoEco(L,meus,estId);
   $("fSum").innerHTML=`<div><span>ITENS COMPRADOS AQUI</span><b>${meus.length}</b></div>`+
     `<div><span>TOTAL</span><b>${brl(meus.reduce((s,r)=>s+(r.total||0),0))}</b></div>`+
+    (R.n?`<div><span>${R.d>0?"PAGOU A MAIS QUE O MAIS BARATO":"ECONOMIA (VS MAIS BARATO)"}<small style="display:block;font-weight:600">${R.n} ITE${R.n===1?"M":"NS"} NA CONTA${R.fora?" · "+R.fora+" FORA (SEM CATEGORIA OU CONTEÚDO)":""}</small></span><b style="color:${R.d>0?"var(--warn)":"var(--accent)"}">${R.d>0?"▲":R.d<0?"▼":"="} ${brl(Math.abs(R.d))}</b></div>`:"")+
+    (R.nm?`<div><span>PREÇOS QUE MUDARAM DESDE A CRIAÇÃO<small style="display:block;font-weight:600">${R.nm} ITE${R.nm===1?"M":"NS"}</small></span><b style="color:${R.m>0?"var(--warn)":"var(--accent)"}">${R.m>0?"▲":"▼"} ${brl(Math.abs(R.m))}</b></div>`:"")+
     `<div><span>ITENS QUE FALTAM</span><b>${falt.length}</b></div>`;
   $("fFalta").textContent=falt.length?"FALTAM: "+falt.map(it=>(S.produtos[it.produtoId]||{}).nome||"?").join(", ")+". CONTINUAM NA LISTA PARA COMPRAR EM OUTRO ESTABELECIMENTO.":"NADA FALTANDO. LISTA COMPLETA! 🎉";
   show("mFim");
 };
+// economia das compras feitas aqui e quanto os preços mudaram desde a criação da lista
+function resumoEco(L,meus,estId){
+  const todos=[...(L.grupo?listasDoGrupo(L.grupo):[]),L]; let d=0,n=0,fora=0,m=0,nm=0;
+  meus.forEach(r=>{ let it=null; for(const l of todos){ it=(l.itens||[]).find(x=>x.produtoId===r.produtoId); if(it) break; }
+    if(!it){ fora++; return; }
+    const e=ecoItem(L,it); if(e&&e.real){ d+=e.d; n++; } else fora++;
+    if(it.pv&&it.pv.pid===r.produtoId&&it.pv.estId===estId&&r.valor){ const dm=(r.valor-it.pv.v)*(+r.qtd||1); if(Math.abs(dm)>=0.005){ m+=dm; nm++; } } });
+  return {d:Math.round(d*100)/100,n,fora,m:Math.round(m*100)/100,nm};
+}
 $("fCancel").onclick=()=>hide("mFim");
 $("fOk").onclick=()=>{
   if(mm.ativo) pararModoMercado();
@@ -3815,6 +3923,7 @@ $("fOk").onclick=()=>{
   DB.add("finalizacoes",{grupo:grupoKey(L),listaId:L.id,listaNome:L.nome,estabelecimentoId:estId,estNome:estNome(estId),
     usuarioUid:eu().uid,usuarioNome:eu().nome,inicio:Math.min(...meus.map(r=>r.ts)),fim:Date.now(),
     total:Math.round(meus.reduce((s,r)=>s+(r.total||0),0)*100)/100,itens:meus.length,
+    ...(()=>{ const R=resumoEco(L,meus,estId); return {economia:-R.d,ecoItens:R.n,mudancaPrecos:R.m}; })(),
     faltantes:falt.map(it=>(S.produtos[it.produtoId]||{}).nome||"?")});
   setLojaSel(L,""); hide("mFim");
   if(falt.length){ setFiltro("todo"); agendar(); toast("COMPRA FINALIZADA. ESCOLHA O PRÓXIMO ESTABELECIMENTO."); }
